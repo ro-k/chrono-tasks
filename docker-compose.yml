@@ -1,0 +1,36 @@
+﻿services:
+  app:
+    image: app
+    build:
+      context: .
+      dockerfile: App/Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      - db
+  
+  db:
+    image: postgres:latest   # or the database you're using (e.g. mssql, mongo)
+    environment:
+      POSTGRES_DB: taskdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: p0stgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data   # Path may vary based on the DB you're using
+
+  yuniql:
+    build:
+      context: ./Lib/_db
+      dockerfile: Dockerfile
+    depends_on:
+      - db
+    environment:
+      CONNECTION_STRING: "Host=db;Database=taskdb;Username=postgres;Password=p0stgres"
+      YUNIQL_PLATFORM: "postgresql"
+      # ... any other environment variables needed by Yuniql ...
+
+volumes:
+  db-data:
+    

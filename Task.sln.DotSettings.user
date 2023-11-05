@@ -1,0 +1,15 @@
+﻿<wpf:ResourceDictionary xml:space="preserve" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:s="clr-namespace:System;assembly=mscorlib" xmlns:ss="urn:shemas-jetbrains-com:settings-storage-xaml" xmlns:wpf="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+	<s:String x:Key="/Default/Environment/AssemblyExplorer/XmlDocument/@EntryValue">&lt;AssemblyExplorer&gt;
+  &lt;Assembly Path="/usr/share/dotnet/packs/Microsoft.NETCore.App.Ref/7.0.9/ref/net7.0/System.Data.dll" /&gt;
+  &lt;Assembly Path="/usr/share/dotnet/packs/Microsoft.AspNetCore.App.Ref/7.0.11/ref/net7.0/Microsoft.AspNetCore.Http.Abstractions.dll" /&gt;
+  &lt;Assembly Path="/home/roman/.nuget/packages/microsoft.aspnet.identity.core/2.2.4/lib/net45/Microsoft.AspNet.Identity.Core.dll" /&gt;
+  &lt;Assembly Path="/home/roman/.nuget/packages/microsoft.aspnet.identity.owin/2.2.4/lib/net45/Microsoft.AspNet.Identity.Owin.dll" /&gt;
+&lt;/AssemblyExplorer&gt;</s:String>
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=aafa4ac7_002D5589_002D4589_002D8fb1_002D0ef83130a14b/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="LocalFileStorageServiceTests" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
+  &lt;TestAncestor&gt;
+    &lt;TestId&gt;xUnit::E1C25072-99C8-4947-8A60-83DBD9E70F6C::net7.0::UnitTest.DataAccess.LocalFileStorageServiceTests&lt;/TestId&gt;
+  &lt;/TestAncestor&gt;
+&lt;/SessionState&gt;</s:String>
+	
+	
+	</wpf:ResourceDictionary>

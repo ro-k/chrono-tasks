@@ -1,0 +1,11 @@
+
+1. Objective
+Provide a way to track maintanance proceedures for vehicles, property, or any other custom category. Attaching files to events allows a possibility of accessing or even exporting the full maintanance record.
+
+2. MVP
+- Identity / permissions
+- Front-end app to provide rough basic functionality for category, task, and event, and file management.
+- Backend services for the above. 
+- Monolith OK, 
+
+
