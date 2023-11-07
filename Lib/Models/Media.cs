@@ -13,5 +13,4 @@ public class Media : BaseModel
     public string StoragePath { get; set; }
     public string Hash { get; set; }
     public string Metadata { get; set; }
-    public Status Status { get; set; }
 }

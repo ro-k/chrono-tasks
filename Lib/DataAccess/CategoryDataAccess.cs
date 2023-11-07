@@ -3,22 +3,20 @@ using Npgsql;
 
 namespace Lib.DataAccess;
 
-public class EventDataAccess : IEventDataAccess
+public class CategoryDataAccess : ICategoryDataAccess
 {
     private readonly IDataBaseManager _dataBaseManager;
-    
-    public EventDataAccess(IDataBaseManager dataBaseManager)
+
+    public CategoryDataAccess(IDataBaseManager dataBaseManager)
     {
         _dataBaseManager = dataBaseManager;
     }
 
-    public async Task Create(Event model)
+    public async Task Create(Category model)
     {
         const string insertQuery = @"
-INSERT INTO public.event (
-    event_id, 
-    start_time, 
-    end_time, 
+INSERT INTO public.category (
+    category_id, 
     name, 
     description, 
     created_at, 
@@ -27,9 +25,7 @@ INSERT INTO public.event (
     concurrency_stamp,
     status
 ) VALUES (
-    @EventId, 
-    @StartTime, 
-    @EndTime, 
+    @CategoryId, 
     @Name, 
     @Description, 
     @CreatedAt, 
@@ -39,26 +35,13 @@ INSERT INTO public.event (
     @Status
 )";
 
-        await _dataBaseManager.ExecuteAsync(insertQuery, new {
-            model.EventId,
-            model.StartTime,
-            model.EndTime,
-            model.Name,
-            model.Description,
-            model.CreatedAt,
-            model.ModifiedAt,
-            model.UserId,
-            model.ConcurrencyStamp,
-            model.Status
-        });
+        await _dataBaseManager.ExecuteAsync(insertQuery, model);
     }
 
-    public async Task Update(Event model)
+    public async Task Update(Category model)
     {
         const string updateQuery = @"
-UPDATE public.event SET
-    start_time = @StartTime,
-    end_time = @EndTime,
+UPDATE public.category SET
     name = @Name,
     description = @Description,
     created_at = @CreatedAt,
@@ -66,7 +49,7 @@ UPDATE public.event SET
     user_id = @UserId,
     concurrency_stamp = @ConcurrencyStamp,
     status = @Status
-WHERE event_id = @EventId";
+WHERE category_id = @CategoryId";
 
         var (query, parameters) = _dataBaseManager.WrapQueryWithConcurrencyCheck(updateQuery, model);
 
@@ -76,26 +59,22 @@ WHERE event_id = @EventId";
         }
         catch (NpgsqlException e) when (e.SqlState == PgErrorCodes.ConcurrencyError)
         {
-            
             throw;
         }
     }
-
-
-    public async Task<List<Event>> GetPaged(int startRow = 0, int count = 100, bool descending = true)
+    
+    public async Task<List<Category>> GetPaged(int startRow = 0, int count = 100, bool descending = true)
     {
         var orderByDirection = descending ? "DESC" : "ASC";
 
         const string pagedQuery = @"
-WITH ranked_events AS (
+WITH ranked_categories AS (
     SELECT *,
     ROW_NUMBER() OVER (ORDER BY created_at {0}) AS rn
-    FROM public.event
+    FROM public.category
 )
 SELECT
-    event_id,
-    start_time,
-    end_time,
+    category_id,
     name,
     description,
     created_at,
@@ -103,7 +82,7 @@ SELECT
     user_id,
     concurrency_stamp,
     status
-FROM ranked_events
+FROM ranked_categories
 WHERE rn > @StartRow AND rn <= @EndRow
 ORDER BY created_at {0};";
 
@@ -112,16 +91,14 @@ ORDER BY created_at {0};";
 
         var parameters = new { StartRow = startRow, EndRow = startRow + count };
 
-        return (await _dataBaseManager.QueryAsync<Event>(finalQuery, parameters)).ToList();
+        return (await _dataBaseManager.QueryAsync<Category>(finalQuery, parameters)).ToList();
     }
-
-    public async Task<Event> Get(Guid id)
+    
+    public async Task<Category> Get(Guid categoryId)
     {
         const string query = @"
 SELECT
-    event_id,
-    start_time,
-    end_time,
+    category_id,
     name,
     description,
     created_at,
@@ -130,11 +107,10 @@ SELECT
     concurrency_stamp,
     status
 FROM
-    public.event
+    public.category
 WHERE
-    event_id = @Id;";
+    category_id = @CategoryId;";
 
-        return await _dataBaseManager.QuerySingleOrDefaultAsync<Event>(query, new { Id = id });
+        return await _dataBaseManager.QuerySingleOrDefaultAsync<Category>(query, new { CategoryId = categoryId });
     }
-
 }

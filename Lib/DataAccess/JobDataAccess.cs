@@ -3,35 +3,35 @@ using Npgsql;
 
 namespace Lib.DataAccess;
 
-public class EventDataAccess : IEventDataAccess
+public class JobDataAccess : IJobDataAccess
 {
     private readonly IDataBaseManager _dataBaseManager;
-    
-    public EventDataAccess(IDataBaseManager dataBaseManager)
+
+    public JobDataAccess(IDataBaseManager dataBaseManager)
     {
         _dataBaseManager = dataBaseManager;
     }
 
-    public async Task Create(Event model)
+    public async Task Create(Job model)
     {
         const string insertQuery = @"
-INSERT INTO public.event (
-    event_id, 
-    start_time, 
-    end_time, 
+INSERT INTO public.job (
+    job_id, 
+    category_id, 
     name, 
-    description, 
+    description,
+    data, 
     created_at, 
     modified_at, 
     user_id, 
     concurrency_stamp,
-    status
+    status  
 ) VALUES (
-    @EventId, 
-    @StartTime, 
-    @EndTime, 
+    @JobId, 
+    @CategoryId, 
     @Name, 
-    @Description, 
+    @Description,
+    @Data, 
     @CreatedAt, 
     @ModifiedAt, 
     @UserId, 
@@ -39,34 +39,23 @@ INSERT INTO public.event (
     @Status
 )";
 
-        await _dataBaseManager.ExecuteAsync(insertQuery, new {
-            model.EventId,
-            model.StartTime,
-            model.EndTime,
-            model.Name,
-            model.Description,
-            model.CreatedAt,
-            model.ModifiedAt,
-            model.UserId,
-            model.ConcurrencyStamp,
-            model.Status
-        });
+        await _dataBaseManager.ExecuteAsync(insertQuery, model);
     }
 
-    public async Task Update(Event model)
+    public async Task Update(Job model)
     {
         const string updateQuery = @"
-UPDATE public.event SET
-    start_time = @StartTime,
-    end_time = @EndTime,
+UPDATE public.job SET
+    category_id = @CategoryId,
     name = @Name,
     description = @Description,
+    data = @Data,
     created_at = @CreatedAt,
     modified_at = @ModifiedAt,
     user_id = @UserId,
     concurrency_stamp = @ConcurrencyStamp,
     status = @Status
-WHERE event_id = @EventId";
+WHERE job_id = @JobId";
 
         var (query, parameters) = _dataBaseManager.WrapQueryWithConcurrencyCheck(updateQuery, model);
 
@@ -76,34 +65,32 @@ WHERE event_id = @EventId";
         }
         catch (NpgsqlException e) when (e.SqlState == PgErrorCodes.ConcurrencyError)
         {
-            
             throw;
         }
     }
 
-
-    public async Task<List<Event>> GetPaged(int startRow = 0, int count = 100, bool descending = true)
+    public async Task<List<Job>> GetPaged(int startRow = 0, int count = 100, bool descending = true)
     {
         var orderByDirection = descending ? "DESC" : "ASC";
 
         const string pagedQuery = @"
-WITH ranked_events AS (
+WITH ranked_jobs AS (
     SELECT *,
     ROW_NUMBER() OVER (ORDER BY created_at {0}) AS rn
-    FROM public.event
+    FROM public.job
 )
 SELECT
-    event_id,
-    start_time,
-    end_time,
+    job_id,
+    category_id,
     name,
     description,
+    data,
     created_at,
     modified_at,
     user_id,
     concurrency_stamp,
     status
-FROM ranked_events
+FROM ranked_jobs
 WHERE rn > @StartRow AND rn <= @EndRow
 ORDER BY created_at {0};";
 
@@ -112,29 +99,28 @@ ORDER BY created_at {0};";
 
         var parameters = new { StartRow = startRow, EndRow = startRow + count };
 
-        return (await _dataBaseManager.QueryAsync<Event>(finalQuery, parameters)).ToList();
+        return (await _dataBaseManager.QueryAsync<Job>(finalQuery, parameters)).ToList();
     }
 
-    public async Task<Event> Get(Guid id)
+    public async Task<Job> Get(Guid jobId)
     {
         const string query = @"
 SELECT
-    event_id,
-    start_time,
-    end_time,
+    job_id,
+    category_id,
     name,
     description,
+    data,
     created_at,
     modified_at,
     user_id,
     concurrency_stamp,
     status
 FROM
-    public.event
+    public.job
 WHERE
-    event_id = @Id;";
+    job_id = @JobId;";
 
-        return await _dataBaseManager.QuerySingleOrDefaultAsync<Event>(query, new { Id = id });
+        return await _dataBaseManager.QuerySingleOrDefaultAsync<Job>(query, new { JobId = jobId });
     }
-
 }

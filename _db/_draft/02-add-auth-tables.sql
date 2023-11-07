@@ -20,9 +20,9 @@ CREATE TABLE public.user (
     lockout_enabled BOOLEAN NOT NULL,
     access_failed_count INTEGER NOT NULL DEFAULT 0,
     profile_picture_media_id UUID,
-    is_active BOOLEAN NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL,
-    modified_at TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL
+    created_at TIMESTAMP DEFAULT NOW() NOT NULL,
+    modified_at TIMESTAMP DEFAULT NOW() NOT NULL,
+    status INTEGER NOT NULL
 );
 END IF;
 

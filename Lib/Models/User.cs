@@ -18,9 +18,9 @@ public class User : IHasConcurrencyStamp
     public bool LockoutEnabled { get; set; }
     public int AccessFailedCount { get; set; }
     public Guid? ProfilePictureMediaId { get; set; }
-    public bool IsActive { get; set; } = true;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime ModifiedAt { get; set; } = DateTime.UtcNow;
+    public Status Status { get; set; }
     // For Claims and Roles, consider using separate classes and linking via foreign keys.
     // public ICollection<Claim> Claims { get; set; }
     // public ICollection<Role> Roles { get; set; }

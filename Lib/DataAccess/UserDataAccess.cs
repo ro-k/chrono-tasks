@@ -21,13 +21,12 @@ public class UserDataAccess : IUserDataAccess
 INSERT INTO public.user 
     (user_id, user_name, normalized_user_name, email, normalized_email, email_confirmed, 
     password_hash, security_stamp, concurrency_stamp, phone_number, phone_number_confirmed, 
-    two_factor_enabled, lockout_end, lockout_enabled, access_failed_count, profile_picture_media_id, 
-    is_active) 
+    two_factor_enabled, lockout_end, lockout_enabled, access_failed_count, profile_picture_media_id, status) 
 VALUES 
     (@UserId, @UserName, @NormalizedUserName, @Email, @NormalizedEmail, @EmailConfirmed, 
     @PasswordHash, @SecurityStamp, @ConcurrencyStamp, @PhoneNumber, @PhoneNumberConfirmed, 
     @TwoFactorEnabled, @LockoutEnd, @LockoutEnabled, @AccessFailedCount, @ProfilePictureMediaId, 
-    @IsActive)";
+    @Status)";
     
         ct.ThrowIfCancellationRequested();
         
@@ -55,10 +54,10 @@ SET
     lockout_end = @LockoutEnd, 
     lockout_enabled = @LockoutEnabled, 
     access_failed_count = @AccessFailedCount, 
-    profile_picture_media_id = @ProfilePictureMediaId, 
-    is_active = @IsActive, 
+    profile_picture_media_id = @ProfilePictureMediaId,
     created_at = @CreatedAt, 
-    modified_at = @ModifiedAt
+    modified_at = @ModifiedAt,
+    status = @Status
 WHERE user_id = @UserId;";
     
         var (query, parameters) = _dataBaseManager.WrapQueryWithConcurrencyCheck(updateQuery, user);
@@ -79,6 +78,7 @@ WHERE user_id = @UserId;";
 
     public async Task<IdentityResult> DeleteAsync(User user, CancellationToken ct)
     {
+        // should probably just use Update and set Status
         const string deleteQuery = "DELETE FROM public.user WHERE user_id = @UserId";
     
         var (query, parameters) = _dataBaseManager.WrapQueryWithConcurrencyCheck(deleteQuery, user);
@@ -121,10 +121,10 @@ SELECT
     lockout_end, 
     lockout_enabled, 
     access_failed_count, 
-    profile_picture_media_id, 
-    is_active, 
+    profile_picture_media_id,
     created_at, 
-    modified_at
+    modified_at,
+    status
 FROM public.user 
 WHERE 
     user_id = @UserId";
@@ -160,9 +160,9 @@ SELECT
     lockout_enabled, 
     access_failed_count, 
     profile_picture_media_id, 
-    is_active, 
     created_at, 
-    modified_at
+    modified_at,
+    status
 FROM public.user 
 WHERE 
     normalized_user_name = @NormalizedUserName";

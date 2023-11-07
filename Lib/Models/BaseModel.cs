@@ -6,4 +6,5 @@ public class BaseModel : IHasConcurrencyStamp
     public DateTime ModifiedAt { get; set; } = DateTime.UtcNow;
     public Guid UserId { get; set; }
     public Guid ConcurrencyStamp { get; set; } = Guid.NewGuid();
+    public Status Status { get; set; }
 }
