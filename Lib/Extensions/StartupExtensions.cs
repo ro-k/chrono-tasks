@@ -7,13 +7,18 @@ namespace Lib.Extensions;
 
 public static class StartupExtensions
 {
-    public static IServiceCollection ConfigureServices(this IServiceCollection serviceCollection)
+    public static IServiceCollection ConfigureServices(this IServiceCollection serviceCollection) =>
+        serviceCollection.AddDataAccess();
+
+    private static IServiceCollection AddDataAccess(this IServiceCollection serviceCollection)
     {
         serviceCollection
             .AddScoped<IDataBaseManager, DataBaseManager>()
-            .AddScoped<IEventDataAccess, EventDataAccess>()
+            
             .AddScoped<IFileStorageDataAccess, LocalFileStorageDataAccess>()
             .AddScoped<LocalFileStorageDataAccess.IFileStreamWrapper, LocalFileStorageDataAccess.FileStreamWrapper>()
+            
+            .AddScoped<IEventDataAccess, EventDataAccess>()
             .AddScoped<MediaDataAccess, MediaDataAccess>()
             .AddScoped<IRoleDataAccess, RoleDataAccess>()
             .AddScoped<IUserDataAccess, UserDataAccess>();

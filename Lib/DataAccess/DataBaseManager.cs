@@ -44,6 +44,13 @@ public class DataBaseManager : IDataBaseManager
         return await dbConnection.ExecuteAsync(query, parameters);
     }
 
+    public async Task<T> ExecuteScalarAsync<T>(string query, object? parameters = null)
+    {
+        using IDbConnection dbConnection = new SqlConnection(_connectionString);
+        dbConnection.Open();
+        return await dbConnection.ExecuteScalarAsync<T>(query, parameters);
+    }
+
     public (string, DynamicParameters) WrapQueryWithConcurrencyCheck(string query, IHasConcurrencyStamp baseParameters)
     {
         var whereRegex = new Regex(@"\bWHERE\b", RegexOptions.IgnoreCase);

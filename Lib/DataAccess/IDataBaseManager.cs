@@ -14,5 +14,6 @@ public interface IDataBaseManager
 
     Task<T> QueryFirstOrDefaultAsync<T>(string query, object? parameters = null);
     Task<int> ExecuteAsync(string query, object? parameters = null);
+    Task<T> ExecuteScalarAsync<T>(string query, object? parameters = null);
     (string, DynamicParameters) WrapQueryWithConcurrencyCheck(string query, IHasConcurrencyStamp baseParameters);
 }
