@@ -1,7 +1,9 @@
+using System.Security.Claims;
 using Lib.Models;
 using Microsoft.AspNetCore.Identity;
 using Npgsql;
 using Claim = System.Security.Claims.Claim;
+using DbClaim = Lib.Models.Claim;
 
 namespace Lib.DataAccess;
 
@@ -9,12 +11,36 @@ public class UserDataAccess : IUserDataAccess
 {
     private readonly IDataBaseManager _dataBaseManager;
     private readonly IRoleDataAccess _roleDataAccess;
+    private readonly IClaimDataAccess _claimDataAccess;
 
-    public UserDataAccess(IDataBaseManager dataBaseManager, IRoleDataAccess roleDataAccess)
+    public UserDataAccess(IDataBaseManager dataBaseManager, IRoleDataAccess roleDataAccess, IClaimDataAccess claimDataAccess)
     {
         _dataBaseManager = dataBaseManager;
         _roleDataAccess = roleDataAccess;
+        _claimDataAccess = claimDataAccess;
     }
+
+    public const string UserSelectString = @"
+    user_id, 
+    user_name, 
+    normalized_user_name, 
+    email, 
+    normalized_email, 
+    email_confirmed, 
+    password_hash, 
+    security_stamp, 
+    concurrency_stamp, 
+    phone_number, 
+    phone_number_confirmed, 
+    two_factor_enabled, 
+    lockout_end, 
+    lockout_enabled, 
+    access_failed_count, 
+    profile_picture_media_id, 
+    created_at, 
+    modified_at,
+    status
+";
 
     public async Task<IdentityResult> CreateAsync(User user, CancellationToken ct)
     {
@@ -107,36 +133,14 @@ WHERE user_id = @UserId;";
             return null!;
         }
     
-        const string selectQuery = @"
-SELECT 
-    user_id, 
-    user_name, 
-    normalized_user_name, 
-    email, 
-    normalized_email, 
-    email_confirmed, 
-    password_hash, 
-    security_stamp, 
-    concurrency_stamp, 
-    phone_number, 
-    phone_number_confirmed, 
-    two_factor_enabled, 
-    lockout_end, 
-    lockout_enabled, 
-    access_failed_count, 
-    profile_picture_media_id,
-    created_at, 
-    modified_at,
-    status
-FROM public.user 
-WHERE 
-    user_id = @UserId";
+        const string selectQuery = $"SELECT {UserSelectString} FROM public.user WHERE user_id = @UserId";
         
         ct.ThrowIfCancellationRequested();
     
         return await _dataBaseManager.QuerySingleOrDefaultAsync<User>(selectQuery, new { UserId = userId });
     }
-
+    
+    public Task<User> FindByIdAsync(Guid userId, CancellationToken ct) => FindByIdAsync(userId.ToString(), ct);
 
     public async Task<User> FindByNameAsync(string userName, CancellationToken ct)
     {
@@ -145,30 +149,7 @@ WHERE
             return null!;
         }
     
-        const string selectQuery = @"
-SELECT 
-    user_id, 
-    user_name, 
-    normalized_user_name, 
-    email, 
-    normalized_email, 
-    email_confirmed, 
-    password_hash, 
-    security_stamp, 
-    concurrency_stamp, 
-    phone_number, 
-    phone_number_confirmed, 
-    two_factor_enabled, 
-    lockout_end, 
-    lockout_enabled, 
-    access_failed_count, 
-    profile_picture_media_id, 
-    created_at, 
-    modified_at,
-    status
-FROM public.user 
-WHERE 
-    normalized_user_name = @NormalizedUserName";
+        const string selectQuery = @$"SELECT {UserSelectString} FROM public.user WHERE normalized_user_name = @NormalizedUserName";
     
         ct.ThrowIfCancellationRequested();
         
@@ -182,24 +163,24 @@ WHERE
 
     public async Task<string> GetUserNameAsync(User user, CancellationToken ct)
     {
-        return (await FindByIdAsync(user.UserId.ToString(), ct)).UserName;
+        return (await FindByIdAsync(user.UserId, ct)).UserName;
     }
 
     public async Task SetUserNameAsync(User user, string userName, CancellationToken ct)
     {
-        var dbUser = await FindByIdAsync(user.UserId.ToString(), ct);
+        var dbUser = await FindByIdAsync(user.UserId, ct);
         dbUser.UserName = userName;
         await UpdateAsync(dbUser, ct);
     }
 
     public async Task<string> GetNormalizedUserNameAsync(User user, CancellationToken ct)
     {
-        return (await FindByIdAsync(user.UserId.ToString(), ct)).NormalizedUserName;
+        return (await FindByIdAsync(user.UserId, ct)).NormalizedUserName;
     }
 
     public async Task SetNormalizedUserNameAsync(User user, string normalizedName, CancellationToken ct)
     {
-        var dbUser = await FindByIdAsync(user.UserId.ToString(), ct);
+        var dbUser = await FindByIdAsync(user.UserId, ct);
         dbUser.NormalizedUserName = normalizedName;
         await UpdateAsync(dbUser, ct);
     }
@@ -210,20 +191,20 @@ WHERE
 
     public async Task SetPasswordHashAsync(User user, string passwordHash, CancellationToken cancellationToken)
     {
-        var dbUser = await FindByIdAsync(user.UserId.ToString(), cancellationToken);
+        var dbUser = await FindByIdAsync(user.UserId, cancellationToken);
         dbUser.PasswordHash = passwordHash;
         await UpdateAsync(dbUser, cancellationToken);
     }
 
     public async Task<string> GetPasswordHashAsync(User user, CancellationToken cancellationToken)
     {
-        var dbUser = await FindByIdAsync(user.UserId.ToString(), cancellationToken);
+        var dbUser = await FindByIdAsync(user.UserId, cancellationToken);
         return dbUser.PasswordHash;
     }
 
     public async Task<bool> HasPasswordAsync(User user, CancellationToken cancellationToken)
     {
-        var dbUser = await FindByIdAsync(user.UserId.ToString(), cancellationToken);
+        var dbUser = await FindByIdAsync(user.UserId, cancellationToken);
         return !string.IsNullOrEmpty(dbUser.PasswordHash);
     }
 
@@ -232,7 +213,7 @@ WHERE
         var dbRole = await _roleDataAccess.FindByNameAsync(roleName.Normalize(), cancellationToken);
         
         const string query = @"
-insert into user_role (user_id, role_id) 
+insert into public.user_role (user_id, role_id) 
 values (@UserId, @RoleId) on conflict (user_id, role_id) DO NOTHING;";
 
         cancellationToken.ThrowIfCancellationRequested();
@@ -252,8 +233,8 @@ values (@UserId, @RoleId) on conflict (user_id, role_id) DO NOTHING;";
     public async Task<IList<string>> GetRolesAsync(User user, CancellationToken cancellationToken)
     {
         const string query = @"
-select name from role r
-join user_role ur on r.role_id = ur.role_id
+select name from public.role r
+join public.user_role ur on r.role_id = ur.role_id
 where ur.user_id = @UserId
 ";
 
@@ -264,7 +245,7 @@ where ur.user_id = @UserId
     {
         var dbRole = await _roleDataAccess.FindByNameAsync(roleName.Normalize(), cancellationToken);
         
-        const string query = @"select exists(select 1 from user_role where user_id = @UserId and role_id = @RoleId)";
+        const string query = @"select exists(select 1 from user_role where user_id = @UserId and role_id = @RoleId);";
 
         cancellationToken.ThrowIfCancellationRequested();
         return await _dataBaseManager.ExecuteScalarAsync<bool>(query, new { user.UserId, dbRole.RoleId });
@@ -272,97 +253,157 @@ where ur.user_id = @UserId
 
     public async Task<IList<User>> GetUsersInRoleAsync(string roleName, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        const string query = @$"
+select
+    {UserSelectString}
+from public.user u
+join public.user_role ur on u.user_id = ur.user_id
+join public.role r on ur.role_id = r.role_id
+where r.normalized_name = @NormalizedRoleName;
+";
+        
+        cancellationToken.ThrowIfCancellationRequested();
+        return (await _dataBaseManager.QueryAsync<User>(query, new { NormalizedRoleName = roleName.Normalize() }))
+            .ToList();
     }
 
     public async Task<IList<Claim>> GetClaimsAsync(User user, CancellationToken cancellationToken)
     {
+        var roles = (await GetRolesAsync(user, cancellationToken)).ToList();
+
+        var claims =  roles.Select(x => new Claim(ClaimTypes.Role, x)).ToList();
+        claims.Add(new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()));
+
+        return claims;
+    }
+
+    public Task AddClaimsAsync(User user, IEnumerable<Claim> claims, CancellationToken cancellationToken)
+    {
+        // claims are not editable atm
         throw new NotImplementedException();
     }
 
-    public async Task AddClaimsAsync(User user, IEnumerable<Claim> claims, CancellationToken cancellationToken)
+    public Task ReplaceClaimAsync(User user, Claim claim, Claim newClaim, CancellationToken cancellationToken)
     {
+        // claims are not editable atm
         throw new NotImplementedException();
     }
 
-    public async Task ReplaceClaimAsync(User user, Claim claim, Claim newClaim, CancellationToken cancellationToken)
+    public  Task RemoveClaimsAsync(User user, IEnumerable<Claim> claims, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
-    }
-
-    public async Task RemoveClaimsAsync(User user, IEnumerable<Claim> claims, CancellationToken cancellationToken)
-    {
+        // claims are not editable atm
         throw new NotImplementedException();
     }
 
     public async Task<IList<User>> GetUsersForClaimAsync(Claim claim, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        if (claim.Type != ClaimTypes.NameIdentifier || !Guid.TryParse(claim.Value, out var userId))
+        {
+            return new List<User>();
+        }
+        
+        var user = await FindByIdAsync(userId, cancellationToken);
+        return new List<User> { user };
     }
 
     public async Task SetEmailAsync(User user, string email, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        var dbUser = await FindByIdAsync(user.UserId, cancellationToken);
+        dbUser.Email = user.Email;
+        await UpdateAsync(dbUser, cancellationToken);
     }
 
     public async Task<string> GetEmailAsync(User user, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        var dbUser = await FindByIdAsync(user.UserId, cancellationToken);
+        return dbUser.Email;
     }
 
     public async Task<bool> GetEmailConfirmedAsync(User user, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        var dbUser = await FindByIdAsync(user.UserId, cancellationToken);
+        return dbUser.EmailConfirmed;
     }
 
     public async Task SetEmailConfirmedAsync(User user, bool confirmed, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        var dbUser = await FindByIdAsync(user.UserId, cancellationToken);
+        dbUser.EmailConfirmed = true;
+        await UpdateAsync(dbUser, cancellationToken);
     }
 
     public async Task<User> FindByEmailAsync(string normalizedEmail, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        if (string.IsNullOrEmpty(normalizedEmail))
+        {
+            return null!;
+        }
+    
+        const string selectQuery = $"SELECT {UserSelectString} FROM public.user WHERE normalized_email = @NormalizedEmail";
+        
+        cancellationToken.ThrowIfCancellationRequested();
+
+        return await _dataBaseManager.QuerySingleOrDefaultAsync<User>(selectQuery,
+            new { NormalizedEmail = normalizedEmail });
     }
 
+    
+    
     public async Task<string> GetNormalizedEmailAsync(User user, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        var dbUser = await FindByIdAsync(user.UserId, cancellationToken);
+        return dbUser.NormalizedEmail;
     }
 
     public async Task SetNormalizedEmailAsync(User user, string normalizedEmail, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        var dbUser = await FindByIdAsync(user.UserId, cancellationToken);
+        dbUser.NormalizedEmail = normalizedEmail;
+        await UpdateAsync(dbUser, cancellationToken);
     }
 
     public async Task<DateTimeOffset?> GetLockoutEndDateAsync(User user, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        var dbUser = await FindByIdAsync(user.UserId, cancellationToken);
+        return dbUser.LockoutEnd;
     }
 
     public async Task SetLockoutEndDateAsync(User user, DateTimeOffset? lockoutEnd, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        var dbUser = await FindByIdAsync(user.UserId, cancellationToken);
+        dbUser.LockoutEnd = lockoutEnd?.UtcDateTime;
+        await UpdateAsync(dbUser, cancellationToken);
     }
 
     public async Task<int> IncrementAccessFailedCountAsync(User user, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        const string query = @"
+UPDATE public.user SET access_failed_count = access_failed_count + 1
+WHERE user_id = @UserId 
+RETURNING access_failed_count;";
+
+        return await _dataBaseManager.ExecuteScalarAsync<int>(query, new { user.UserId });
     }
 
     public async Task ResetAccessFailedCountAsync(User user, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        const string query = @"
+UPDATE public.user SET access_failed_count = 0
+WHERE user_id = @UserId;";
+
+        await _dataBaseManager.ExecuteAsync(query, new { user.UserId });
     }
 
     public async Task<int> GetAccessFailedCountAsync(User user, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        var dbUser = await FindByIdAsync(user.UserId, cancellationToken);
+        return dbUser.AccessFailedCount;
     }
 
     public async Task<bool> GetLockoutEnabledAsync(User user, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        var dbUser = await FindByIdAsync(user.UserId, cancellationToken);
+        return dbUser.LockoutEnabled;
     }
 
     public async Task SetLockoutEnabledAsync(User user, bool enabled, CancellationToken cancellationToken)
