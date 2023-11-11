@@ -1,9 +1,6 @@
-using System.Security.Claims;
 using Lib.Models;
 using Microsoft.AspNetCore.Identity;
 using Npgsql;
-using Claim = System.Security.Claims.Claim;
-using DbClaim = Lib.Models.Claim;
 
 namespace Lib.DataAccess;
 
@@ -11,13 +8,11 @@ public class UserDataAccess : IUserDataAccess
 {
     private readonly IDataBaseManager _dataBaseManager;
     private readonly IRoleDataAccess _roleDataAccess;
-    private readonly IClaimDataAccess _claimDataAccess;
 
-    public UserDataAccess(IDataBaseManager dataBaseManager, IRoleDataAccess roleDataAccess, IClaimDataAccess claimDataAccess)
+    public UserDataAccess(IDataBaseManager dataBaseManager, IRoleDataAccess roleDataAccess)
     {
         _dataBaseManager = dataBaseManager;
         _roleDataAccess = roleDataAccess;
-        _claimDataAccess = claimDataAccess;
     }
 
     public const string UserSelectString = @"
@@ -267,45 +262,6 @@ where r.normalized_name = @NormalizedRoleName;
             .ToList();
     }
 
-    public async Task<IList<Claim>> GetClaimsAsync(User user, CancellationToken cancellationToken)
-    {
-        var roles = (await GetRolesAsync(user, cancellationToken)).ToList();
-
-        var claims =  roles.Select(x => new Claim(ClaimTypes.Role, x)).ToList();
-        claims.Add(new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()));
-
-        return claims;
-    }
-
-    public Task AddClaimsAsync(User user, IEnumerable<Claim> claims, CancellationToken cancellationToken)
-    {
-        // claims are not editable atm
-        throw new NotImplementedException();
-    }
-
-    public Task ReplaceClaimAsync(User user, Claim claim, Claim newClaim, CancellationToken cancellationToken)
-    {
-        // claims are not editable atm
-        throw new NotImplementedException();
-    }
-
-    public  Task RemoveClaimsAsync(User user, IEnumerable<Claim> claims, CancellationToken cancellationToken)
-    {
-        // claims are not editable atm
-        throw new NotImplementedException();
-    }
-
-    public async Task<IList<User>> GetUsersForClaimAsync(Claim claim, CancellationToken cancellationToken)
-    {
-        if (claim.Type != ClaimTypes.NameIdentifier || !Guid.TryParse(claim.Value, out var userId))
-        {
-            return new List<User>();
-        }
-        
-        var user = await FindByIdAsync(userId, cancellationToken);
-        return new List<User> { user };
-    }
-
     public async Task SetEmailAsync(User user, string email, CancellationToken cancellationToken)
     {
         var dbUser = await FindByIdAsync(user.UserId, cancellationToken);
@@ -408,37 +364,52 @@ WHERE user_id = @UserId;";
 
     public async Task SetLockoutEnabledAsync(User user, bool enabled, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        var dbUser = await FindByIdAsync(user.UserId, cancellationToken);
+        dbUser.LockoutEnabled = enabled;
+
+        await UpdateAsync(dbUser, cancellationToken);
     }
 
     public async Task SetPhoneNumberAsync(User user, string phoneNumber, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        var dbUser = await FindByIdAsync(user.UserId, cancellationToken);
+        dbUser.PhoneNumber = phoneNumber;
+
+        await UpdateAsync(dbUser, cancellationToken);
     }
 
     public async Task<string> GetPhoneNumberAsync(User user, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        var dbUser = await FindByIdAsync(user.UserId, cancellationToken);
+        return dbUser.PhoneNumber;
     }
 
     public async Task<bool> GetPhoneNumberConfirmedAsync(User user, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        var dbUser = await FindByIdAsync(user.UserId, cancellationToken);
+        return dbUser.PhoneNumberConfirmed;
     }
 
     public async Task SetPhoneNumberConfirmedAsync(User user, bool confirmed, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        var dbUser = await FindByIdAsync(user.UserId, cancellationToken);
+        dbUser.PhoneNumberConfirmed = confirmed;
+
+        await UpdateAsync(dbUser, cancellationToken);
     }
 
     public async Task SetSecurityStampAsync(User user, string stamp, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        var dbUser = await FindByIdAsync(user.UserId, cancellationToken);
+        dbUser.SecurityStamp = stamp;
+
+        await UpdateAsync(dbUser, cancellationToken);
     }
 
     public async Task<string> GetSecurityStampAsync(User user, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        var dbUser = await FindByIdAsync(user.UserId, cancellationToken);
+        return dbUser.SecurityStamp;
     }
 
     public async Task AddLoginAsync(User user, UserLoginInfo login, CancellationToken cancellationToken)
