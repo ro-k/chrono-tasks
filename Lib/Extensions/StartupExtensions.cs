@@ -28,10 +28,17 @@ public static class StartupExtensions
 
     public static IServiceCollection ConfigureIdentity(this IServiceCollection serviceCollection)
     {
+        // TODO: register all interfaces from IUserDataAccess
+
         serviceCollection
-            .AddScoped<IUserStore<User>, UserDataAccess>()
-            .AddScoped<IRoleStore<Role>, RoleDataAccess>()
             .AddIdentity<User, Role>()
+            .AddUserManager<IUserDataAccess>()
+            .AddUserStore<IUserDataAccess>()
+            .AddRoleManager<IUserDataAccess>()
+            .AddRoleStore<IUserDataAccess>()
+            .AddSignInManager<IUserDataAccess>()
+            // .AddScoped<IUserStore<User>, UserDataAccess>()
+            // .AddScoped<IRoleStore<Role>, RoleDataAccess>()
             .AddDefaultTokenProviders();
         return serviceCollection;
     }
