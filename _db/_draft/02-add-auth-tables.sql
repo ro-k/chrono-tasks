@@ -12,7 +12,6 @@ CREATE TABLE public.user (
     email_confirmed BOOLEAN NOT NULL,
     password_hash TEXT,
     security_stamp UUID,
-    concurrency_stamp UUID NOT NULL,
     phone_number TEXT,
     phone_number_confirmed BOOLEAN NOT NULL,
     two_factor_enabled BOOLEAN NOT NULL,
@@ -20,6 +19,7 @@ CREATE TABLE public.user (
     lockout_enabled BOOLEAN NOT NULL,
     access_failed_count INTEGER NOT NULL DEFAULT 0,
     profile_picture_media_id UUID,
+    concurrency_stamp UUID NOT NULL,
     created_at TIMESTAMP DEFAULT NOW() NOT NULL,
     modified_at TIMESTAMP DEFAULT NOW() NOT NULL,
     status INTEGER NOT NULL
@@ -55,6 +55,10 @@ create table public.user_login (
     provider_key VARCHAR(128) NOT NULL,
     provider_display_name VARCHAR(255),
     user_id UUID NOT NULL,
+    concurrency_stamp UUID NOT NULL,
+    created_at TIMESTAMP DEFAULT NOW() NOT NULL,
+    modified_at TIMESTAMP DEFAULT NOW() NOT NULL,
+    status INTEGER NOT NULL,
     
     CONSTRAINT FK_UserLogins_Users_UserId FOREIGN KEY (user_id)
     REFERENCES public.user (user_id) ON DELETE CASCADE

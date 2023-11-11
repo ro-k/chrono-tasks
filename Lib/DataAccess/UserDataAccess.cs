@@ -15,7 +15,7 @@ public class UserDataAccess : IUserDataAccess
         _roleDataAccess = roleDataAccess;
     }
 
-    public const string UserSelectString = @"
+    private const string UserSelectString = @"
     user_id, 
     user_name, 
     normalized_user_name, 
@@ -134,8 +134,8 @@ WHERE user_id = @UserId;";
     
         return await _dataBaseManager.QuerySingleOrDefaultAsync<User>(selectQuery, new { UserId = userId });
     }
-    
-    public Task<User> FindByIdAsync(Guid userId, CancellationToken ct) => FindByIdAsync(userId.ToString(), ct);
+
+    private Task<User> FindByIdAsync(Guid userId, CancellationToken ct) => FindByIdAsync(userId.ToString(), ct);
 
     public async Task<User> FindByNameAsync(string userName, CancellationToken ct)
     {
@@ -412,23 +412,56 @@ WHERE user_id = @UserId;";
         return dbUser.SecurityStamp;
     }
 
-    public async Task AddLoginAsync(User user, UserLoginInfo login, CancellationToken cancellationToken)
+    public async Task AddLoginAsync(User user, UserLoginInfo loginInfo, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        var userLogin = new UserLogin
+        {
+            UserLoginId = Guid.NewGuid(),
+            LoginProvider = loginInfo.LoginProvider,
+            ProviderKey = loginInfo.ProviderKey,
+            ProviderDisplayName = loginInfo.ProviderDisplayName,
+            UserId = user.UserId,
+            Status = Status.Active
+        };
+        const string insertQuery = @"
+INSERT INTO public.user_login
+    (user_login_id, login_provider, provider_key, provider_display_name, concurrency_stamp, status, created_at, modified_at, user_id) 
+VALUES 
+    (@UserLoginId, @LoginProvider, @ProviderKey, @ProviderDisplayName, @ConcurrencyStamp, @Status, @CreatedAt, @ModifiedAt, @UserId)";
+
+        await _dataBaseManager.ExecuteAsync(insertQuery, userLogin);
     }
 
     public async Task RemoveLoginAsync(User user, string loginProvider, string providerKey, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        const string query = @"delete from public.user_login where provider_key = @ProviderKey and login_provider = @LoginProvider and user_id = @UserId";
+
+        await _dataBaseManager.ExecuteAsync(query, new { providerKey, loginProvider, user.UserId });
     }
 
     public async Task<IList<UserLoginInfo>> GetLoginsAsync(User user, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        const string query = @$"
+select
+    user_login_id, login_provider, provider_key, provider_display_name, concurrency_stamp, status, created_at, modified_at, user_id
+from public.user_login where user_id = @UserId;";
+        
+        cancellationToken.ThrowIfCancellationRequested();
+        return (await _dataBaseManager.QueryAsync<UserLogin>(query, new { user.UserId }))
+            .Select(x => new UserLoginInfo(x.LoginProvider, x.ProviderKey, x.ProviderDisplayName)).ToList();
     }
 
     public async Task<User> FindByLoginAsync(string loginProvider, string providerKey, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        const string query = @$"
+select
+    {UserSelectString}
+from public.user u
+join public.user_login ul on u.user_id = ul.user_id
+where ul.provider_key = @ProviderKey and ul.login_provider = @LoginProvider;
+";
+        
+        cancellationToken.ThrowIfCancellationRequested();
+        return await _dataBaseManager.QuerySingleOrDefaultAsync<User>(query, new { loginProvider, providerKey });
     }
 }
