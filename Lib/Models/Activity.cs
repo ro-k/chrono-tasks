@@ -1,8 +1,8 @@
 namespace Lib.Models;
 
-public class Event : BaseModel
+public class Activity : BaseModel
 {
-    public Guid EventId { get; set; }
+    public Guid ActivityId { get; set; }
     
     public DateTime StartTime { get; set; }
     

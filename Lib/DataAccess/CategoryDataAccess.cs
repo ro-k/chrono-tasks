@@ -12,7 +12,7 @@ public class CategoryDataAccess : ICategoryDataAccess
         _dataBaseManager = dataBaseManager;
     }
 
-    public async Task Create(Category model)
+    public async Task<Category> Create(Category model)
     {
         const string insertQuery = @"
 INSERT INTO public.category (
@@ -33,12 +33,13 @@ INSERT INTO public.category (
     @UserId, 
     @ConcurrencyStamp,
     @Status
-)";
+)
+RETURNING *;";
 
-        await _dataBaseManager.ExecuteAsync(insertQuery, model);
+        return await _dataBaseManager.ExecuteScalarAsync<Category>(insertQuery, model);
     }
 
-    public async Task Update(Category model)
+    public async Task<Category> Update(Category model)
     {
         const string updateQuery = @"
 UPDATE public.category SET
@@ -55,7 +56,7 @@ WHERE category_id = @CategoryId";
 
         try
         {
-            await _dataBaseManager.ExecuteAsync(query, parameters);
+            return await _dataBaseManager.ExecuteScalarAsync<Category>(query, parameters);
         }
         catch (NpgsqlException e) when (e.SqlState == PgErrorCodes.ConcurrencyError)
         {

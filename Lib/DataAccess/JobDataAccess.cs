@@ -12,7 +12,7 @@ public class JobDataAccess : IJobDataAccess
         _dataBaseManager = dataBaseManager;
     }
 
-    public async Task Create(Job model)
+    public async Task<Job> Create(Job model)
     {
         const string insertQuery = @"
 INSERT INTO public.job (
@@ -37,12 +37,13 @@ INSERT INTO public.job (
     @UserId, 
     @ConcurrencyStamp,
     @Status
-)";
+)
+RETURNING *;";
 
-        await _dataBaseManager.ExecuteAsync(insertQuery, model);
+        return await _dataBaseManager.ExecuteScalarAsync<Job>(insertQuery, model);
     }
 
-    public async Task Update(Job model)
+    public async Task<Job> Update(Job model)
     {
         const string updateQuery = @"
 UPDATE public.job SET
@@ -61,7 +62,7 @@ WHERE job_id = @JobId";
 
         try
         {
-            await _dataBaseManager.ExecuteAsync(query, parameters);
+            return await _dataBaseManager.ExecuteScalarAsync<Job>(query, parameters);
         }
         catch (NpgsqlException e) when (e.SqlState == PgErrorCodes.ConcurrencyError)
         {

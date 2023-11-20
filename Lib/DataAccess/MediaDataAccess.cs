@@ -12,23 +12,24 @@ public class MediaDataAccess : IMediaDataAccess
         _dataBaseManager = dataBaseManager;
     }
 
-    public async Task Create(Media media)
+    public async Task<Media> Create(Media media)
     {
         const string insertQuery = @"
 INSERT INTO public.media
-    (media_id, category_id, event_id, job_id, original_filename, extension, mime_type, size, storage_path, hash, metadata, status, created_at, modified_at, user_id) 
+    (media_id, category_id, activity_id, job_id, original_filename, extension, mime_type, size, storage_path, hash, metadata, status, created_at, modified_at, user_id) 
 VALUES 
-    (@MediaId, @CategoryId, @EventId, @JobId, @OriginalFilename, @Extension, @MimeType, @Size, @StoragePath, @Hash, @Metadata, @Status, @CreatedAt, @ModifiedAt, @UserId)";
+    (@MediaId, @CategoryId, @ActivityId, @JobId, @OriginalFilename, @Extension, @MimeType, @Size, @StoragePath, @Hash, @Metadata, @Status, @CreatedAt, @ModifiedAt, @UserId)
+RETURNING *;";
 
-        await _dataBaseManager.ExecuteAsync(insertQuery, media);
+        return await _dataBaseManager.ExecuteScalarAsync<Media>(insertQuery, media);
     }
 
-    public async Task Update(Media media)
+    public async Task<Media> Update(Media media)
     {
         const string updateQuery = @"
 UPDATE public.media SET
     category_id = @CategoryId,
-    event_id = @EventId,
+    activity_id = @ActivityId,
     job_id = @JobId,
     original_filename = @OriginalFilename,
     extension = @Extension,
@@ -46,7 +47,7 @@ WHERE media_id = @MediaId;";
 
         try
         {
-            await _dataBaseManager.ExecuteAsync(query, parameters);
+            return await _dataBaseManager.ExecuteScalarAsync<Media>(query, parameters);
         }
         catch (NpgsqlException e) when (e.SqlState == PgErrorCodes.ConcurrencyError)
         {
@@ -68,7 +69,7 @@ WITH ranked_media AS (
 SELECT
     media_id,
     category_id,
-    event_id,
+    activity_id,
     job_id,
     original_filename,
     extension,
@@ -99,7 +100,7 @@ ORDER BY created_at {0};";
 SELECT 
     media_id,
     category_id,
-    event_id,
+    activity_id,
     job_id,
     original_filename,
     extension,

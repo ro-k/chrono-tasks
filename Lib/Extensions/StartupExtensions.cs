@@ -19,15 +19,17 @@ public static class StartupExtensions
             .AddScoped<IFileStorageDataAccess, LocalFileStorageDataAccess>()
             .AddScoped<LocalFileStorageDataAccess.IFileStreamWrapper, LocalFileStorageDataAccess.FileStreamWrapper>()
             
-            .AddScoped<IEventDataAccess, EventDataAccess>()
+            .AddScoped<IActivityDataAccess, ActivityDataAccess>()
             .AddScoped<IMediaDataAccess, MediaDataAccess>()
             .AddScoped<IRoleDataAccess, RoleDataAccess>()
             .AddScoped<IJobDataAccess, JobDataAccess>()
             .AddScoped<IUserDataAccess, UserDataAccess>();
 
 
-        serviceCollection.AddScoped<IUserService, UserService>();
-        
+        serviceCollection
+            .AddScoped<IAuthService, AuthService>()
+            .AddScoped<ISignInManagerWrapper, SignInManagerWrapper>();
+
         return serviceCollection;
     }
 

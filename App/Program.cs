@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using Lib;
 using Lib.Extensions;
 
@@ -16,7 +17,11 @@ builder.Services.Configure<AppSettings>(x =>
 builder.Services.ConfigureServices(); // add services in here
 
 
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+    });
 
 var app = builder.Build();
 

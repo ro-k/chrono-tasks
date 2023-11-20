@@ -64,11 +64,14 @@ public class DataBaseManager : IDataBaseManager
                 RegexOptions.IgnoreCase)
             : $"{query} WHERE concurrency_stamp = @OldConcurrencyStamp";
 
+        appendedQuery = appendedQuery.TrimEnd(' ', ';');
+
         appendedQuery = @$"
 DO $$ 
 BEGIN 
 
 {appendedQuery}
+RETURNING *;
 
 IF NOT FOUND THEN 
     RAISE EXCEPTION 'Concurrency conflict' USING ERRCODE = 'P0001';
