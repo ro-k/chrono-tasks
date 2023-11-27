@@ -1,4 +1,5 @@
 using Lib.Models;
+using Lib.Services;
 using Npgsql;
 
 namespace Lib.DataAccess;
@@ -6,10 +7,12 @@ namespace Lib.DataAccess;
 public class JobDataAccess : IJobDataAccess
 {
     private readonly IDataBaseManager _dataBaseManager;
+    private readonly IUserContext _userContext;
 
-    public JobDataAccess(IDataBaseManager dataBaseManager)
+    public JobDataAccess(IDataBaseManager dataBaseManager, IUserContext userContext)
     {
         _dataBaseManager = dataBaseManager;
+        _userContext = userContext;
     }
 
     public async Task<Job> Create(Job model)
@@ -123,5 +126,27 @@ WHERE
     job_id = @JobId;";
 
         return await _dataBaseManager.QuerySingleOrDefaultAsync<Job>(query, new { JobId = jobId });
+    }
+
+    public async Task<IEnumerable<Job>> GetAllByUserContext()
+    {
+        const string query = @"
+SELECT
+    job_id,
+    category_id,
+    name,
+    description,
+    data,
+    created_at,
+    modified_at,
+    user_id,
+    concurrency_stamp,
+    status
+FROM
+    public.job
+WHERE
+    user_id = @UserId;";
+
+        return await _dataBaseManager.QueryAsync<Job>(query, new { _userContext.UserId });
     }
 }

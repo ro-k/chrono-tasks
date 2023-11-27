@@ -1,4 +1,5 @@
 using Lib.Models;
+using Lib.Services;
 using Npgsql;
 
 namespace Lib.DataAccess;
@@ -6,17 +7,19 @@ namespace Lib.DataAccess;
 public class MediaDataAccess : IMediaDataAccess
 {
     private readonly IDataBaseManager _dataBaseManager;
+    private readonly IUserContext _userContext;
 
-    public MediaDataAccess(IDataBaseManager dataBaseManager)
+    public MediaDataAccess(IDataBaseManager dataBaseManager, IUserContext userContext)
     {
         _dataBaseManager = dataBaseManager;
+        _userContext = userContext;
     }
 
     public async Task<Media> Create(Media media)
     {
         const string insertQuery = @"
 INSERT INTO public.media
-    (media_id, category_id, activity_id, job_id, original_filename, extension, mime_type, size, storage_path, hash, metadata, status, created_at, modified_at, user_id) 
+    (media_id, activity_id, original_filename, extension, mime_type, size, storage_path, hash, metadata, status, created_at, modified_at, user_id) 
 VALUES 
     (@MediaId, @CategoryId, @ActivityId, @JobId, @OriginalFilename, @Extension, @MimeType, @Size, @StoragePath, @Hash, @Metadata, @Status, @CreatedAt, @ModifiedAt, @UserId)
 RETURNING *;";
@@ -28,9 +31,7 @@ RETURNING *;";
     {
         const string updateQuery = @"
 UPDATE public.media SET
-    category_id = @CategoryId,
     activity_id = @ActivityId,
-    job_id = @JobId,
     original_filename = @OriginalFilename,
     extension = @Extension,
     mime_type = @MimeType,
@@ -68,9 +69,7 @@ WITH ranked_media AS (
 )
 SELECT
     media_id,
-    category_id,
     activity_id,
-    job_id,
     original_filename,
     extension,
     mime_type,
@@ -99,9 +98,7 @@ ORDER BY created_at {0};";
         const string selectQuery = @"
 SELECT 
     media_id,
-    category_id,
     activity_id,
-    job_id,
     original_filename,
     extension,
     mime_type,
@@ -121,4 +118,28 @@ WHERE
         return await _dataBaseManager.QueryFirstOrDefaultAsync<Media>(selectQuery, new { MediaId = mediaId });
     }
 
+    public async Task<IEnumerable<Media>> GetAllByUserContext()
+    {
+        const string selectQuery = @"
+SELECT 
+    media_id,
+    activity_id,
+    original_filename,
+    extension,
+    mime_type,
+    size,
+    storage_path,
+    hash,
+    metadata,
+    status,
+    created_at,
+    modified_at,
+    user_id
+FROM 
+    public.media
+WHERE 
+    user_id = @UserId";
+
+        return await _dataBaseManager.QueryAsync<Media>(selectQuery, new { _userContext.UserId });
+    }
 }

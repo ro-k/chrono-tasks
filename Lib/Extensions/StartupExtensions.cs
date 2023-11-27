@@ -20,10 +20,12 @@ public static class StartupExtensions
             .AddScoped<LocalFileStorageDataAccess.IFileStreamWrapper, LocalFileStorageDataAccess.FileStreamWrapper>()
             
             .AddScoped<IActivityDataAccess, ActivityDataAccess>()
+            .AddScoped<ICategoryDataAccess, CategoryDataAccess>()
             .AddScoped<IMediaDataAccess, MediaDataAccess>()
             .AddScoped<IRoleDataAccess, RoleDataAccess>()
             .AddScoped<IJobDataAccess, JobDataAccess>()
-            .AddScoped<IUserDataAccess, UserDataAccess>();
+            .AddScoped<IUserDataAccess, UserDataAccess>()
+            .AddScoped<IUserContext, UserContext>();
 
 
         serviceCollection

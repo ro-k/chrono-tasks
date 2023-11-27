@@ -142,6 +142,29 @@ WHERE
         return await _dataBaseManager.QuerySingleOrDefaultAsync<Activity>(query, new { Id = id, _userContext.UserId });
     }
 
+    public async Task<IEnumerable<Activity>> GetAllByUserContext()
+    {
+        const string query = @"
+SELECT
+    activity_id,
+    start_time,
+    end_time,
+    name,
+    description,
+    created_at,
+    modified_at,
+    user_id,
+    concurrency_stamp,
+    status
+FROM
+    public.activity
+WHERE
+    user_id = @UserId;
+";
+
+        return await _dataBaseManager.QueryAsync<Activity>(query, new { _userContext.UserId });
+    }
+
     public async Task AssignCategory(Guid activityId, Guid categoryId, bool clearCurrentAssignments = true)
     {
         const string deleteQuery = @"
