@@ -43,7 +43,7 @@ INSERT INTO public.job (
 )
 RETURNING *;";
 
-        return await _dataBaseManager.ExecuteScalarAsync<Job>(insertQuery, model);
+        return await _dataBaseManager.QuerySingleOrDefaultAsync<Job>(insertQuery, model);
     }
 
     public async Task<Job> Update(Job model)
@@ -65,7 +65,7 @@ WHERE job_id = @JobId";
 
         try
         {
-            return await _dataBaseManager.ExecuteScalarAsync<Job>(query, parameters);
+            return await _dataBaseManager.QuerySingleOrDefaultAsync<Job>(query, parameters);
         }
         catch (NpgsqlException e) when (e.SqlState == PgErrorCodes.ConcurrencyError)
         {
@@ -148,5 +148,16 @@ WHERE
     user_id = @UserId;";
 
         return await _dataBaseManager.QueryAsync<Job>(query, new { _userContext.UserId });
+    }
+
+    public async Task<bool> Delete(Guid jobId)
+    {
+        const string query = @"
+DELETE FROM
+    public.job
+WHERE
+    job_id = @JobId AND user_id = @UserId;";
+
+        return await _dataBaseManager.ExecuteScalarAsync<int>(query, new { _userContext.UserId, jobId }) > 0;
     }
 }

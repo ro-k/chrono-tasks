@@ -43,7 +43,7 @@ INSERT INTO public.activity (
 )
 returning *;";
 
-        return await _dataBaseManager.ExecuteScalarAsync<Activity>(insertQuery, new {
+        return await _dataBaseManager.QuerySingleOrDefaultAsync<Activity>(insertQuery, new {
             model.ActivityId,
             model.StartTime,
             model.EndTime,
@@ -77,7 +77,7 @@ WHERE activity_id = @ActivityId";
 
         try
         {
-            return await _dataBaseManager.ExecuteScalarAsync<Activity>(query, parameters);
+            return await _dataBaseManager.QuerySingleOrDefaultAsync<Activity>(query, parameters);
         }
         catch (NpgsqlException e) when (e.SqlState == PgErrorCodes.ConcurrencyError)
         {
@@ -163,6 +163,17 @@ WHERE
 ";
 
         return await _dataBaseManager.QueryAsync<Activity>(query, new { _userContext.UserId });
+    }
+
+    public async Task<bool> Delete(Guid activityId)
+    {
+        const string query = @"
+DELETE FROM
+    public.activity
+WHERE
+    activity_id = @ActivityId AND user_id = @UserId;";
+
+        return await _dataBaseManager.ExecuteScalarAsync<int>(query, new { _userContext.UserId, activityId }) > 0;
     }
 
     public async Task AssignCategory(Guid activityId, Guid categoryId, bool clearCurrentAssignments = true)

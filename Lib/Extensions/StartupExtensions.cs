@@ -25,7 +25,9 @@ public static class StartupExtensions
             .AddScoped<IRoleDataAccess, RoleDataAccess>()
             .AddScoped<IJobDataAccess, JobDataAccess>()
             .AddScoped<IUserDataAccess, UserDataAccess>()
-            .AddScoped<IUserContext, UserContext>();
+            .AddScoped<IUserContext, UserContext>()
+            
+            .AddScoped<ICategoryService, CategoryService>();
 
 
         serviceCollection

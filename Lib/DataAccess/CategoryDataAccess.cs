@@ -39,7 +39,7 @@ INSERT INTO public.category (
 )
 RETURNING *;";
 
-        return await _dataBaseManager.ExecuteScalarAsync<Category>(insertQuery, model);
+        return await _dataBaseManager.QuerySingleOrDefaultAsync<Category>(insertQuery, model);
     }
 
     public async Task<Category> Update(Category model)
@@ -59,7 +59,7 @@ WHERE category_id = @CategoryId";
 
         try
         {
-            return await _dataBaseManager.ExecuteScalarAsync<Category>(query, parameters);
+            return await _dataBaseManager.QuerySingleOrDefaultAsync<Category>(query, parameters);
         }
         catch (NpgsqlException e) when (e.SqlState == PgErrorCodes.ConcurrencyError)
         {
@@ -136,5 +136,16 @@ WHERE
     user_id = @UserId;";
 
         return await _dataBaseManager.QueryAsync<Category>(query, new { _userContext.UserId });
+    }
+
+    public async Task<bool> Delete(Guid categoryId)
+    {
+        const string query = @"
+DELETE FROM
+    public.category
+WHERE
+    category_id = @CategoryId AND user_id = @UserId;";
+
+        return await _dataBaseManager.ExecuteScalarAsync<int>(query, new { _userContext.UserId, categoryId }) > 0;
     }
 }

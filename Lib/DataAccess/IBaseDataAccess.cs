@@ -12,4 +12,6 @@ public interface IBaseDataAccess<T>
     Task<T> Get(Guid id);
 
     Task<IEnumerable<T>> GetAllByUserContext();
+
+    Task<bool> Delete(Guid id);
 }

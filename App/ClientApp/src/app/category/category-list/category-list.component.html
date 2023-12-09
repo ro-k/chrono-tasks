@@ -1,0 +1,24 @@
+<div class="category-list">
+  <h2>Category List</h2>
+
+  <!-- Display Categories -->
+  <ul>
+    <li *ngFor="let category of categories">
+      {{ category.name }}
+      <!-- Edit and Delete Buttons -->
+      <button (click)="editCategory(category)">Edit</button>
+      <button (click)="deleteCategory(category.categoryId)">Delete</button>
+    </li>
+  </ul>
+
+  <!-- Add Category Form -->
+  <div>
+    <h3>Add New Category</h3>
+    <form (ngSubmit)="addCategory()">
+      <label for="categoryName">Category Name:</label>
+      <input type="text" id="categoryName" [(ngModel)]="newCategory.name" name="name" required>
+
+      <button type="submit">Add Category</button>
+    </form>
+  </div>
+</div>

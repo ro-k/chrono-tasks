@@ -1,6 +1,6 @@
 using System.Data;
-using System.Data.SqlClient;
 using System.Text.RegularExpressions;
+using Npgsql;
 using Dapper;
 using Lib.Models;
 using Microsoft.Extensions.Options;
@@ -18,35 +18,35 @@ public class DataBaseManager : IDataBaseManager
 
     public async Task<IEnumerable<T>> QueryAsync<T>(string query, object? parameters = null)
     {
-        using IDbConnection dbConnection = new SqlConnection(_connectionString);
+        using IDbConnection dbConnection = new NpgsqlConnection(_connectionString);
         dbConnection.Open();
         return await dbConnection.QueryAsync<T>(query, parameters);
     }
     
     public async Task<T> QuerySingleOrDefaultAsync<T>(string query, object? parameters = null)
     {
-        using IDbConnection dbConnection = new SqlConnection(_connectionString);
+        using IDbConnection dbConnection = new NpgsqlConnection(_connectionString);
         dbConnection.Open();
         return await dbConnection.QuerySingleOrDefaultAsync<T>(query, parameters);
     }
     
     public async Task<T> QueryFirstOrDefaultAsync<T>(string query, object? parameters = null)
     {
-        using IDbConnection dbConnection = new SqlConnection(_connectionString);
+        using IDbConnection dbConnection = new NpgsqlConnection(_connectionString);
         dbConnection.Open();
         return await dbConnection.QueryFirstOrDefaultAsync<T>(query, parameters);
     }
     
     public async Task<int> ExecuteAsync(string query, object? parameters = null)
     {
-        using IDbConnection dbConnection = new SqlConnection(_connectionString);
+        using IDbConnection dbConnection = new NpgsqlConnection(_connectionString);
         dbConnection.Open();
         return await dbConnection.ExecuteAsync(query, parameters);
     }
 
     public async Task<T> ExecuteScalarAsync<T>(string query, object? parameters = null)
     {
-        using IDbConnection dbConnection = new SqlConnection(_connectionString);
+        using IDbConnection dbConnection = new NpgsqlConnection(_connectionString);
         dbConnection.Open();
         return await dbConnection.ExecuteScalarAsync<T>(query, parameters);
     }

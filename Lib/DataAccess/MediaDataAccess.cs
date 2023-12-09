@@ -24,7 +24,7 @@ VALUES
     (@MediaId, @CategoryId, @ActivityId, @JobId, @OriginalFilename, @Extension, @MimeType, @Size, @StoragePath, @Hash, @Metadata, @Status, @CreatedAt, @ModifiedAt, @UserId)
 RETURNING *;";
 
-        return await _dataBaseManager.ExecuteScalarAsync<Media>(insertQuery, media);
+        return await _dataBaseManager.QuerySingleOrDefaultAsync<Media>(insertQuery, media);
     }
 
     public async Task<Media> Update(Media media)
@@ -48,7 +48,7 @@ WHERE media_id = @MediaId;";
 
         try
         {
-            return await _dataBaseManager.ExecuteScalarAsync<Media>(query, parameters);
+            return await _dataBaseManager.QuerySingleOrDefaultAsync<Media>(query, parameters);
         }
         catch (NpgsqlException e) when (e.SqlState == PgErrorCodes.ConcurrencyError)
         {
@@ -141,5 +141,16 @@ WHERE
     user_id = @UserId";
 
         return await _dataBaseManager.QueryAsync<Media>(selectQuery, new { _userContext.UserId });
+    }
+
+    public async Task<bool> Delete(Guid mediaId)
+    {
+        const string query = @"
+DELETE FROM
+    public.media
+WHERE
+    media_id = @MediaId AND user_id = @UserId;";
+
+        return await _dataBaseManager.ExecuteScalarAsync<int>(query, new { _userContext.UserId, mediaId }) > 0;
     }
 }

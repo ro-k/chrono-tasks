@@ -29,6 +29,8 @@ public class CategoryService : ICategoryService
     
     public Task<Category> Create(Category model)
     {
+        model.UserId = _userContext.UserId;
+        
         return _categoryDataAccess.Create(model);
     }
 
