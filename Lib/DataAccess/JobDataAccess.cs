@@ -128,8 +128,9 @@ WHERE
         return await _dataBaseManager.QuerySingleOrDefaultAsync<Job>(query, new { JobId = jobId });
     }
 
-    public async Task<IEnumerable<Job>> GetAllByUserContext()
+    public async Task<IEnumerable<Job>> GetAllByUserContext(bool descending = true)
     {
+        var orderByDirection = descending ? "DESC" : "ASC";
         const string query = @"
 SELECT
     job_id,
@@ -145,9 +146,14 @@ SELECT
 FROM
     public.job
 WHERE
-    user_id = @UserId;";
+    user_id = @UserId
+ORDER BY created_at {0};
+";
+        
+        // Formatted query to include dynamic order by direction
+        var finalQuery = string.Format(query, orderByDirection);
 
-        return await _dataBaseManager.QueryAsync<Job>(query, new { _userContext.UserId });
+        return await _dataBaseManager.QueryAsync<Job>(finalQuery, new { _userContext.UserId });
     }
 
     public async Task<bool> Delete(Guid jobId)
@@ -158,6 +164,6 @@ DELETE FROM
 WHERE
     job_id = @JobId AND user_id = @UserId;";
 
-        return await _dataBaseManager.ExecuteScalarAsync<int>(query, new { _userContext.UserId, jobId }) > 0;
+        return await _dataBaseManager.ExecuteAsync(query, new { _userContext.UserId, jobId }) > 0;
     }
 }

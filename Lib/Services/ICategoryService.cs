@@ -10,4 +10,5 @@ public interface ICategoryService
     Task<List<Category>> GetPaged(int startRow = 0, int count = 100, bool descending = true);
     Task<Category> Get(Guid id);
     Task<IEnumerable<Category>> GetAllByUserContext();
+    Task<bool> Delete(Guid categoryId);
 }

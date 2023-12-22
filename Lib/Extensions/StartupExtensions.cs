@@ -29,11 +29,13 @@ public static class StartupExtensions
             
             .AddScoped<ICategoryService, CategoryService>();
 
-
         serviceCollection
             .AddScoped<IAuthService, AuthService>()
             .AddScoped<ISignInManagerWrapper, SignInManagerWrapper>();
 
+        // allow dapper to properly map snake_case db fields to PascalCase model properties
+        Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true;
+        
         return serviceCollection;
     }
 

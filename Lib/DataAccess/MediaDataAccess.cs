@@ -21,7 +21,7 @@ public class MediaDataAccess : IMediaDataAccess
 INSERT INTO public.media
     (media_id, activity_id, original_filename, extension, mime_type, size, storage_path, hash, metadata, status, created_at, modified_at, user_id) 
 VALUES 
-    (@MediaId, @CategoryId, @ActivityId, @JobId, @OriginalFilename, @Extension, @MimeType, @Size, @StoragePath, @Hash, @Metadata, @Status, @CreatedAt, @ModifiedAt, @UserId)
+    (@MediaId, @ActivityId, @OriginalFilename, @Extension, @MimeType, @Size, @StoragePath, @Hash, @Metadata, @Status, @CreatedAt, @ModifiedAt, @UserId)
 RETURNING *;";
 
         return await _dataBaseManager.QuerySingleOrDefaultAsync<Media>(insertQuery, media);
@@ -118,9 +118,10 @@ WHERE
         return await _dataBaseManager.QueryFirstOrDefaultAsync<Media>(selectQuery, new { MediaId = mediaId });
     }
 
-    public async Task<IEnumerable<Media>> GetAllByUserContext()
+    public async Task<IEnumerable<Media>> GetAllByUserContext(bool descending = true)
     {
-        const string selectQuery = @"
+        var orderByDirection = descending ? "DESC" : "ASC";
+        const string query = @"
 SELECT 
     media_id,
     activity_id,
@@ -138,9 +139,14 @@ SELECT
 FROM 
     public.media
 WHERE 
-    user_id = @UserId";
+    user_id = @UserId
+ORDER BY created_at {0};
+";
 
-        return await _dataBaseManager.QueryAsync<Media>(selectQuery, new { _userContext.UserId });
+        // Formatted query to include dynamic order by direction
+        var finalQuery = string.Format(query, orderByDirection);
+        
+        return await _dataBaseManager.QueryAsync<Media>(finalQuery, new { _userContext.UserId });
     }
 
     public async Task<bool> Delete(Guid mediaId)
@@ -151,6 +157,6 @@ DELETE FROM
 WHERE
     media_id = @MediaId AND user_id = @UserId;";
 
-        return await _dataBaseManager.ExecuteScalarAsync<int>(query, new { _userContext.UserId, mediaId }) > 0;
+        return await _dataBaseManager.ExecuteAsync(query, new { _userContext.UserId, mediaId }) > 0;
     }
 }

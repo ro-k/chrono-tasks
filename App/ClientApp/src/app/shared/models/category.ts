@@ -9,3 +9,14 @@ export interface Category {
   status: number;
 }
 
+export const defaultCategory: Category = {
+  categoryId: "",
+  concurrencyStamp: "",
+  createdAt: new Date(),
+  description: null,
+  modifiedAt: new Date(),
+  name: "",
+  status: 0,
+  userId: ""
+};
+

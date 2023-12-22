@@ -1,4 +1,5 @@
 using Lib.DataAccess;
+using Lib.Exceptions;
 using Lib.Models;
 
 namespace Lib.Services;
@@ -34,9 +35,15 @@ public class CategoryService : ICategoryService
         return _categoryDataAccess.Create(model);
     }
 
-    public Task<Category> Update(Category model)
+    public async Task<Category> Update(Category model)
     {
-        return _categoryDataAccess.Update(model);
+        var current = await Get(model.CategoryId);
+        if (model.ConcurrencyStamp != current.ConcurrencyStamp)
+        {
+            throw new ConcurrencyStampMismatchException();
+        }
+        current.UpdateWith(model);
+        return await _categoryDataAccess.Update(current);
     }
 
     public Task<List<Category>> GetPaged(int startRow = 0, int count = 100, bool descending = true)
@@ -52,5 +59,10 @@ public class CategoryService : ICategoryService
     public Task<IEnumerable<Category>> GetAllByUserContext()
     {
         return _categoryDataAccess.GetAllByUserContext();
+    }
+
+    public Task<bool> Delete(Guid categoryId)
+    {
+        return _categoryDataAccess.Delete(categoryId);
     }
 }

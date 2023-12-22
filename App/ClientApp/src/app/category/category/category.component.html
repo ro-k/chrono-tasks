@@ -1,0 +1,32 @@
+<app-yes-no
+  *ngIf="showConfirmDelete"
+  (yes)="showConfirmDelete = false; deleteCategory()"
+  (no)="showConfirmDelete = false">
+</app-yes-no>
+
+<app-category-form
+  *ngIf="showEdit"
+  (save)="showEdit = false; updateCategory($event)"
+  (cancel)="showEdit = false"
+  [category]="category">
+</app-category-form>
+
+<div class="list-group-item d-flex flex-column justify-content-between"
+     [ngClass]="{'expanded': isExpanded}"
+     (click)="isExpanded = !isExpanded">
+
+  <div class="d-flex justify-content-between">
+    <div class="category-name align-middle">{{ category.name }}</div>
+    <div class="button-group">
+      <button class="btn btn-primary edit-button" (click)="showEdit = true; $event.stopPropagation();">
+        <i class="bi bi-pencil-square"></i>
+      </button>
+      <button class="btn btn-danger delete-button" (click)="showConfirmDelete = true; $event.stopPropagation();">
+        <i class="bi bi-trash"></i>
+      </button>
+    </div>
+  </div>
+  <div class="category-divider-line"></div>
+  <p class="category-description">{{ category.description }}</p>
+  <div class="category-cover-line"></div>
+</div>

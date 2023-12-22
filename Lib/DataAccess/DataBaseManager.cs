@@ -56,8 +56,10 @@ public class DataBaseManager : IDataBaseManager
         var whereRegex = new Regex(@"\bWHERE\b", RegexOptions.IgnoreCase);
         var oldConcurrencyStamp = baseParameters.ConcurrencyStamp;
         baseParameters.ConcurrencyStamp = Guid.NewGuid();
+        
         var parameters = new DynamicParameters(baseParameters);
         parameters.AddDynamicParams(new { OldConcurrencyStamp = oldConcurrencyStamp });
+        parameters.RemoveUnused = false;
 
         var appendedQuery = whereRegex.IsMatch(query)
             ? Regex.Replace(query, @"\bWHERE\b", $"WHERE concurrency_stamp = @OldConcurrencyStamp AND ",
@@ -67,16 +69,8 @@ public class DataBaseManager : IDataBaseManager
         appendedQuery = appendedQuery.TrimEnd(' ', ';');
 
         appendedQuery = @$"
-DO $$ 
-BEGIN 
-
 {appendedQuery}
 RETURNING *;
-
-IF NOT FOUND THEN 
-    RAISE EXCEPTION 'Concurrency conflict' USING ERRCODE = 'P0001';
-END IF;
-END $$;
 ";
 
         return (appendedQuery, parameters);

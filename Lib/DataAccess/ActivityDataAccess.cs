@@ -142,8 +142,9 @@ WHERE
         return await _dataBaseManager.QuerySingleOrDefaultAsync<Activity>(query, new { Id = id, _userContext.UserId });
     }
 
-    public async Task<IEnumerable<Activity>> GetAllByUserContext()
+    public async Task<IEnumerable<Activity>> GetAllByUserContext(bool descending = true)
     {
+        var orderByDirection = descending ? "DESC" : "ASC";
         const string query = @"
 SELECT
     activity_id,
@@ -159,10 +160,14 @@ SELECT
 FROM
     public.activity
 WHERE
-    user_id = @UserId;
+    user_id = @UserId
+ORDER BY created_at {0};
 ";
+        
+        // Formatted query to include dynamic order by direction
+        var finalQuery = string.Format(query, orderByDirection);
 
-        return await _dataBaseManager.QueryAsync<Activity>(query, new { _userContext.UserId });
+        return await _dataBaseManager.QueryAsync<Activity>(finalQuery, new { _userContext.UserId });
     }
 
     public async Task<bool> Delete(Guid activityId)
@@ -173,7 +178,7 @@ DELETE FROM
 WHERE
     activity_id = @ActivityId AND user_id = @UserId;";
 
-        return await _dataBaseManager.ExecuteScalarAsync<int>(query, new { _userContext.UserId, activityId }) > 0;
+        return await _dataBaseManager.ExecuteAsync(query, new { _userContext.UserId, activityId }) > 0;
     }
 
     public async Task AssignCategory(Guid activityId, Guid categoryId, bool clearCurrentAssignments = true)

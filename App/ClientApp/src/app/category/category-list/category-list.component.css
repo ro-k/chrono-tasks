@@ -1,0 +1,19 @@
+.container {
+  padding: 20px;
+  border-radius: 8px;
+}
+
+h2 {
+  font-size: 1.5em;
+  margin-bottom: 20px;
+}
+
+/*.list-group-item {*/
+/*  background-color: #f2f2f2; !* Slightly lighter than container for contrast *!*/
+/*  color: #ffffff;*/
+/*  !* Other styles remain the same *!*/
+/*}*/
+
+/*.list-group-item:hover {*/
+/*  background-color: #e6e6e6; !* Lighter on hover *!*/
+/*}*/

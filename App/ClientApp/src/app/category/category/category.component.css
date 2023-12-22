@@ -1,0 +1,84 @@
+.list-group-item {
+  border-radius: 10px;
+  margin-bottom: 10px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  cursor: pointer;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+  max-height: 5.1em; /* Adjusted to show name and first line of description */
+  position: relative; /* Required for absolute positioning of the cover line */
+}
+
+.list-group-item.expanded {
+  max-height: none; /* Expand to fit all content */
+}
+
+.category-name {
+  font-size: 1.3rem; /* Slightly larger font size for name */
+  /*margin-bottom: 0; !* Minimal gap between name and description *!*/
+  line-height: 1.2em;
+}
+
+.category-divider-line {
+  position: absolute;
+  top: 2.5em; /* Set this to the desired distance from the top */
+  left: 0;
+  right: 0;
+  height: 1px; /* Thickness of the divider line */
+  background-color: #ccc; /* Color of the divider line */
+  z-index: 1; /* Ensures it's above other content */
+}
+
+.category-description {
+  font-size: 1rem; /* Standard font size for description */
+  line-height: 1.6em;
+  margin-bottom: 0;
+  margin-top: 0.8em;
+}
+
+.category-cover-line {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 0.7em; /* Height to cover partial text */
+  background-color: white; /* Match the background color of the list item */
+}
+
+.button-group {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch; /* Stretch buttons to fill the width */
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%;
+  z-index: 2; /* Above other content */
+}
+
+.edit-button,
+.delete-button {
+  flex-grow: 1; /* Each button takes half the vertical space */
+  border-radius: 0; /* Optional: removes border-radius if desired */
+}
+
+.button-group::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 20%; /* Adjust to align with horizontal divider */
+  bottom: 20%; /* Adjust to align with horizontal divider */
+  width: 1px;
+  background-color: #ccc; /* Color of the vertical divider */
+  z-index: -1;
+}
+
+.edit-button:focus,
+.delete-button:focus {
+  outline: none; /* Removes the default outline */
+  box-shadow: inset 0 0 0 2px #007bff; /* Custom focus style */
+}
+
+.delete-button:focus {
+  box-shadow: inset 0 0 0 2px #dc3545; /* Custom focus style for delete button */
+}
