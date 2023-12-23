@@ -1,3 +1,30 @@
 .modal {
   display: block; /* Or use 'flex' depending on Bootstrap version */
+  backdrop-filter: blur(0.1em);
 }
+
+.modal-dialog {
+  width: 60%;
+  max-width: none;
+  margin: 10em auto auto;
+}
+
+.description-textarea {
+  min-height: 20em;
+}
+
+.close-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  border: none;
+  background: none;
+  font-size: 1.5em;
+  cursor: pointer;
+  margin-right: 10px;
+}
+
+.modal-content {
+
+}
+
