@@ -7,16 +7,24 @@
   transition: max-height 0.3s ease;
   max-height: 5.1em; /* Adjusted to show name and first line of description */
   position: relative; /* Required for absolute positioning of the cover line */
+  padding-right: 1.5em; /* Adjust based on the size of your buttons */
+}
+
+.category-name, .category-description {
+  max-width: calc(100% - 1.5em); /* Adjust the same value as padding-right */
 }
 
 .list-group-item.expanded {
-  max-height: none; /* Expand to fit all content */
+  max-height: fit-content; /* Expand to fit all content */
+  overflow: hidden; /* This will hide overflow, not needed for a scrollbar */
 }
 
 .category-name {
   font-size: 1.3rem; /* Slightly larger font size for name */
-  /*margin-bottom: 0; !* Minimal gap between name and description *!*/
   line-height: 1.2em;
+  white-space: nowrap; /* Ensures the text stays on one line */
+  overflow: hidden; /* Hides overflow */
+  text-overflow: ellipsis; /* Adds ellipsis to indicate text overflow */
 }
 
 .category-divider-line {
@@ -34,6 +42,9 @@
   line-height: 1.6em;
   margin-bottom: 0;
   margin-top: 0.8em;
+  max-height: 8em;
+  overflow-y: auto;
+  /*direction: rtl; !* Moves the scrollbar to the left *!*/
 }
 
 .category-cover-line {
