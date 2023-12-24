@@ -16,7 +16,7 @@
      (click)="isExpanded = !isExpanded">
 
   <div class="d-flex justify-content-between">
-    <div class="category-name align-middle">{{ category.name }}</div>
+    <div class="name align-middle">{{ category.name }}</div>
     <div class="button-group">
       <button class="btn btn-primary edit-button" (click)="showEdit = true; $event.stopPropagation();">
         <i class="bi bi-pencil-square"></i>
@@ -26,9 +26,9 @@
       </button>
     </div>
   </div>
-  <div class="category-divider-line"></div>
-  <div class="category-description">
+  <div class="divider-line"></div>
+  <div class="description">
       {{ category.description }}
   </div>
-  <div class="category-cover-line"></div>
+  <div class="cover-line"></div>
 </div>

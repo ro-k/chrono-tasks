@@ -10,7 +10,7 @@
   padding-right: 1.5em; /* Adjust based on the size of your buttons */
 }
 
-.category-name, .category-description {
+.name, .description {
   max-width: calc(100% - 1.5em); /* Adjust the same value as padding-right */
 }
 
@@ -19,7 +19,7 @@
   overflow: hidden; /* This will hide overflow, not needed for a scrollbar */
 }
 
-.category-name {
+.name {
   font-size: 1.3rem; /* Slightly larger font size for name */
   line-height: 1.2em;
   white-space: nowrap; /* Ensures the text stays on one line */
@@ -27,7 +27,7 @@
   text-overflow: ellipsis; /* Adds ellipsis to indicate text overflow */
 }
 
-.category-divider-line {
+.divider-line {
   position: absolute;
   top: 2.5em; /* Set this to the desired distance from the top */
   left: 0;
@@ -37,7 +37,7 @@
   z-index: 1; /* Ensures it's above other content */
 }
 
-.category-description {
+.description {
   font-size: 1rem; /* Standard font size for description */
   line-height: 1.6em;
   margin-bottom: 0;
@@ -47,7 +47,7 @@
   /*direction: rtl; !* Moves the scrollbar to the left *!*/
 }
 
-.category-cover-line {
+.cover-line {
   position: absolute;
   bottom: 0;
   left: 0;
