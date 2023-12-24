@@ -1,5 +1,5 @@
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
-import {Category, defaultCategory} from "../../shared/models/category";
+import {Category, defaultCategory} from "../shared/models/category";
 import {FormBuilder, FormGroup, Validators} from "@angular/forms";
 
 @Component({
