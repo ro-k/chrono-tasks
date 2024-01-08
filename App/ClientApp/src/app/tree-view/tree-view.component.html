@@ -1,0 +1,15 @@
+<ul class="list-group">
+  <ng-template #recursiveList let-folders>
+    <li *ngFor="let folder of folders" class="list-group-item">
+      <span>{{ folder.name }}</span>
+      <ul class="list-group">
+        <li *ngFor="let item of folder.items" class="list-group-item">
+          {{ item.name }}
+        </li>
+        <ng-container *ngTemplateOutlet="recursiveList; context: {$implicit: folder.subFolders}"></ng-container>
+      </ul>
+    </li>
+  </ng-template>
+
+  <ng-container *ngTemplateOutlet="recursiveList; context: {$implicit: folders}"></ng-container>
+</ul>
