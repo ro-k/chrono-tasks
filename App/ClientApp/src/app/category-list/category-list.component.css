@@ -8,12 +8,18 @@ h2 {
   margin-bottom: 20px;
 }
 
-/*.list-group-item {*/
-/*  background-color: #f2f2f2; !* Slightly lighter than container for contrast *!*/
-/*  color: #ffffff;*/
-/*  !* Other styles remain the same *!*/
-/*}*/
+.header-area {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1em; /* Adjust as needed */
+}
 
-/*.list-group-item:hover {*/
-/*  background-color: #e6e6e6; !* Lighter on hover *!*/
-/*}*/
+.add-button {
+  /* Styles similar to your edit and delete buttons */
+  background-color: #007bff; /* Bootstrap primary color */
+  color: white;
+  border-radius: 0.25rem; /* Bootstrap border radius */
+  /* Additional styles if needed */
+}
+

@@ -1,0 +1,7 @@
+.list-group-item {
+  cursor: pointer; /* Makes it clear that items are clickable */
+}
+
+.list-group-item span {
+  user-select: none; /* Prevents text selection on click */
+}

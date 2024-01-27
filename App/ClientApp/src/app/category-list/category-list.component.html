@@ -1,5 +1,17 @@
 <div class="category-list container">
-  <h2>Categories</h2>
+  <div class="header-area d-flex justify-content-between align-items-center">
+    <h2>Categories</h2>
+    <button class="btn btn-primary add-button" (click)="showAdd = !showAdd">
+      <i class="bi bi-plus-lg"></i> Add Category
+    </button>
+  </div>
+
+  <app-category-form
+    *ngIf="showAdd"
+    (save)="showAdd = false; createCategory($event)"
+    (cancel)="showAdd = false"
+    [category]="undefined">
+  </app-category-form>
 
   <!-- List of Categories -->
   <div class="list-group">

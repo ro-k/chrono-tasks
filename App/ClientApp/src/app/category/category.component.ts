@@ -11,6 +11,7 @@ export class CategoryComponent {
   @Input() category!: Category;
   @Output() delete = new EventEmitter<Category>();
   @Output() update = new EventEmitter<Category>();
+  @Output() add = new EventEmitter<Category>();
   isExpanded = false;
   showConfirmDelete = false;
   showEdit = false;
@@ -22,12 +23,12 @@ export class CategoryComponent {
     this.categoryService.updateCategory(this.category).subscribe(
       {
         next: () => {
-          // Handle successful deletion
+          // Handle successful update
           console.log(`Category with ID ${this.category.categoryId} updated successfully`);
           this.update.emit(this.category);
         }, error: error => {
           // Handle error
-          console.error('Error occurred while deleting category:', error);
+          console.error('Error occurred while updating category:', error);
         }
       });
   }

@@ -44,7 +44,11 @@
   margin-top: 0.8em;
   max-height: 8em;
   overflow-y: auto;
-  /*direction: rtl; !* Moves the scrollbar to the left *!*/
+  white-space: normal;
+}
+
+.description.expanded {
+  white-space: pre-line; /* For expanded state */
 }
 
 .cover-line {

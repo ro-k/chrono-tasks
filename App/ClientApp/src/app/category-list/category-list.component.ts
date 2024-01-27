@@ -9,6 +9,7 @@ import {CategoryService} from "../shared/services/category.service";
 })
 export class CategoryListComponent implements OnInit {
   categories: Category[] = [];
+  showAdd = false;
 
   constructor(private categoryService: CategoryService) {  }
   ngOnInit(): void {
@@ -27,14 +28,25 @@ export class CategoryListComponent implements OnInit {
     this.categories = this.categories.filter(x => x.categoryId !== category.categoryId);
   }
 
-  addCategory(name: string, description: string) {
-
-  }
-
   updateCategory(category: Category) {
     const index = this.categories.findIndex(x => x.categoryId === category.categoryId);
     if (index !== -1) {
       this.categories[index] = category;
     }
+  }
+
+  createCategory(category: Category) {
+    console.log('creating in category-list component');
+    this.categoryService.createCategory(category).subscribe(
+      {
+        next: (createdCategory: Category) => {
+          // Handle successful add
+          console.log(`Category with ID ${createdCategory.categoryId} created successfully`);
+          this.categories.unshift(createdCategory);
+        }, error: error => {
+          // Handle error
+          console.error('Error occurred while creating category:', error);
+        }
+      });
   }
 }

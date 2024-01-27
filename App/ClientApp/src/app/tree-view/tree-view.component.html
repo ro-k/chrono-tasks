@@ -1,8 +1,10 @@
 <ul class="list-group">
   <ng-template #recursiveList let-folders>
     <li *ngFor="let folder of folders" class="list-group-item">
-      <span>{{ folder.name }}</span>
-      <ul class="list-group">
+      <span (click)="toggle(folder)">
+        {{ folder.isExpanded ? '[-]' : '[+]'}} {{ folder.name }}
+      </span>
+      <ul *ngIf="folder.isExpanded" class="list-group">
         <li *ngFor="let item of folder.items" class="list-group-item">
           {{ item.name }}
         </li>

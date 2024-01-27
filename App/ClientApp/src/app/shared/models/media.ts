@@ -1,5 +1,6 @@
 export interface Media {
   mediaId: string;
+  activityId: string;
   originalFilename: string;
   extension: string;
   mimeType: string;
@@ -16,6 +17,7 @@ export interface Media {
 
 export const defaultMedia: Media = {
   mediaId: "",
+  activityId: "",
   originalFilename: "",
   extension: "",
   mimeType: "",
