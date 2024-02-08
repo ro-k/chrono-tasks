@@ -22,7 +22,7 @@ public class DataBaseManager : IDataBaseManager
         dbConnection.Open();
         return await dbConnection.QueryAsync<T>(query, parameters);
     }
-    
+
     public async Task<T> QuerySingleOrDefaultAsync<T>(string query, object? parameters = null)
     {
         using IDbConnection dbConnection = new NpgsqlConnection(_connectionString);
@@ -49,6 +49,14 @@ public class DataBaseManager : IDataBaseManager
         using IDbConnection dbConnection = new NpgsqlConnection(_connectionString);
         dbConnection.Open();
         return await dbConnection.ExecuteScalarAsync<T>(query, parameters);
+    }
+    
+    public async Task<T> QueryMultipleAsync<T>(Func<SqlMapper.GridReader, Task<T>> processGridReader, string query, object? parameters = null)
+    {
+        using IDbConnection dbConnection = new NpgsqlConnection(_connectionString);
+        dbConnection.Open();
+        await using var gridReader = await dbConnection.QueryMultipleAsync(query, parameters);
+        return await processGridReader(gridReader);
     }
 
     public (string, DynamicParameters) WrapQueryWithConcurrencyCheck(string query, IHasConcurrencyStamp baseParameters)

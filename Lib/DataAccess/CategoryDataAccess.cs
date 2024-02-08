@@ -9,6 +9,36 @@ public class CategoryDataAccess : ICategoryDataAccess
     private readonly IDataBaseManager _dataBaseManager;
     private readonly IUserContext _userContext;
 
+    public const string PagedCategoryCte = @"
+WITH ranked_category_ids AS (
+    SELECT category_id,
+    ROW_NUMBER() OVER (ORDER BY created_at {0}) AS rn
+    FROM public.category
+)
+WITH paged_category_ids AS (
+    SELECT category_id
+    FROM ranked_categories
+    WHERE user_id = @UserId AND rn > @StartRow AND rn <= @EndRow
+)
+";
+
+    public const string GetAllQuery = @"
+SELECT
+    category_id,
+    name,
+    description,
+    created_at,
+    modified_at,
+    user_id,
+    concurrency_stamp,
+    status
+FROM
+    public.category
+WHERE
+    user_id = @UserId
+ORDER BY created_at {0};
+";
+
     public CategoryDataAccess(IDataBaseManager dataBaseManager, IUserContext userContext)
     {
         _dataBaseManager = dataBaseManager;
@@ -87,8 +117,8 @@ SELECT
     concurrency_stamp,
     status
 FROM ranked_categories
-WHERE user_id = @UserId AND rn > @StartRow AND rn <= @EndRow
-ORDER BY created_at {0};";
+WHERE user_id = @UserId AND rn > @StartRow AND rn <= @EndRow;
+";
 
         // Formatted query to include dynamic order by direction
         var finalQuery = string.Format(pagedQuery, orderByDirection);
@@ -121,25 +151,9 @@ WHERE
     public async Task<IEnumerable<Category>> GetAllByUserContext(bool descending = true)
     {
         var orderByDirection = descending ? "DESC" : "ASC";
-        const string query = @"
-SELECT
-    category_id,
-    name,
-    description,
-    created_at,
-    modified_at,
-    user_id,
-    concurrency_stamp,
-    status
-FROM
-    public.category
-WHERE
-    user_id = @UserId
-ORDER BY created_at {0};
-";
         
         // Formatted query to include dynamic order by direction
-        var finalQuery = string.Format(query, orderByDirection);
+        var finalQuery = string.Format(GetAllQuery, orderByDirection);
         
         var categories =  await _dataBaseManager.QueryAsync<Category>(finalQuery, new { _userContext.UserId });
         

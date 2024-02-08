@@ -1,0 +1,40 @@
+using Dapper;
+using Lib.DTOs;
+using Lib.Models;
+using Lib.Services;
+
+namespace Lib.DataAccess;
+
+public class TreeViewDataAccess : ITreeViewDataAccess
+{
+    private readonly IDataBaseManager _dataBaseManager;
+    private readonly IUserContext _userContext;
+    
+    public TreeViewDataAccess(IDataBaseManager dataBaseManager, IUserContext userContext)
+    {
+        _dataBaseManager = dataBaseManager;
+        _userContext = userContext;
+    }
+
+    public async Task<(IEnumerable<Category>, IEnumerable<Job>, IEnumerable<TreeViewActivityDto>)> GetAllByUserContext(
+        Func<SqlMapper.GridReader, Task<(IEnumerable<Category>, IEnumerable<Job>, IEnumerable<TreeViewActivityDto>)>>
+            processGridReader, bool descending = true)
+    {
+        var orderByDirection = descending ? "DESC" : "ASC";
+        var query = @"
+{0}
+{1}
+{2}
+";
+        // put Category, Jobs and Activity queries together
+        query = string.Format(query, CategoryDataAccess.GetAllQuery, JobDataAccess.GetAllQuery,
+            ActivityDataAccess.GetAllWithParentIdsQuery);
+
+        // replace order by
+        query = string.Format(query, orderByDirection);
+
+        return await _dataBaseManager
+            .QueryMultipleAsync(
+                processGridReader, query, new { _userContext.UserId });
+    }
+}

@@ -1,17 +1,17 @@
 <ul class="list-group">
-  <ng-template #recursiveList let-folders>
-    <li *ngFor="let folder of folders" class="list-group-item">
-      <span (click)="toggle(folder)">
-        {{ folder.isExpanded ? '[-]' : '[+]'}} {{ folder.name }}
+  <ng-template #recursiveList let-treeCategories>
+    <li *ngFor="let treeCategory of treeCategories" class="list-group-item">
+      <span (click)="toggle(treeCategory)">
+        {{ treeCategory.isExpanded ? '[-]' : '[+]'}} {{ treeCategory.name }}
       </span>
-      <ul *ngIf="folder.isExpanded" class="list-group">
-        <li *ngFor="let item of folder.items" class="list-group-item">
-          {{ item.name }}
+      <ul *ngIf="treeCategory.isExpanded" class="list-group">
+        <li *ngFor="let treeActivity of treeCategory.activities" class="list-group-item">
+          {{ treeActivity.name }}
         </li>
-        <ng-container *ngTemplateOutlet="recursiveList; context: {$implicit: folder.subFolders}"></ng-container>
+        <ng-container *ngTemplateOutlet="recursiveList; context: {$implicit: treeCategory.jobs}"></ng-container>
       </ul>
     </li>
   </ng-template>
 
-  <ng-container *ngTemplateOutlet="recursiveList; context: {$implicit: folders}"></ng-container>
+  <ng-container *ngTemplateOutlet="recursiveList; context: {$implicit: treeCategories}"></ng-container>
 </ul>

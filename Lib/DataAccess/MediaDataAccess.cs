@@ -82,8 +82,8 @@ SELECT
     modified_at,
     user_id
 FROM ranked_media
-WHERE rn > @StartRow AND rn <= @EndRow
-ORDER BY created_at {0};";
+WHERE rn > @StartRow AND rn <= @EndRow;
+";
 
         // Formatted query to include dynamic order by direction
         var finalQuery = string.Format(pagedQuery, orderByDirection);

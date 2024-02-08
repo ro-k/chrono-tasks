@@ -9,6 +9,27 @@ public class ActivityDataAccess : IActivityDataAccess
     private readonly IDataBaseManager _dataBaseManager;
     private readonly IUserContext _userContext;
     
+    public const string GetAllWithParentIdsQuery = @"
+SELECT
+    activity.activity_id,
+    start_time,
+    end_time,
+    name,
+    description,
+    created_at,
+    modified_at,
+    user_id,
+    concurrency_stamp,
+    status,
+    ca.category_id,
+    ja.job_id,
+FROM public.activity
+LEFT JOIN public.category_activity ca ON activity.activity_id = ca.activity_id
+LEFT JOIN job_activity ja ON activity.activity_id = ja.activity_id
+WHERE user_id = @UserId
+ORDER BY created_at {0};
+";
+    
     public ActivityDataAccess(IDataBaseManager dataBaseManager, IUserContext userContext)
     {
         _dataBaseManager = dataBaseManager;
@@ -41,7 +62,7 @@ INSERT INTO public.activity (
     @ConcurrencyStamp,
     @Status
 )
-returning *;";
+RETURNING *;";
 
         return await _dataBaseManager.QuerySingleOrDefaultAsync<Activity>(insertQuery, new {
             model.ActivityId,
@@ -109,8 +130,8 @@ SELECT
     concurrency_stamp,
     status
 FROM ranked_activities
-WHERE rn > @StartRow AND rn <= @EndRow AND user_id = @UserId
-ORDER BY created_at {0};";
+WHERE rn > @StartRow AND rn <= @EndRow AND user_id = @UserId;
+";
 
         // Formatted query to include dynamic order by direction
         var finalQuery = string.Format(pagedQuery, orderByDirection);
