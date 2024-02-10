@@ -1,0 +1,14 @@
+.input-group {
+  max-width: 300px; /* Adjust based on your preference */
+  width: auto;
+  display: flex;
+}
+
+.input-group .form-control {
+  flex-grow: 1; /* Allows the input to grow and fill the space */
+}
+
+/*shift this to to the left to overlay the search box*/
+.input-group .btn {
+  flex-shrink: 0; /* Prevents the button from shrinking */
+}

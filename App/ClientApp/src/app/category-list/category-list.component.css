@@ -15,29 +15,6 @@ h2 {
   margin-bottom: 1em; /* Adjust as needed */
 }
 
-.header-area .input-group {
-  max-width: 300px; /* Adjust based on your preference */
-  width: auto;
-  display: flex;
-}
-
-.header-area .input-group .form-control {
-  flex-grow: 1; /* Allows the input to grow and fill the space */
-}
-
-/*shift this to to the left to overlay the search box*/
-.header-area .input-group .btn {
-  flex-shrink: 0; /* Prevents the button from shrinking */
-}
-
-
-.search-box {
-  padding: 8px;
-  margin-right: 10px; /* Adjust based on your layout */
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-
 .add-button {
   /* Styles similar to your edit and delete buttons */
   background-color: #007bff; /* Bootstrap primary color */
