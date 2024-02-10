@@ -4,6 +4,6 @@ namespace Lib.DTOs;
 
 public class TreeViewCategoryDto : Category
 {
-    public List<TreeViewActivityDto> TreeViewActivities { get; set; }
-    public List<TreeViewJobDto> TreeViewJobs { get; set; }
+    public List<TreeViewActivityDto> TreeViewActivities { get; set; } = new();
+    public List<TreeViewJobDto> TreeViewJobs { get; set; } = new();
 }

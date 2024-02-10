@@ -9,16 +9,24 @@ import {CategoryService} from "../shared/services/category.service";
 })
 export class CategoryListComponent implements OnInit {
   categories: Category[] = [];
+  originalCategories: Category[] = [];
   showAdd = false;
 
   constructor(private categoryService: CategoryService) {  }
+
   ngOnInit(): void {
     this.fetchCategories();
   }
 
   fetchCategories(): void {
     this.categoryService.getCategories().subscribe(
-      { next: (v) => this.categories = v, error: console.error }
+      {
+        next: (category) => {
+          this.categories = category;
+          this.originalCategories = [...category];
+        },
+        error: console.error
+      }
     );
   }
 
@@ -49,4 +57,19 @@ export class CategoryListComponent implements OnInit {
         }
       });
   }
+
+  handleFilter(filterTerm:string): void {
+    if (!filterTerm) {
+      // If no search term, reset categories to original
+      this.categories = [...this.originalCategories];
+    } else {
+      // Filter categories based on the search term
+      this.categories = this.originalCategories.filter(category =>
+        category.name.toLowerCase().includes(filterTerm.toLowerCase()) ||
+        category.description?.toLowerCase().includes(filterTerm.toLowerCase())
+      );
+    }
+  }
+
+  protected readonly console = console;
 }

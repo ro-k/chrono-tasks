@@ -14,6 +14,7 @@ import { CategoryFormComponent } from './category-form/category-form.component';
 import { CategoryComponent } from './category/category.component';
 import { YesNoComponent } from './yes-no/yes-no.component';
 import { TreeViewComponent } from './tree-view/tree-view.component';
+import { FilterInputComponent } from './filter-input/filter-input.component';
 
 @NgModule({
   declarations: [
@@ -27,6 +28,7 @@ import { TreeViewComponent } from './tree-view/tree-view.component';
     CategoryComponent,
     YesNoComponent,
     TreeViewComponent,
+    FilterInputComponent,
   ],
   imports: [
     BrowserModule.withServerTransition({appId: 'ng-cli-universal'}),

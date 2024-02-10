@@ -1,0 +1,6 @@
+<div class="input-group">
+  <input type="text" class="form-control" placeholder="Search categories..." [(ngModel)]="filterTerm" (input)="filterCategories()">
+  <button class="btn btn-outline-secondary" type="button" [disabled]="!filterTerm" (click)="clearFilter()">
+    <i class="bi bi-x-circle-fill"></i> <!-- Bootstrap icon -->
+  </button>
+</div>
