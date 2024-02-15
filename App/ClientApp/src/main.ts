@@ -1,4 +1,5 @@
 import { enableProdMode } from '@angular/core';
+import { devTools } from '@ngneat/elf-devtools';
 import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
 
 import { AppModule } from './app/app.module';
@@ -14,6 +15,9 @@ const providers = [
 
 if (environment.production) {
   enableProdMode();
+}
+else {
+  devTools();
 }
 
 platformBrowserDynamic(providers).bootstrapModule(AppModule)

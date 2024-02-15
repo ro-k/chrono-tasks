@@ -22,7 +22,7 @@ SELECT
     concurrency_stamp,
     status,
     ca.category_id,
-    ja.job_id,
+    ja.job_id
 FROM public.activity
 LEFT JOIN public.category_activity ca ON activity.activity_id = ca.activity_id
 LEFT JOIN job_activity ja ON activity.activity_id = ja.activity_id

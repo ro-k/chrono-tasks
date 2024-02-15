@@ -17,8 +17,8 @@ public class TreeViewService : ITreeViewService
     {
         var (categories, jobs, activities) = await _treeViewDataAccess.GetAllByUserContext(async reader =>
         {
-            var categories = await reader.ReadAsync<Category>();
-            var jobs = await reader.ReadAsync<Job>();
+            var categories = await reader.ReadAsync<TreeViewCategoryDto>();
+            var jobs = await reader.ReadAsync<TreeViewJobDto>();
             var activities = await reader.ReadAsync<TreeViewActivityDto>();
 
             return (categories, jobs, activities);
@@ -27,7 +27,7 @@ public class TreeViewService : ITreeViewService
         return AssembleTreeView(categories, jobs, activities);
     }
 
-    private TreeViewDto AssembleTreeView(IEnumerable<Category> categories, IEnumerable<Job> jobs,
+    private static TreeViewDto AssembleTreeView(IEnumerable<Category> categories, IEnumerable<Job> jobs,
         IEnumerable<TreeViewActivityDto> activities)
     {
         var treeViewCategories = categories.Select(x => (TreeViewCategoryDto)x).ToDictionary(x => x.CategoryId);

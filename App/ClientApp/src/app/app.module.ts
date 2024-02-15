@@ -15,6 +15,7 @@ import { CategoryComponent } from './category/category.component';
 import { YesNoComponent } from './yes-no/yes-no.component';
 import { TreeViewComponent } from './tree-view/tree-view.component';
 import { FilterInputComponent } from './filter-input/filter-input.component';
+import { NothingHereComponent } from './nothing-here/nothing-here.component';
 
 @NgModule({
   declarations: [
@@ -29,6 +30,7 @@ import { FilterInputComponent } from './filter-input/filter-input.component';
     YesNoComponent,
     TreeViewComponent,
     FilterInputComponent,
+    NothingHereComponent,
   ],
   imports: [
     BrowserModule.withServerTransition({appId: 'ng-cli-universal'}),

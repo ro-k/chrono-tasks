@@ -5,3 +5,23 @@
 .list-group-item span {
   user-select: none; /* Prevents text selection on click */
 }
+
+.list-group {
+  width: calc(100% - 1.5em); /* Adjust 10em to the desired value */
+}
+.tree-view {
+  position: relative;
+  min-height: 100vh; /* Ensures minimum height is full viewport height */
+}
+
+.tree-view::after {
+  content: "";
+  position: absolute;
+  top: -1em;
+  right: 0;
+  bottom: 0;
+  width: 1px; /* For a thin line */
+  background-color: #ddd; /* Light gray border, adjust to match navbar */
+  margin-right: 1em;
+}
+

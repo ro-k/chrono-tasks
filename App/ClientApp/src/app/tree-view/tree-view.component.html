@@ -1,17 +1,22 @@
-<ul class="list-group">
-  <ng-template #recursiveList let-treeCategories>
-    <li *ngFor="let treeCategory of treeCategories" class="list-group-item">
-      <span (click)="toggle(treeCategory)">
-        {{ treeCategory.isExpanded ? '[-]' : '[+]'}} {{ treeCategory.name }}
-      </span>
-      <ul *ngIf="treeCategory.isExpanded" class="list-group">
-        <li *ngFor="let treeActivity of treeCategory.activities" class="list-group-item">
-          {{ treeActivity.name }}
-        </li>
-        <ng-container *ngTemplateOutlet="recursiveList; context: {$implicit: treeCategory.jobs}"></ng-container>
-      </ul>
-    </li>
-  </ng-template>
+<div class="tree-view">
+  <ul class="list-group">
+    <ng-template #recursiveList let-treeCategories>
+      <li *ngFor="let treeCategory of treeCategories" class="list-group-item">
+        <span (click)="toggle(treeCategory)">
+          {{ treeCategory.isExpanded ? '[-]' : '[+]'}} {{ treeCategory.name }}
+        </span>
+        <ul *ngIf="treeCategory.isExpanded" class="list-group">
+          <li *ngFor="let treeActivity of treeCategory.activities" class="list-group-item">
+            {{ treeActivity.name }}
+          </li>
+          <ng-container *ngTemplateOutlet="recursiveList; context: {$implicit: treeCategory.jobs}"></ng-container>
+        </ul>
+      </li>
+    </ng-template>
 
-  <ng-container *ngTemplateOutlet="recursiveList; context: {$implicit: treeCategories}"></ng-container>
-</ul>
+    <ng-container *ngTemplateOutlet="recursiveList; context: {$implicit: treeCategories}"></ng-container>
+
+    <!-- Empty state condition -->
+    <app-nothing-here [items]="treeCategories"></app-nothing-here>
+  </ul>
+</div>

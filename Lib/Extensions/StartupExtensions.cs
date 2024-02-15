@@ -9,29 +9,24 @@ namespace Lib.Extensions;
 public static class StartupExtensions
 {
     public static IServiceCollection ConfigureServices(this IServiceCollection serviceCollection) =>
-        serviceCollection.AddDataAccess().ConfigureIdentity();
+        serviceCollection.AddDataAccess().AddServices().ConfigureIdentity();
 
     private static IServiceCollection AddDataAccess(this IServiceCollection serviceCollection)
     {
         serviceCollection
             .AddScoped<IDataBaseManager, DataBaseManager>()
-            
+
             .AddScoped<IFileStorageDataAccess, LocalFileStorageDataAccess>()
             .AddScoped<LocalFileStorageDataAccess.IFileStreamWrapper, LocalFileStorageDataAccess.FileStreamWrapper>()
-            
+
             .AddScoped<IActivityDataAccess, ActivityDataAccess>()
             .AddScoped<ICategoryDataAccess, CategoryDataAccess>()
             .AddScoped<IMediaDataAccess, MediaDataAccess>()
             .AddScoped<IRoleDataAccess, RoleDataAccess>()
             .AddScoped<IJobDataAccess, JobDataAccess>()
             .AddScoped<IUserDataAccess, UserDataAccess>()
-            .AddScoped<IUserContext, UserContext>()
-            
-            .AddScoped<ICategoryService, CategoryService>();
-
-        serviceCollection
-            .AddScoped<IAuthService, AuthService>()
-            .AddScoped<ISignInManagerWrapper, SignInManagerWrapper>();
+            .AddScoped<ITreeViewDataAccess, TreeViewDataAccess>()
+            .AddScoped<IUserContext, UserContext>();
 
         // allow dapper to properly map snake_case db fields to PascalCase model properties
         Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true;
@@ -39,7 +34,13 @@ public static class StartupExtensions
         return serviceCollection;
     }
 
-    public static IServiceCollection ConfigureIdentity(this IServiceCollection serviceCollection)
+    private static IServiceCollection AddServices(this IServiceCollection serviceCollection) => serviceCollection
+        .AddScoped<IAuthService, AuthService>()
+        .AddScoped<ISignInManagerWrapper, SignInManagerWrapper>()
+        .AddScoped<ICategoryService, CategoryService>()
+        .AddScoped<ITreeViewService, TreeViewService>();
+
+    private static IServiceCollection ConfigureIdentity(this IServiceCollection serviceCollection)
     {
         // TODO: register all interfaces from IUserDataAccess
         serviceCollection

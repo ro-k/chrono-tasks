@@ -1,6 +1,5 @@
 using Dapper;
 using Lib.DTOs;
-using Lib.Models;
 using Lib.Services;
 
 namespace Lib.DataAccess;
@@ -16,9 +15,11 @@ public class TreeViewDataAccess : ITreeViewDataAccess
         _userContext = userContext;
     }
 
-    public async Task<(IEnumerable<Category>, IEnumerable<Job>, IEnumerable<TreeViewActivityDto>)> GetAllByUserContext(
-        Func<SqlMapper.GridReader, Task<(IEnumerable<Category>, IEnumerable<Job>, IEnumerable<TreeViewActivityDto>)>>
-            processGridReader, bool descending = true)
+    public async Task<(IEnumerable<TreeViewCategoryDto>, IEnumerable<TreeViewJobDto>, IEnumerable<TreeViewActivityDto>)>
+        GetAllByUserContext(
+            Func<SqlMapper.GridReader,
+                Task<(IEnumerable<TreeViewCategoryDto>, IEnumerable<TreeViewJobDto>, IEnumerable<TreeViewActivityDto>)>> processGridReader,
+            bool descending = true)
     {
         var orderByDirection = descending ? "DESC" : "ASC";
         var query = @"

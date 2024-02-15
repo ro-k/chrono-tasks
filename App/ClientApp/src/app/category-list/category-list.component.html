@@ -23,4 +23,7 @@
       (delete)="deleteCategory($event)"
       (update)="updateCategory($event)"></app-category>
   </div>
+
+  <!-- Empty state condition -->
+  <app-nothing-here [items]="categories"></app-nothing-here>
 </div>

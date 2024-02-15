@@ -25,6 +25,28 @@ const PROXY_CONFIG = [
     headers: {
       Connection: 'Keep-Alive'
     }
+  },
+  {
+    context: [
+      "/api/treeview",
+    ],
+    proxyTimeout: 10000,
+    target: target,
+    secure: false,
+    headers: {
+      Connection: 'Keep-Alive'
+    }
+  },
+  {
+    context: [
+      "/api/swagger",
+    ],
+    proxyTimeout: 10000,
+    target: target,
+    secure: false,
+    headers: {
+      Connection: 'Keep-Alive'
+    }
   }
 ]
 

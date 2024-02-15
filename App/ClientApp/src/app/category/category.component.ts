@@ -20,7 +20,7 @@ export class CategoryComponent {
 
   updateCategory(category: Category) {
     console.log('updating in category component');
-    this.categoryService.updateCategory(this.category).subscribe(
+    this.categoryService.updateCategory(category).subscribe(
       {
         next: () => {
           // Handle successful update

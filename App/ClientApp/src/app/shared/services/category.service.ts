@@ -7,7 +7,6 @@ import {catchError, map, Observable, throwError} from "rxjs";
   providedIn: 'root'
 })
 export class CategoryService  {
-  public categories: Category[] = [];
 
   constructor(private http: HttpClient, @Inject('BASE_URL') private baseUrl: string) {  }
 
