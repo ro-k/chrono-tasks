@@ -1,48 +1,36 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
-import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { RouterModule } from '@angular/router';
 
 import { AppComponent } from './app.component';
-import { NavMenuComponent } from './nav-menu/nav-menu.component';
-import { HomeComponent } from './home/home.component';
-import { CounterComponent } from './counter/counter.component';
-import { FetchDataComponent } from './fetch-data/fetch-data.component';
-import { CategoryListComponent } from './category-list/category-list.component';
-import { CategoryFormComponent } from './category-form/category-form.component';
-import { CategoryComponent } from './category/category.component';
-import { YesNoComponent } from './yes-no/yes-no.component';
-import { TreeViewComponent } from './tree-view/tree-view.component';
-import { FilterInputComponent } from './filter-input/filter-input.component';
-import { NothingHereComponent } from './nothing-here/nothing-here.component';
+import { SharedModule } from "./shared/shared.module";
+import { CoreModule } from "./core/core.module";
+import { NavigationModule } from "./features/navigation/navigation.module";
+import { HomeComponent } from "./features/navigation/components/home/home.component";
+import { CategoriesModule } from "./features/categories/categories.module";
+import { CategoryListComponent } from "./features/categories/components/category-list/category-list.component";
+import {TreeViewModule} from "./features/tree-view/tree-view.module";
 
 @NgModule({
   declarations: [
     AppComponent,
-    NavMenuComponent,
-    HomeComponent,
-    CounterComponent,
-    FetchDataComponent,
-    CategoryListComponent,
-    CategoryFormComponent,
-    CategoryComponent,
-    YesNoComponent,
-    TreeViewComponent,
-    FilterInputComponent,
-    NothingHereComponent,
   ],
   imports: [
     BrowserModule.withServerTransition({appId: 'ng-cli-universal'}),
     HttpClientModule,
     FormsModule,
+    ReactiveFormsModule,
+    SharedModule,
+    CoreModule,
+    NavigationModule,
+    CategoriesModule,
+    TreeViewModule,
     RouterModule.forRoot([
       {path: '', component: HomeComponent, pathMatch: 'full'},
-      {path: 'counter', component: CounterComponent},
-      {path: 'fetch-data', component: FetchDataComponent},
       {path: 'category', component: CategoryListComponent},
     ]),
-    ReactiveFormsModule
   ],
   providers: [],
   bootstrap: [AppComponent]

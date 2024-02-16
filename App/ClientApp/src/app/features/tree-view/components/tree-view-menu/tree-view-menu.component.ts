@@ -1,15 +1,15 @@
 import {Component, Input, OnInit} from '@angular/core';
-import { TreeViewCategory } from '../shared/models/treeViewCategory';
-import {Expandable} from "../shared/models/expandable";
-import {AppState} from "../shared/models/appState";
-import {TreeViewService} from "../shared/services/tree-view.service";
+import {TreeViewCategory} from "../../../../core/models/treeViewCategory";
+import {AppState} from "../../../../core/models/appState";
+import {TreeViewService} from "../../services/tree-view.service";
+import {Expandable} from "../../../../core/models/expandable";
 
 @Component({
-  selector: 'app-tree-view',
-  templateUrl: './tree-view.component.html',
-  styleUrls: ['./tree-view.component.css']
+  selector: 'app-tree-view-menu',
+  templateUrl: './tree-view-menu.component.html',
+  styleUrls: ['./tree-view-menu.component.css']
 })
-export class TreeViewComponent implements OnInit {
+export class TreeViewMenuComponent implements OnInit {
   treeCategories: TreeViewCategory[] = [];
   treeView: AppState = { categories: this.treeCategories };
 

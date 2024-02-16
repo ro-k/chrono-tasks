@@ -1,8 +1,7 @@
 import {Inject, Injectable, OnInit} from '@angular/core';
 import {HttpClient} from "@angular/common/http";
-import {Category} from "../models/category";
-import {catchError, map, Observable, throwError} from "rxjs";
-import {AppState} from "../models/appState";
+import {Observable} from "rxjs";
+import {AppState} from "../../../core/models/appState";
 
 
 @Injectable({

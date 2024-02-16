@@ -1,6 +1,6 @@
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
-import {Category, defaultCategory} from "../shared/models/category";
 import {FormBuilder, FormGroup, Validators} from "@angular/forms";
+import {Category, defaultCategory} from "../../../../core/models/category";
 
 @Component({
   selector: 'app-category-form',
@@ -11,6 +11,7 @@ export class CategoryFormComponent implements OnInit {
   @Input() category?: Category = undefined;
   @Output() save = new EventEmitter<Category>();
   @Output() cancel = new EventEmitter<void>();
+  //categoryForm: FormGroup = new FormGroup({ });
   categoryForm!: FormGroup;
 
   constructor(private formBuilder: FormBuilder) {
