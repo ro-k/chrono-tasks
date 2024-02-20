@@ -1,16 +1,16 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import {TreeViewMenuComponent} from "./components/tree-view-menu/tree-view-menu.component";
 import {SharedModule} from "../../shared/shared.module";
+import {TreeViewExplorerComponent} from "./components/tree-view-explorer/tree-view-explorer.component";
 
 
 
 @NgModule({
   declarations: [
-    TreeViewMenuComponent,
+    TreeViewExplorerComponent,
   ],
   exports: [
-    TreeViewMenuComponent,
+    TreeViewExplorerComponent,
   ],
   imports: [
     CommonModule,

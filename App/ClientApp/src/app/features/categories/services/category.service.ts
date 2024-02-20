@@ -1,4 +1,4 @@
-import {Inject, Injectable, OnInit} from '@angular/core';
+import {Inject, Injectable} from '@angular/core';
 import {HttpClient} from "@angular/common/http";
 import {catchError, map, Observable, throwError} from "rxjs";
 import {Category} from "../../../core/models/category";
@@ -34,6 +34,6 @@ export class CategoryService  {
   private handleError(error: any) {
     // logging the error or displaying a message?
     console.error(error);
-    return throwError(error);
+    return throwError(() => error);
   }
 }

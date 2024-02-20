@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { TreeViewMenuComponent } from './tree-view-menu.component';
+import { TreeViewExplorerComponent } from './tree-view-explorer.component';
 
 describe('TreeViewComponent', () => {
-  let component: TreeViewMenuComponent;
-  let fixture: ComponentFixture<TreeViewMenuComponent>;
+  let component: TreeViewExplorerComponent;
+  let fixture: ComponentFixture<TreeViewExplorerComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ TreeViewMenuComponent ]
+      declarations: [ TreeViewExplorerComponent ]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(TreeViewMenuComponent);
+    fixture = TestBed.createComponent(TreeViewExplorerComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

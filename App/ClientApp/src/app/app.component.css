@@ -3,7 +3,7 @@
   flex-direction: row;
 }
 
-app-tree-view {
+app-tree-view-explorer {
   flex: 1; /* Adjust this value as needed to control width */
 }
 

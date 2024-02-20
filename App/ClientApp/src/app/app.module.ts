@@ -1,5 +1,5 @@
 import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
+import {APP_ID, NgModule} from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { RouterModule } from '@angular/router';
@@ -18,7 +18,7 @@ import {TreeViewModule} from "./features/tree-view/tree-view.module";
     AppComponent,
   ],
   imports: [
-    BrowserModule.withServerTransition({appId: 'ng-cli-universal'}),
+    BrowserModule,
     HttpClientModule,
     FormsModule,
     ReactiveFormsModule,
@@ -32,7 +32,9 @@ import {TreeViewModule} from "./features/tree-view/tree-view.module";
       {path: 'category', component: CategoryListComponent},
     ]),
   ],
-  providers: [],
+  providers: [
+    {provide: APP_ID, useValue: 'ng-cli-universal'}
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
