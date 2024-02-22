@@ -20,9 +20,6 @@ export class CategoryStore {
       {
         next: (newCategories) => {
           console.log('loading categories');
-          newCategories.forEach(x => console.log(x));
-          console.log(this.store);
-          this.store.forEach(x => console.log(x));
           this.store.update(addEntities(newCategories));
         },
         error: (error) => {
@@ -36,7 +33,7 @@ export class CategoryStore {
   add(category: Category) {
     this.categoryService.create(category).subscribe({
       next: (newCategory: Category) => {
-        this.store.update(addEntities(category));
+        this.store.update(addEntities(newCategory));
       },
       error: (error) => {
         console.error('Failed to add category', error);

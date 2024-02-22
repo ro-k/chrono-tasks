@@ -1,8 +1,8 @@
 import {Component, OnInit} from '@angular/core';
 import {Category} from "../../../../core/models/category";
-import {CategoryService} from "../../services/category.service";
 import {CategoryStore} from "../../../../state/stores/category-store";
-import {Observable} from "rxjs";
+import {BehaviorSubject, combineLatest, map, Observable} from "rxjs";
+import {NothingHereComponent} from "../../../../shared/components/nothing-here/nothing-here.component";
 
 
 
@@ -12,13 +12,25 @@ import {Observable} from "rxjs";
   styleUrls: ['./category-list.component.css']
 })
 export class CategoryListComponent implements OnInit {
-  categories: Category[] = [];
-  originalCategories: Category[] = [];
   showAdd = false;
   categories$: Observable<Category[]>;
+  filteredCategories$: Observable<Category[]>;
+  protected readonly alert = alert;
+
+  private filterTerms = new BehaviorSubject<string>('');
 
   constructor(private categoryStore: CategoryStore) {
     this.categories$ = this.categoryStore.categories$;
+    this.filteredCategories$ = combineLatest([this.categories$, this.filterTerms])
+      .pipe(
+        map(([items, filterTerm]) => {
+          return items.filter(category =>
+            filterTerm === '' ||
+            category.name.toLowerCase().includes(filterTerm.toLowerCase()) ||
+            (category.description && category.description.toLowerCase().includes(filterTerm.toLowerCase()))
+          );
+        }),
+      );
   }
 
   ngOnInit(): void {
@@ -27,58 +39,18 @@ export class CategoryListComponent implements OnInit {
 
   fetchCategories(): void {
     this.categoryStore.load();
-    this.categories$.subscribe(
-      {
-        next: (category) => {
-          this.categories = category;
-          this.originalCategories = [...category];
-        },
-        error: console.error
-      }
-    );
-  }
-
-  protected readonly alert = alert;
-
-  deleteCategory(category: Category) {
-    this.categories = this.categories.filter(x => x.categoryId !== category.categoryId);
-  }
-
-  updateCategory(category: Category) {
-    const index = this.categories.findIndex(x => x.categoryId === category.categoryId);
-    if (index !== -1) {
-      this.categories[index] = category;
-    }
   }
 
   createCategory(category: Category) {
     console.log('creating in category-list component');
     this.categoryStore.add(category);
-    // this.categoryStore.add(category);.subscribe(
-    //   {
-    //     next: (createdCategory: Category) => {
-    //       // Handle successful add
-    //       console.log(`Category with ID ${createdCategory.categoryId} created successfully`);
-    //       this.categories.unshift(createdCategory);
-    //     }, error: error => {
-    //       // Handle error
-    //       console.error('Error occurred while creating category:', error);
-    //     }
-    //   });
   }
 
-  handleFilter(filterTerm:string): void {
-    if (!filterTerm) {
-      // If no search term, reset categories to original
-      this.categories = [...this.originalCategories];
-    } else {
-      // Filter categories based on the search term
-      this.categories = this.originalCategories.filter(category =>
-        category.name.toLowerCase().includes(filterTerm.toLowerCase()) ||
-        category.description?.toLowerCase().includes(filterTerm.toLowerCase())
-      );
-    }
+  // handle the filter, update BehaviorSubject
+  handleFilter(term: string) {
+    this.filterTerms.next(term);
   }
 
   protected readonly console = console;
+  protected readonly NothingHereComponent = NothingHereComponent;
 }

@@ -6,5 +6,6 @@ import {Component, Input} from '@angular/core';
   styleUrls: ['./nothing-here.component.css']
 })
 export class NothingHereComponent {
+  // @Input() items: ArrayWrapper<any> = {items: []};
   @Input() items: any[] = [];
 }

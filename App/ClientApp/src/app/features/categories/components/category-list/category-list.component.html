@@ -10,20 +10,17 @@
 
   <app-category-form
     *ngIf="showAdd"
-    (save)="showAdd = false; createCategory($event)"
-    (cancel)="showAdd = false"
-    [category]="undefined">
+    [category]="undefined"
+    (visible) = "showAdd=$event">
   </app-category-form>
 
   <!-- List of Categories -->
   <div class="list-group">
-    <app-category
-      *ngFor="let category of categories$ | async"
-      [category]="category"
-      (delete)="deleteCategory($event)"
-      (update)="updateCategory($event)"></app-category>
+      <app-category
+        *ngFor="let category of filteredCategories$ | async"
+        [category]="category"></app-category>
   </div>
 
   <!-- Empty state condition -->
-  <app-nothing-here [items]="categories"></app-nothing-here>
+  <app-nothing-here [items]="((categories$ | async) ?? [])"></app-nothing-here>
 </div>

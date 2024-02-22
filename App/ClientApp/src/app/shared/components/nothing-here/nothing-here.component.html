@@ -1,5 +1,4 @@
-<div *ngIf="items.length === 0" class="empty-state">
+<div *ngIf="(items?.length ?? 0) === 0" class="empty-state">
   <i class="bi bi-folder-x" style="font-size: 48px;"></i>
   <div>Nothing here</div>
 </div>
-

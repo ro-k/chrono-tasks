@@ -6,8 +6,7 @@
 
 <app-category-form
   *ngIf="showEdit"
-  (save)="showEdit = false; updateCategory($event)"
-  (cancel)="showEdit = false"
+  (visible) = "showEdit=$event"
   [category]="category">
 </app-category-form>
 

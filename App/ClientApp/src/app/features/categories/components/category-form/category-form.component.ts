@@ -1,6 +1,7 @@
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {FormBuilder, FormGroup, Validators} from "@angular/forms";
 import {Category, defaultCategory} from "../../../../core/models/category";
+import {CategoryStore} from "../../../../state/stores/category-store";
 
 @Component({
   selector: 'app-category-form',
@@ -9,12 +10,10 @@ import {Category, defaultCategory} from "../../../../core/models/category";
 })
 export class CategoryFormComponent implements OnInit {
   @Input() category?: Category = undefined;
-  @Output() save = new EventEmitter<Category>();
-  @Output() cancel = new EventEmitter<void>();
-  //categoryForm: FormGroup = new FormGroup({ });
+  @Output() visible = new EventEmitter<boolean>();
   categoryForm!: FormGroup;
 
-  constructor(private formBuilder: FormBuilder) {
+  constructor(private formBuilder: FormBuilder, private categoryStore: CategoryStore) {
   }
 
   ngOnInit(){
@@ -36,18 +35,20 @@ export class CategoryFormComponent implements OnInit {
       if (this.category) {
         this.category.name = name;
         this.category.description = description;
+        this.categoryStore.update(this.category);
       } else {
         this.category = {...defaultCategory,name,description};
+        this.categoryStore.add(this.category);
       }
 
-      this.save.emit(this.category);
+      this.visible.emit(false);
     } else {
       // Handle form validation errors
     }
   }
 
   onCancel() {
-    this.cancel.emit();
+    this.visible.emit(false);
   }
 }
 
