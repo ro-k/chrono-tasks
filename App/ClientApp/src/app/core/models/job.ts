@@ -1,5 +1,6 @@
 export interface Job {
   jobId: string;
+  categoryId: string;
   name: string;
   description: string;
   // BaseModel properties
@@ -11,6 +12,7 @@ export interface Job {
 
 export const defaultJob: Job = {
   jobId: "",
+  categoryId: "",
   name: "",
   description: "",
   createdAt: new Date(),

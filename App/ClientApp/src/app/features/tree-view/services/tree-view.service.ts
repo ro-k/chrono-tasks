@@ -1,7 +1,7 @@
 import {Inject, Injectable} from '@angular/core';
 import {HttpClient} from "@angular/common/http";
 import {Observable} from "rxjs";
-import {AppState} from "../../../core/models/appState";
+import {TreeViewState} from "../../../core/models/treeViewState";
 
 
 @Injectable({
@@ -15,7 +15,7 @@ export class TreeViewService {
   //   return this.http.get<TreeView>(this.baseUrl + 'api/treeview');
   // }
 
-  getTreeView(): Observable<AppState> {
-    return this.http.get<AppState>(this.baseUrl + 'api/treeview');
+  getTreeView(): Observable<TreeViewState> {
+    return this.http.get<TreeViewState>(this.baseUrl + 'api/treeview');
   }
 }

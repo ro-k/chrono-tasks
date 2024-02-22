@@ -1,6 +1,8 @@
 import {Component, OnInit} from '@angular/core';
 import {Category} from "../../../../core/models/category";
 import {CategoryService} from "../../services/category.service";
+import {CategoryStore} from "../../../../state/stores/category-store";
+import {Observable} from "rxjs";
 
 
 
@@ -13,15 +15,19 @@ export class CategoryListComponent implements OnInit {
   categories: Category[] = [];
   originalCategories: Category[] = [];
   showAdd = false;
+  categories$: Observable<Category[]>;
 
-  constructor(private categoryService: CategoryService) {  }
+  constructor(private categoryStore: CategoryStore) {
+    this.categories$ = this.categoryStore.categories$;
+  }
 
   ngOnInit(): void {
     this.fetchCategories();
   }
 
   fetchCategories(): void {
-    this.categoryService.getCategories().subscribe(
+    this.categoryStore.load();
+    this.categories$.subscribe(
       {
         next: (category) => {
           this.categories = category;
@@ -47,17 +53,18 @@ export class CategoryListComponent implements OnInit {
 
   createCategory(category: Category) {
     console.log('creating in category-list component');
-    this.categoryService.createCategory(category).subscribe(
-      {
-        next: (createdCategory: Category) => {
-          // Handle successful add
-          console.log(`Category with ID ${createdCategory.categoryId} created successfully`);
-          this.categories.unshift(createdCategory);
-        }, error: error => {
-          // Handle error
-          console.error('Error occurred while creating category:', error);
-        }
-      });
+    this.categoryStore.add(category);
+    // this.categoryStore.add(category);.subscribe(
+    //   {
+    //     next: (createdCategory: Category) => {
+    //       // Handle successful add
+    //       console.log(`Category with ID ${createdCategory.categoryId} created successfully`);
+    //       this.categories.unshift(createdCategory);
+    //     }, error: error => {
+    //       // Handle error
+    //       console.error('Error occurred while creating category:', error);
+    //     }
+    //   });
   }
 
   handleFilter(filterTerm:string): void {

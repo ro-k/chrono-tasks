@@ -1,6 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {TreeViewCategory} from "../../../../core/models/treeViewCategory";
-import {AppState} from "../../../../core/models/appState";
+import {TreeViewState} from "../../../../core/models/treeViewState";
 import {TreeViewService} from "../../services/tree-view.service";
 import {Expandable} from "../../../../core/models/expandable";
 
@@ -11,7 +11,7 @@ import {Expandable} from "../../../../core/models/expandable";
 })
 export class TreeViewExplorerComponent implements OnInit {
   treeCategories: TreeViewCategory[] = [];
-  treeView: AppState = { categories: this.treeCategories };
+  treeView: TreeViewState = { categories: this.treeCategories };
 
   constructor(private treeViewService: TreeViewService) { }
 

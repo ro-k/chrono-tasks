@@ -1,5 +1,5 @@
 import {TreeViewCategory} from "./treeViewCategory";
 
-export interface AppState {
+export interface TreeViewState {
   categories: TreeViewCategory[];
 }
