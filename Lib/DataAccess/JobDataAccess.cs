@@ -167,4 +167,33 @@ WHERE
 
         return await _dataBaseManager.ExecuteAsync(query, new { _userContext.UserId, jobId }) > 0;
     }
+
+    public async Task<IEnumerable<Job>> GetByCategoryId(Guid categoryId, bool descending = true)
+    {
+        var orderByDirection = descending ? "DESC" : "ASC";
+        const string getByCategoryQuery = @"
+SELECT
+    job_id,
+    category_id,
+    name,
+    description,
+    data,
+    created_at,
+    modified_at,
+    user_id,
+    concurrency_stamp,
+    status
+FROM
+    public.job
+WHERE
+    user_id = @UserId
+    category_id = @CategoryId  
+ORDER BY created_at {0};
+";
+        
+        // Formatted query to include dynamic order by direction
+        var finalQuery = string.Format(getByCategoryQuery, orderByDirection);
+
+        return await _dataBaseManager.QueryAsync<Job>(finalQuery, new { _userContext.UserId, categoryId });
+    }
 }

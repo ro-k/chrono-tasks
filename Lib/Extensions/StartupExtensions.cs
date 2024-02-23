@@ -38,7 +38,8 @@ public static class StartupExtensions
         .AddScoped<IAuthService, AuthService>()
         .AddScoped<ISignInManagerWrapper, SignInManagerWrapper>()
         .AddScoped<ICategoryService, CategoryService>()
-        .AddScoped<ITreeViewService, TreeViewService>();
+        .AddScoped<ITreeViewService, TreeViewService>()
+        .AddScoped<IJobService, JobService>();
 
     private static IServiceCollection ConfigureIdentity(this IServiceCollection serviceCollection)
     {

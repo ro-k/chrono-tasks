@@ -8,3 +8,14 @@ public class Job : BaseModel
     public string Description { get; set; }
     public string Data { get; set; } //json blob
 }
+
+public static class JobExtensions
+{
+    public static Job UpdateWith(this Job existing, Job updated)
+    {
+        existing.Name = updated.Name;
+        existing.Description = updated.Description;
+        existing.Data = updated.Data;
+        return existing;
+    }
+}
