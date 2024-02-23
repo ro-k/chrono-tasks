@@ -10,7 +10,7 @@ export class CategoryService  {
 
   constructor(private http: HttpClient, @Inject('BASE_URL') private baseUrl: string) {  }
 
-  get(): Observable<Category[]> {
+  getAll(): Observable<Category[]> {
     return this.http.get<Category[]>(this.baseUrl + 'api/category').pipe(catchError(this.handleError));
   }
 

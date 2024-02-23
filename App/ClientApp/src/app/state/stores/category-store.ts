@@ -16,7 +16,7 @@ export class CategoryStore {
 
   // load category data
   load() {
-    this.categoryService.get().subscribe(
+    this.categoryService.getAll().subscribe(
       {
         next: (newCategories) => {
           console.log('loading categories');
