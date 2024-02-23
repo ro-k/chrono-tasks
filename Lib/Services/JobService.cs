@@ -30,12 +30,12 @@ public class JobService : IJobService
         return await _jobDataAccess.Create(job);
     }
     
-    public Task<Job> Create(Job model)
+    public async Task<Job> Create(Job model)
     {
         model.UserId = _userContext.UserId;
         model.JobId = Guid.NewGuid();
         
-        return _jobDataAccess.Create(model);
+        return await _jobDataAccess.Create(model);
     }
 
     public async Task<List<Job>> GetPaged(int startRow = 0, int count = 100, bool descending = true)
@@ -48,9 +48,9 @@ public class JobService : IJobService
         return await _jobDataAccess.Get(id);
     }
 
-    public async Task<IEnumerable<Job>> GetByCategoryId(Guid categoryId)
+    public async Task<IEnumerable<Job>> GetAllByCategoryId(Guid categoryId)
     {
-        return await _jobDataAccess.GetByCategoryId(categoryId);
+        return await _jobDataAccess.GetAllByCategoryId(categoryId);
     }
 
     public async Task<Job> Update(Job model)
@@ -64,13 +64,13 @@ public class JobService : IJobService
         return await _jobDataAccess.Update(current);
     }
     
-    public Task<IEnumerable<Job>> GetAllByUserContext()
+    public async Task<IEnumerable<Job>> GetAllByUserContext()
     {
-        return _jobDataAccess.GetAllByUserContext();
+        return await _jobDataAccess.GetAllByUserContext();
     }
 
-    public Task<bool> Delete(Guid jobId)
+    public async Task<bool> Delete(Guid jobId)
     {
-        return _jobDataAccess.Delete(jobId);
+        return await _jobDataAccess.Delete(jobId);
     }
 }

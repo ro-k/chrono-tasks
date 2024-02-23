@@ -26,10 +26,10 @@ public class JobController : ControllerBase
     }
     
     [HttpGet]
-    public async Task<IActionResult> GetByCategoryId([FromQuery] Guid categoryId)
+    public async Task<IActionResult> GetAllByCategoryId([FromQuery] Guid categoryId)
     {
         _userContext.UserId = Guid.Parse("27bf9e8e-317c-4a71-a2a3-61fa0be6d40a"); // TODO: temp
-        var categories = await _jobService.GetByCategoryId(categoryId);
+        var categories = await _jobService.GetAllByCategoryId(categoryId);
         return Ok(categories);
     }
 
@@ -57,7 +57,7 @@ public class JobController : ControllerBase
         _userContext.UserId = Guid.Parse("27bf9e8e-317c-4a71-a2a3-61fa0be6d40a"); // TODO: temp
         var newJob = await _jobService.Create(job.CategoryId, job.Name, job.Description, job.Data);
 
-        return CreatedAtAction(nameof(Get), new { job.JobId }, newJob);
+        return CreatedAtAction(nameof(Get), new { newJob.JobId }, newJob);
     }
     
     [HttpPut]

@@ -12,3 +12,15 @@ public class Activity : BaseModel
     
     public string Description { get; set; }
 }
+
+public static class ActivityExtensions
+{
+    public static Activity UpdateWith(this Activity existing, Activity updated)
+    {
+        existing.Name = updated.Name;
+        existing.Description = updated.Description;
+        existing.StartTime = updated.StartTime;
+        existing.EndTime = updated.EndTime;
+        return existing;
+    }
+}

@@ -3,6 +3,7 @@ export interface Job {
   categoryId: string;
   name: string;
   description: string;
+  data: string;
   // BaseModel properties
   createdAt: Date;
   modifiedAt: Date;
@@ -15,6 +16,7 @@ export const defaultJob: Job = {
   categoryId: "",
   name: "",
   description: "",
+  data: "",
   createdAt: new Date(),
   modifiedAt: new Date(),
   userId: "",

@@ -1,14 +1,14 @@
 using Lib.Models;
 
-namespace Lib.DataAccess;
+namespace Lib.Services;
 
-public interface IActivityDataAccess
+public interface IActivityService
 {
-    Task<Activity> Create(Activity model);
+    Task<Activity> Create(string name, string description, DateTime startTime, DateTime endTime);
     Task<Activity> Update(Activity model);
     Task<List<Activity>> GetPaged(int startRow = 0, int count = 100, bool descending = true);
     Task<Activity> Get(Guid id);
-    Task<IEnumerable<Activity>> GetAllByUserContext(bool descending = true);
+    Task<IEnumerable<Activity>> GetAllByUserContext();
     Task<bool> Delete(Guid activityId);
     Task AssignCategory(Guid activityId, Guid categoryId, bool clearCurrentAssignments = true);
     Task<IEnumerable<Activity>> GetAllByCategory(Guid categoryId);
@@ -16,4 +16,6 @@ public interface IActivityDataAccess
     Task AssignJob(Guid activityId, Guid jobId, bool clearCurrentAssignments = true);
     Task<IEnumerable<Activity>> GetAllByJob(Guid jobId);
     Task ClearJobs(Guid activityId);
+    Task<IEnumerable<Activity>> GetByParent(Guid? categoryId, Guid? jobId);
+    Task UpdateParents(Guid activityId, Guid? categoryId, Guid? jobId, bool clearCurrentAssignments = true);
 }

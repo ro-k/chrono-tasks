@@ -168,7 +168,7 @@ WHERE
         return await _dataBaseManager.ExecuteAsync(query, new { _userContext.UserId, jobId }) > 0;
     }
 
-    public async Task<IEnumerable<Job>> GetByCategoryId(Guid categoryId, bool descending = true)
+    public async Task<IEnumerable<Job>> GetAllByCategoryId(Guid categoryId, bool descending = true)
     {
         var orderByDirection = descending ? "DESC" : "ASC";
         const string getByCategoryQuery = @"
