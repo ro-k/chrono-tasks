@@ -14,7 +14,7 @@ export class JobService {
   }
 
   getByCategory(categoryId: string): Observable<Job[]> {
-    return this.http.get<Job[]>(this.baseUrl + `api/job?categoryId=${categoryId}`);
+    return this.http.get<Job[]>(this.baseUrl + `api/job/category/${categoryId}`);
   }
 
   get(jobId: string): Observable<Job[]> {

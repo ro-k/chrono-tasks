@@ -25,10 +25,11 @@ public class JobController : ControllerBase
         return Ok(categories);
     }
     
-    [HttpGet]
-    public async Task<IActionResult> GetAllByCategoryId([FromQuery] Guid categoryId)
+    [HttpGet("category/{categoryId:guid}")]
+    public async Task<IActionResult> GetAllByCategoryId(Guid categoryId)
     {
         _userContext.UserId = Guid.Parse("27bf9e8e-317c-4a71-a2a3-61fa0be6d40a"); // TODO: temp
+        
         var categories = await _jobService.GetAllByCategoryId(categoryId);
         return Ok(categories);
     }

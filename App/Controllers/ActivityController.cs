@@ -61,6 +61,42 @@ public class ActivityController : ControllerBase
         return NotFound();
     }
     
+    [HttpGet("category/{categoryId:guid}")]
+    public async Task<IActionResult> GetAllByCategory(Guid categoryId)
+    {
+        _userContext.UserId = Guid.Parse("27bf9e8e-317c-4a71-a2a3-61fa0be6d40a"); // TODO: temp
+
+        var categories = await _activityService.GetAllByCategory(categoryId);
+        return Ok(categories);
+    }
+    
+    [HttpDelete("{activityId:guid}/category/")]
+    public async Task<IActionResult> ClearCategory(Guid activityId)
+    {
+        _userContext.UserId = Guid.Parse("27bf9e8e-317c-4a71-a2a3-61fa0be6d40a"); // TODO: temp
+
+        await _activityService.ClearCategories(activityId);
+        return NoContent();
+    }
+    
+    [HttpGet("job/{jobId:guid}")]
+    public async Task<IActionResult> GetAllByJob(Guid jobId)
+    {
+        _userContext.UserId = Guid.Parse("27bf9e8e-317c-4a71-a2a3-61fa0be6d40a"); // TODO: temp
+
+        var categories = await _activityService.GetAllByJob(jobId);
+        return Ok(categories);
+    }
+    
+    [HttpDelete("{activityId:guid}/job/")]
+    public async Task<IActionResult> ClearJob(Guid activityId)
+    {
+        _userContext.UserId = Guid.Parse("27bf9e8e-317c-4a71-a2a3-61fa0be6d40a"); // TODO: temp
+
+        await _activityService.ClearJobs(activityId);
+        return NoContent();
+    }
+    
     [HttpGet]
     public async Task<IActionResult> GetBy([FromQuery] Guid? categoryId, [FromQuery] Guid? jobId)
     {
@@ -76,6 +112,6 @@ public class ActivityController : ControllerBase
         _userContext.UserId = Guid.Parse("27bf9e8e-317c-4a71-a2a3-61fa0be6d40a"); // TODO: temp
 
         await _activityService.UpdateParents(activityId, categoryId, jobId, clearCurrentAssignments ?? true);
-        return Ok();
+        return NoContent();
     }
 }
