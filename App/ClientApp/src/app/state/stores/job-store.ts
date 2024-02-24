@@ -10,7 +10,7 @@ export class JobStore {
   constructor(private jobService: JobService) {
   }
 
-  // load category data
+  // load job data
   load() {
     this.jobService.getAll().subscribe(
       {
@@ -25,6 +25,7 @@ export class JobStore {
     );
   }
 
+  // load category jobs
   loadByCategoryId(categoryId: string){
     this.jobService.getByCategory(categoryId).subscribe(
       {
@@ -39,14 +40,29 @@ export class JobStore {
     );
   }
 
-  // add category
+  // load job by id
+  loadById(jobId: string){
+    this.jobService.get(jobId).subscribe(
+      {
+        next: (newJob) => {
+          console.log('loading a job by id');
+          this.store.update(addEntities(newJob));
+        },
+        error: (error) => {
+          console.error('Failed to load a job', error);
+        }
+      }
+    );
+  }
+
+  // add job
   add(job: Job) {
     this.jobService.create(job).subscribe({
       next: (newJob: Job) => {
         this.store.update(addEntities(newJob));
       },
       error: (error) => {
-        console.error('Failed to add category', error);
+        console.error('Failed to add job', error);
       }
     });
   }
@@ -58,25 +74,20 @@ export class JobStore {
         this.store.update(updateEntities(updatedJob.jobId, updatedJob));
       },
       error: (error) => {
-        console.error('Failed to update category', error);
+        console.error('Failed to update a job', error);
       }
     });
   }
 
-  // Delete a category
+  // Delete a job
   delete(job: Job) {
     this.jobService.delete(job).subscribe({
       next: () => {
         this.store.update(deleteEntities(job.jobId));
       },
       error: (error) => {
-        console.error('Failed to delete category', error);
+        console.error('Failed to delete a job', error);
       }
     });
-  }
-
-  // Selector to get all jobs
-  getAll() {
-    return this.store.pipe(selectAllEntities());
   }
 }

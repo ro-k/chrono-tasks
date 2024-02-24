@@ -17,8 +17,8 @@ export class JobService {
     return this.http.get<Job[]>(this.baseUrl + `api/job/category/${categoryId}`);
   }
 
-  get(jobId: string): Observable<Job[]> {
-    return this.http.get<Job[]>(this.baseUrl + `api/job/${jobId}`);
+  get(jobId: string): Observable<Job> {
+    return this.http.get<Job>(this.baseUrl + `api/job/${jobId}`);
   }
 
   delete(job: Job): Observable<void> {

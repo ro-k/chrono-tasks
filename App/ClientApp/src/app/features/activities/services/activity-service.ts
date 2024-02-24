@@ -21,17 +21,17 @@ export class ActivityService {
       .pipe(map(x => x), catchError(this.handleError));
   }
 
-  get(activityId: string): Observable<Activity[]> {
-    return this.http.get<Activity[]>(this.baseUrl + `api/activity/${activityId}`);
+  getAll(): Observable<Activity[]> {
+    return this.http.get<Activity[]>(this.baseUrl + `api/activity/`);
+  }
+
+  getByCategory(categoryId: string): Observable<Activity[]> {
+    return this.http.get<Activity[]>(this.baseUrl + `api/activity/category/${categoryId}`);
   }
 
   delete(activity: Activity): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}api/activity/${activity.activityId}`)
       .pipe(catchError(this.handleError));
-  }
-
-  getByCategory(categoryId: string): Observable<Activity[]> {
-    return this.http.get<Activity[]>(this.baseUrl + `api/activity/category/${categoryId}`);
   }
 
   clearCategory(activityId: string): Observable<void> {
@@ -41,6 +41,10 @@ export class ActivityService {
 
   getByJob(jobId: string): Observable<Activity[]> {
     return this.http.get<Activity[]>(this.baseUrl + `api/activity/job/${jobId}`);
+  }
+
+  get(activityId: string): Observable<Activity> {
+    return this.http.get<Activity>(this.baseUrl + `api/activity/${activityId}`);
   }
 
   clearJob(activityId: string): Observable<void> {
