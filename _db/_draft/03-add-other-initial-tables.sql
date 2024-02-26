@@ -5,6 +5,8 @@ BEGIN
 IF NOT EXISTS (SELECT 1 FROM pg_tables WHERE schemaname = 'public' AND tablename = 'activity') THEN
 CREATE TABLE public.activity (
     activity_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    category_id UUID NULL,
+    job_id UUID NULL,
     start_time TIMESTAMP NOT NULL,
     end_time TIMESTAMP NOT NULL,
     name TEXT NOT NULL,
@@ -67,27 +69,17 @@ CREATE TABLE public.job (
 );
 END IF;
 
---job, category -> activity
-IF NOT EXISTS (SELECT FROM pg_tables WHERE schemaname = 'public' AND tablename = 'job_activity') THEN
-CREATE TABLE public.category_activity (
-    category_id UUID NOT NULL,
-    activity_id UUID NOT NULL,
-    PRIMARY KEY (category_id, activity_id),
-    FOREIGN KEY (category_id) REFERENCES public.category (category_id) ON DELETE CASCADE,
-    FOREIGN KEY (activity_id) REFERENCES public.activity (activity_id) ON DELETE CASCADE
-);
-END IF;
+-- Activity FKs
+ALTER TABLE public.activity
+    ADD CONSTRAINT fk_activity_category
+        FOREIGN KEY (category_id)
+            REFERENCES public.category(category_id)
+            ON DELETE SET NULL ON UPDATE CASCADE;
 
-
--- job_activity
-IF NOT EXISTS (SELECT FROM pg_tables WHERE schemaname = 'public' AND tablename = 'job_activity') THEN
-CREATE TABLE public.job_activity (
-    job_id UUID NOT NULL,
-    activity_id UUID NOT NULL,
-    PRIMARY KEY (job_id, activity_id),
-    FOREIGN KEY (job_id) REFERENCES public.job (job_id) ON DELETE CASCADE,
-    FOREIGN KEY (activity_id) REFERENCES public.activity (activity_id) ON DELETE CASCADE
-);
-END IF;
+ALTER TABLE public.activity
+    ADD CONSTRAINT fk_activity_job
+        FOREIGN KEY (job_id)
+            REFERENCES public.job(job_id)
+            ON DELETE SET NULL ON UPDATE CASCADE;
 
 END $$;

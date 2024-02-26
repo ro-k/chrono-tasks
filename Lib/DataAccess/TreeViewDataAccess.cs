@@ -29,7 +29,7 @@ public class TreeViewDataAccess : ITreeViewDataAccess
 ";
         // put Category, Jobs and Activity queries together
         query = string.Format(query, CategoryDataAccess.GetAllQuery, JobDataAccess.GetAllQuery,
-            ActivityDataAccess.GetAllWithParentIdsQuery);
+            ActivityDataAccess.GetAllQuery);
 
         // replace order by
         query = string.Format(query, orderByDirection);

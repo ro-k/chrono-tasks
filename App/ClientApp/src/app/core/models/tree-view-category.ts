@@ -1,9 +1,10 @@
-import {TreeViewActivity} from "./treeViewActivity";
+import {TreeViewActivity} from "./tree-view-activity";
 import {Category} from "./category";
 import {Expandable} from "./expandable";
-import {TreeViewJob} from "./treeViewJob";
+import {TreeViewJob} from "./tree-view-job";
 
-export interface TreeViewCategory extends Category, Expandable {
+export interface TreeViewCategory extends Expandable {
+  entity: Category;
   activities: TreeViewActivity[];
   jobs: TreeViewJob[];
 }

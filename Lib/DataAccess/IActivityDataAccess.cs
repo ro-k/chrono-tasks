@@ -10,10 +10,10 @@ public interface IActivityDataAccess
     Task<Activity> Get(Guid id);
     Task<IEnumerable<Activity>> GetAllByUserContext(bool descending = true);
     Task<bool> Delete(Guid activityId);
-    Task AssignCategory(Guid activityId, Guid categoryId, bool clearCurrentAssignments = true);
+    Task AssignCategory(Guid activityId, Guid? categoryId, bool clearCurrentAssignments = true);
     Task<IEnumerable<Activity>> GetAllByCategory(Guid categoryId);
     Task ClearCategories(Guid activityId);
-    Task AssignJob(Guid activityId, Guid jobId, bool clearCurrentAssignments = true);
+    Task AssignJob(Guid activityId, Guid? jobId, bool clearCurrentAssignments = true);
     Task<IEnumerable<Activity>> GetAllByJob(Guid jobId);
     Task ClearJobs(Guid activityId);
 }

@@ -1,5 +1,7 @@
 export interface Activity {
   activityId: string;
+  categoryId: string;
+  jobId: string;
   startTime: Date;
   endTime: Date;
   name: string;
@@ -13,6 +15,8 @@ export interface Activity {
 
 export const defaultActivity: Activity = {
   activityId: "",
+  categoryId: "",
+  jobId: "",
   startTime: new Date(),
   endTime: new Date(),
   name: "",

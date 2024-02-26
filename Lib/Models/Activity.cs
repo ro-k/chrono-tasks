@@ -4,6 +4,10 @@ public class Activity : BaseModel
 {
     public Guid ActivityId { get; set; }
     
+    public Guid? CategoryId { get; set; }
+    
+    public Guid? JobId { get; set; }
+    
     public DateTime StartTime { get; set; }
     
     public DateTime EndTime { get; set; }
