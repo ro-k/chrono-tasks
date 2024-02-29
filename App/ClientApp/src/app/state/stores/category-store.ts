@@ -1,14 +1,22 @@
 import {createStore} from "@ngneat/elf";
 import {CategoryService} from "../../features/categories/services/category.service";
 import {Category} from "../../core/models/category";
-import {addEntities, selectAllEntities, updateEntities, withEntities, deleteEntities} from "@ngneat/elf-entities";
+import {
+  addEntities,
+  selectAllEntities,
+  updateEntities,
+  withEntities,
+  deleteEntities,
+  withUIEntities, selectEntities, UIEntitiesRef, unionEntities
+} from "@ngneat/elf-entities";
 import {Injectable} from "@angular/core";
+import {TreeViewUI} from "../../core/models/tree-view-ui";
 
 @Injectable({
   providedIn: 'root'
 })
 export class CategoryStore {
-  private store = createStore({ name: 'categories' }, withEntities<Category, 'categoryId'>({idKey: 'categoryId'}));
+  store = createStore({ name: 'categories' }, withEntities<Category, 'categoryId'>({idKey: 'categoryId'}));
   categories$ = this.store.pipe(selectAllEntities());
 
   constructor(private categoryService: CategoryService) {
@@ -28,6 +36,10 @@ export class CategoryStore {
       }
     );
   }
+
+  // updateTreeViewUI(treeViewUI: TreeViewUI) {
+  //   this.store.update(updateEntities(treeViewUI.id, treeViewUI, { ref: UIEntitiesRef }));
+  // }
 
   // add category
   add(category: Category) {
@@ -63,10 +75,5 @@ export class CategoryStore {
         console.error('Failed to delete category', error);
       }
     });
-  }
-
-  // Selector to get all categories
-  getAll() {
-    return this.store.pipe(selectAllEntities());
   }
 }

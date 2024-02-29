@@ -1,11 +1,26 @@
 import {createStore} from "@ngneat/elf";
-import {addEntities, deleteEntities, selectAllEntities, updateEntities, withEntities} from "@ngneat/elf-entities";
+import {
+  addEntities,
+  deleteEntities,
+  selectAllEntities,
+  selectAllEntitiesApply,
+  updateEntities,
+  withEntities
+} from "@ngneat/elf-entities";
 import {Activity} from "../../core/models/activity";
 import {ActivityService} from "../../features/activities/services/activity-service";
+import {Injectable} from "@angular/core";
 
+@Injectable({
+  providedIn: 'root'
+})
 export class ActivityStore {
-  private store = createStore({ name: 'activities' }, withEntities<Activity, 'activityId'>({idKey: 'activityId'}));
+  store = createStore({ name: 'activities' }, withEntities<Activity, 'activityId'>({idKey: 'activityId'}));
   activities$ = this.store.pipe(selectAllEntities());
+
+  categoryActivities$ = this.store.pipe(selectAllEntitiesApply({mapEntity: e => e, filterEntity: e => e.categoryId !== null}));
+
+  jobActivities$ = this.store.pipe(selectAllEntitiesApply({mapEntity: e => e, filterEntity: e => e.jobId !== null}));
 
   constructor(private activityService: ActivityService) {
   }

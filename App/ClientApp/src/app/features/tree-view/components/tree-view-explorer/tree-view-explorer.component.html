@@ -1,7 +1,8 @@
 <div class="tree-view">
   <ul class="list-group">
     <ng-template #recursiveList let-treeCategories>
-      <li *ngFor="let treeCategory of treeCategories" class="list-group-item">
+<!--      <li *ngFor="let treeCategory of treeCategories" class="list-group-item">-->
+      <li *ngFor="let treeCategory of (treeView$ | async)?.categories" class="list-group-item">
         <span (click)="toggle(treeCategory)">
           {{ treeCategory.isExpanded ? '[-]' : '[+]'}} {{ treeCategory.name }}
         </span>
@@ -14,9 +15,9 @@
       </li>
     </ng-template>
 
-    <ng-container *ngTemplateOutlet="recursiveList; context: {$implicit: treeCategories}"></ng-container>
+    <ng-container *ngTemplateOutlet="recursiveList; context: {$implicit: (treeView$ | async)?.categories}"></ng-container>
 
     <!-- Empty state condition -->
-    <app-nothing-here [items]="treeCategories"></app-nothing-here>
+    <app-nothing-here [items]="(treeView$ | async)?.categories ?? []"></app-nothing-here>
   </ul>
 </div>

@@ -11,6 +11,7 @@ import {Activity} from "../../core/models/activity";
 import {Job} from "../../core/models/job";
 import {TreeViewCategory} from "../../core/models/tree-view-category";
 import {TreeViewActivity} from "../../core/models/tree-view-activity";
+import {TreeViewJob} from "../../core/models/tree-view-job";
 
 
 @Injectable({
@@ -19,55 +20,156 @@ import {TreeViewActivity} from "../../core/models/tree-view-activity";
 export class TreeViewStore {
   private store = createStore(
     { name: 'tree-view' },
-    withProps<TreeView>({ categories: [], uiProps: new Map() })
+    withProps<TreeView>({ categories: [] })
   );
 
   treeView$ = this.store.pipe(map (s => s));
 
   constructor(private categoryStore: CategoryStore, private jobStore: JobStore, private activityStore: ActivityStore) {
+    this.updateItems = this.updateItems.bind(this);
     this.init();
   }
 
   private init() {
-    // Set up combined subscription to entity stores
-    combineLatest([
-      this.categoryStore.categories$,
-      this.jobStore.jobs$,
-      this.activityStore.activities$,
-    ]).pipe(
-      map(([categories, jobs, activities]) => this.constructTreeNodes(categories, jobs, activities))
-    ).subscribe(categories => {
-      this.store.update(tv => ({...tv, categories: categories}));
-    });
+
+    // update categories themselves
+    this.categoryStore.categories$.pipe(
+      map(categories =>
+        this.updateItems<TreeViewCategory, Category>(this.store.state.categories, categories, (x) => x.categoryId, (tv, c) => ({...tv,...c as any}))))
+      .subscribe(categories => {
+        this.store.update(treeView => ({...treeView, categories: categories}))});
+
+    // update categories with jobs
+    this.jobStore.jobs$.pipe(
+      map(jobs =>
+        this.updateCategoryChildren(this.store.state.categories, jobs)))
+      .subscribe(categories => {
+        this.store.update(treeView => ({...treeView, categories: categories}))});
+
+    // update categories with activities
+    this.activityStore.categoryActivities$.pipe(
+      map(activities =>
+        this.updateCategoryActivities(this.store.state.categories, activities)))
+      .subscribe(categories => {
+        this.store.update(treeView => ({...treeView, categories: categories}))});
+
+    // update jobs with activities
+    this.activityStore.jobActivities$.pipe(
+      map(activities =>
+      {
+          let jobs: TreeViewJob[] = [];
+          this.store.state.categories.forEach((category) => jobs = {...jobs, ...category.jobs});
+          this.updateJobActivities(jobs, activities);
+          return this.store.state.categories;
+        }))
+      .subscribe(categories => {
+        this.store.update(treeView => ({...treeView, categories: categories}))});
   }
 
-  private constructTreeNodes(categories: Category[], jobs: Job[], activities: Activity[]): TreeViewCategory[] {
-    // we expect treeView$ to already contain a base item
+  private updateJobActivities(jobs: TreeViewJob[], activities: Activity[]) {
+    const map = new Map<string, Activity[]>();
 
-    return [];
-  }
-
-  private updateCategories(categories: Category[]) : TreeViewCategory[] {
-    let treeViewCategories = this.store.state.categories;
-    categories.forEach(c => {
-      let match = treeViewCategories.find(x => x.entity.categoryId === c.categoryId);
-      if(match === undefined) {
-        treeViewCategories = [new class implements TreeViewCategory {
-          activities = [];
-          entity = c;
-          isExpanded = false;
-          jobs = [];
-        }, ...treeViewCategories]
-      }
-      else {
-        match.entity = c;
+    activities.forEach(activity => {
+      let jobId = activity.jobId;
+      if(jobId !== null){
+        let activitySet = map.get(jobId);
+        if(activitySet === undefined) {
+          map.set(jobId, [activity]);
+        } else {
+          activitySet.push(activity);
+        }
       }
     });
-    return treeViewCategories;
-}
 
-  // Provide direct access to the store for actions and selectors
-  get state() {
-    return this.store;
+    jobs.forEach(job => {
+      let activitySet = map.get(job.jobId);
+      if(activitySet === undefined) {
+        job.activities = [];
+      } else {
+        job.activities = this.updateItems<Activity, Activity>(job.activities, activitySet, (a => job.jobId), (a1, a2) => ({...a1, ...a2}));
+      }
+    });
+
+    return jobs;
+  }
+
+  private updateCategoryActivities(categories: TreeViewCategory[], activities: Activity[]) {
+    const map = new Map<string, Activity[]>();
+
+    activities.forEach(activity => {
+      let categoryId = activity.categoryId;
+      if(categoryId !== null){
+        let activitySet = map.get(categoryId);
+        if(activitySet === undefined) {
+          map.set(categoryId, [activity]);
+        } else {
+          activitySet.push(activity);
+        }
+      }
+    });
+
+    categories.forEach(activity => {
+      let activitySet = map.get(activity.categoryId);
+      if(activitySet === undefined) {
+        activity.activities = [];
+      } else {
+        activity.activities = this.updateItems<Activity, Activity>(activity.activities, activitySet, (a => activity.categoryId), (a1, a2) => ({...a1, ...a2}));
+      }
+    });
+
+    return categories;
+  }
+
+  private updateCategoryChildren(categories: TreeViewCategory[], jobs: Job[]) : TreeViewCategory[] {
+    const map = new Map<string, Job[]>();
+
+    jobs.forEach(job => {
+      let jobSet = map.get(job.categoryId);
+      if(jobSet === undefined) {
+        map.set(job.categoryId, [job]);
+      } else {
+        jobSet.push(job);
+      }
+    });
+
+    categories.forEach(category => {
+      let jobSet = map.get(category.categoryId);
+      if(jobSet === undefined) {
+        category.jobs = [];
+      } else {
+        category.jobs = this.updateItems<TreeViewJob, Job>(category.jobs, jobSet, (j => j.jobId), (tj, j) => ({...tj, ...j as any}));
+      }
+    });
+
+    return categories;
+  }
+
+  // generic update/merge method that maintains children
+  private updateItems<T, U>(items1: T[], items2: U[], getId: (item: T | U) => string, mergeStrategy: (item1: T | U, item2: U) => T): T[] {
+    const map = new Map<string, T>();
+    const items2Ids = new Set(items2.map(item => getId(item)));
+
+    // Add items from the first array to the map
+    items1.forEach(item => {
+      const id = getId(item);
+      if (items2Ids.has(id)) {
+        map.set(id, item);
+      }
+    });
+
+    // Iterate over the second array, update or add items
+    items2.forEach(item => {
+      const id = getId(item);
+      let currentItem = map.get(id);
+      if (currentItem !== undefined) {
+        // Merge using the provided mergeStrategy
+        map.set(id, mergeStrategy(currentItem, item));
+      } else {
+        // Add new item to the map, assuming mergeStrategy can handle creating a T type from U
+        map.set(id, mergeStrategy({} as T, item));
+      }
+    });
+
+    return Array.from(map.values());
   }
 }

@@ -1,7 +1,7 @@
 export interface Activity {
   activityId: string;
-  categoryId: string;
-  jobId: string;
+  categoryId: string | null;
+  jobId: string | null;
   startTime: Date;
   endTime: Date;
   name: string;

@@ -2,7 +2,9 @@ import {Component, OnInit} from '@angular/core';
 import {TreeViewCategory} from "../../../../core/models/tree-view-category";
 import {TreeView} from "../../../../core/models/tree-view";
 import {TreeViewService} from "../../services/tree-view.service";
-import {Expandable} from "../../../../core/models/expandable";
+import {TreeViewUI} from "../../../../core/models/tree-view-ui";
+import {Observable} from "rxjs";
+import {TreeViewStore} from "../../../../state/stores/tree-view-store";
 
 @Component({
   selector: 'app-tree-view-explorer',
@@ -13,7 +15,11 @@ export class TreeViewExplorerComponent implements OnInit {
   treeCategories: TreeViewCategory[] = [];
   treeView: TreeView = { categories: this.treeCategories };
 
-  constructor(private treeViewService: TreeViewService) { }
+  treeView$: Observable<TreeView>;
+
+  constructor(private treeViewStore: TreeViewStore, private treeViewService: TreeViewService) {
+    this.treeView$ = treeViewStore.treeView$;
+  }
 
   ngOnInit(): void {
       this.fetchTreeView();
@@ -31,7 +37,7 @@ export class TreeViewExplorerComponent implements OnInit {
     );
   }
 
-  toggle(treeItem: Expandable) {
+  toggle(treeItem: TreeViewUI) {
     treeItem.isExpanded = !treeItem.isExpanded;
   }
 }
