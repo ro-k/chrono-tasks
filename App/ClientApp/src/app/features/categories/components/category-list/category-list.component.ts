@@ -5,7 +5,6 @@ import {BehaviorSubject, combineLatest, map, Observable} from "rxjs";
 import {NothingHereComponent} from "../../../../shared/components/nothing-here/nothing-here.component";
 
 
-
 @Component({
   selector: 'app-category-list',
   templateUrl: './category-list.component.html',
@@ -34,16 +33,7 @@ export class CategoryListComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.fetchCategories();
-  }
-
-  fetchCategories(): void {
     this.categoryStore.load();
-  }
-
-  createCategory(category: Category) {
-    console.log('creating in category-list component');
-    this.categoryStore.add(category);
   }
 
   // handle the filter, update BehaviorSubject

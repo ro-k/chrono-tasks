@@ -5,6 +5,9 @@ import {TreeViewService} from "../../services/tree-view.service";
 import {TreeViewUI} from "../../../../core/models/tree-view-ui";
 import {Observable} from "rxjs";
 import {TreeViewStore} from "../../../../state/stores/tree-view-store";
+import {CategoryStore} from "../../../../state/stores/category-store";
+import {JobStore} from "../../../../state/stores/job-store";
+import {ActivityStore} from "../../../../state/stores/activity-store";
 
 @Component({
   selector: 'app-tree-view-explorer',
@@ -17,7 +20,10 @@ export class TreeViewExplorerComponent implements OnInit {
 
   treeView$: Observable<TreeView>;
 
-  constructor(private treeViewStore: TreeViewStore, private treeViewService: TreeViewService) {
+  constructor(private treeViewStore: TreeViewStore,
+              private categoryStore: CategoryStore,
+              private jobStore: JobStore,
+              private activityStore: ActivityStore) {
     this.treeView$ = treeViewStore.treeView$;
   }
 
@@ -26,15 +32,17 @@ export class TreeViewExplorerComponent implements OnInit {
   }
 
   fetchTreeView(): void {
-    this.treeViewService.getTreeView().subscribe(
-      {
-        next: (tv) => {
-          this.treeView = tv;
-          this.treeCategories = tv.categories;
-        },
-        error: console.error
-      }
-    );
+    this.categoryStore.load();
+
+    // this.treeViewService.getTreeView().subscribe(
+    //   {
+    //     next: (tv) => {
+    //       this.treeView = tv;
+    //       this.treeCategories = tv.categories;
+    //     },
+    //     error: console.error
+    //   }
+    // );
   }
 
   toggle(treeItem: TreeViewUI) {

@@ -1,23 +1,27 @@
 <div class="tree-view">
   <ul class="list-group">
-    <ng-template #recursiveList let-treeCategories>
-<!--      <li *ngFor="let treeCategory of treeCategories" class="list-group-item">-->
-      <li *ngFor="let treeCategory of (treeView$ | async)?.categories" class="list-group-item">
-        <span (click)="toggle(treeCategory)">
-          {{ treeCategory.isExpanded ? '[-]' : '[+]'}} {{ treeCategory.name }}
-        </span>
-        <ul *ngIf="treeCategory.isExpanded" class="list-group">
-          <li *ngFor="let treeActivity of treeCategory.activities" class="list-group-item">
-            {{ treeActivity.name }}
-          </li>
-          <ng-container *ngTemplateOutlet="recursiveList; context: {$implicit: treeCategory.jobs}"></ng-container>
-        </ul>
-      </li>
-    </ng-template>
+    <!-- Only subscribe to the observable once at the top level -->
+    <ng-container *ngIf="(treeView$ | async) as treeViewData">
+      <ng-template #recursiveList let-categories>
+        <li *ngFor="let category of categories" class="list-group-item">
+          <span (click)="toggle(category)">
+            {{ category.isExpanded ? '[-]' : '[+]'}} {{ category.name }}
+          </span>
+          <ul *ngIf="category.isExpanded" class="list-group">
+            <li *ngFor="let activity of category.activities" class="list-group-item">
+              {{ activity.name }}
+            </li>
+            <!-- Pass the jobs as categories for the next level of recursion -->
+            <ng-container *ngTemplateOutlet="recursiveList; context: {$implicit: category.jobs}"></ng-container>
+          </ul>
+        </li>
+      </ng-template>
 
-    <ng-container *ngTemplateOutlet="recursiveList; context: {$implicit: (treeView$ | async)?.categories}"></ng-container>
+      <!-- Initiate recursion with the top-level categories -->
+      <ng-container *ngTemplateOutlet="recursiveList; context: {$implicit: treeViewData.categories}"></ng-container>
+    </ng-container>
 
-    <!-- Empty state condition -->
-    <app-nothing-here [items]="(treeView$ | async)?.categories ?? []"></app-nothing-here>
+    <!-- Loading and empty state handling -->
+    <app-nothing-here *ngIf="!(treeView$ | async)?.categories?.length ?? 0" [items]="[]"></app-nothing-here>
   </ul>
 </div>

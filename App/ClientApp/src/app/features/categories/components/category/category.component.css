@@ -6,6 +6,7 @@
   overflow: hidden;
   transition: max-height 0.3s ease;
   max-height: 5.1em; /* Adjusted to show name and first line of description */
+  min-height: 5.1em; /* Adjusted to show name and first line of description */
   position: relative; /* Required for absolute positioning of the cover line */
   padding-right: 1.5em; /* Adjust based on the size of your buttons */
 }

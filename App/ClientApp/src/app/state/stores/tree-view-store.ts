@@ -4,13 +4,11 @@ import {createStore, withProps} from "@ngneat/elf";
 import {CategoryStore} from "./category-store";
 import {JobStore} from "./job-store";
 import {ActivityStore} from "./activity-store";
-import {combineLatest, map} from "rxjs";
-import {selectAllEntities} from "@ngneat/elf-entities";
+import {map} from "rxjs";
 import {Category} from "../../core/models/category";
 import {Activity} from "../../core/models/activity";
 import {Job} from "../../core/models/job";
 import {TreeViewCategory} from "../../core/models/tree-view-category";
-import {TreeViewActivity} from "../../core/models/tree-view-activity";
 import {TreeViewJob} from "../../core/models/tree-view-job";
 
 
@@ -86,7 +84,7 @@ export class TreeViewStore {
       if(activitySet === undefined) {
         job.activities = [];
       } else {
-        job.activities = this.updateItems<Activity, Activity>(job.activities, activitySet, (a => job.jobId), (a1, a2) => ({...a1, ...a2}));
+        job.activities = this.updateItems<Activity, Activity>(job.activities, activitySet, (_ => job.jobId), (a1, a2) => ({...a1, ...a2}));
       }
     });
 
@@ -113,7 +111,7 @@ export class TreeViewStore {
       if(activitySet === undefined) {
         activity.activities = [];
       } else {
-        activity.activities = this.updateItems<Activity, Activity>(activity.activities, activitySet, (a => activity.categoryId), (a1, a2) => ({...a1, ...a2}));
+        activity.activities = this.updateItems<Activity, Activity>(activity.activities, activitySet, (_ => activity.categoryId), (a1, a2) => ({...a1, ...a2}));
       }
     });
 
