@@ -39,6 +39,28 @@ const PROXY_CONFIG = [
   },
   {
     context: [
+      "/api/activity",
+    ],
+    proxyTimeout: 10000,
+    target: target,
+    secure: false,
+    headers: {
+      Connection: 'Keep-Alive'
+    }
+  },
+  {
+    context: [
+      "/api/job",
+    ],
+    proxyTimeout: 10000,
+    target: target,
+    secure: false,
+    headers: {
+      Connection: 'Keep-Alive'
+    }
+  },
+  {
+    context: [
       "/api/swagger",
     ],
     proxyTimeout: 10000,

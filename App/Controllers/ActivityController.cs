@@ -97,14 +97,14 @@ public class ActivityController : ControllerBase
         return NoContent();
     }
     
-    [HttpGet]
-    public async Task<IActionResult> GetBy([FromQuery] Guid? categoryId, [FromQuery] Guid? jobId)
-    {
-        _userContext.UserId = Guid.Parse("27bf9e8e-317c-4a71-a2a3-61fa0be6d40a"); // TODO: temp
-
-        var categories = await _activityService.GetByParent(categoryId, jobId);
-        return Ok(categories);
-    }
+    // [HttpGet]
+    // public async Task<IActionResult> GetBy([FromQuery] Guid? categoryId, [FromQuery] Guid? jobId)
+    // {
+    //     _userContext.UserId = Guid.Parse("27bf9e8e-317c-4a71-a2a3-61fa0be6d40a"); // TODO: temp
+    //
+    //     var categories = await _activityService.GetByParent(categoryId, jobId);
+    //     return Ok(categories);
+    // }
     
     [HttpPut("{activityId:guid}")]
     public async Task<IActionResult> UpdateParents([FromRoute] Guid activityId, [FromQuery] Guid? categoryId, [FromQuery] Guid? jobId, [FromQuery] bool? clearCurrentAssignments)

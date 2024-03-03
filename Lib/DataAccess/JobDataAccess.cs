@@ -186,7 +186,7 @@ SELECT
 FROM
     public.job
 WHERE
-    user_id = @UserId
+    user_id = @UserId AND
     category_id = @CategoryId  
 ORDER BY created_at {0};
 ";

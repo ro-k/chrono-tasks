@@ -1,6 +1,6 @@
 import {createStore} from "@ngneat/elf";
 import {
-  addEntities,
+  upsertEntities,
   deleteEntities,
   selectAllEntities,
   selectAllEntitiesApply,
@@ -18,9 +18,9 @@ export class ActivityStore {
   store = createStore({ name: 'activities' }, withEntities<Activity, 'activityId'>({idKey: 'activityId'}));
   activities$ = this.store.pipe(selectAllEntities());
 
-  categoryActivities$ = this.store.pipe(selectAllEntitiesApply({mapEntity: e => e, filterEntity: e => e.categoryId !== null}));
+  categoryActivities$ = this.store.pipe(selectAllEntitiesApply({mapEntity: e => e, filterEntity: e => e.categoryId != null}));
 
-  jobActivities$ = this.store.pipe(selectAllEntitiesApply({mapEntity: e => e, filterEntity: e => e.jobId !== null}));
+  jobActivities$ = this.store.pipe(selectAllEntitiesApply({mapEntity: e => e, filterEntity: e => e.jobId != null}));
 
   constructor(private activityService: ActivityService) {
   }
@@ -31,7 +31,7 @@ export class ActivityStore {
       {
         next: (newActivities) => {
           console.log('loading activities');
-          this.store.update(addEntities(newActivities));
+          this.store.update(upsertEntities(newActivities));
         },
         error: (error) => {
           console.error('Failed to load activities', error);
@@ -46,7 +46,7 @@ export class ActivityStore {
       {
         next: (newActivities) => {
           console.log('loading activities by category');
-          this.store.update(addEntities(newActivities));
+          this.store.update(upsertEntities(newActivities));
         },
         error: (error) => {
           console.error('Failed to load activities', error);
@@ -73,7 +73,7 @@ export class ActivityStore {
       {
         next: (newActivities) => {
           console.log('loading activities by job');
-          this.store.update(addEntities(newActivities));
+          this.store.update(upsertEntities(newActivities));
         },
         error: (error) => {
           console.error('Failed to load job activities', error);
@@ -100,7 +100,7 @@ export class ActivityStore {
       {
         next: (newActivity) => {
           console.log('loading a activity by id');
-          this.store.update(addEntities(newActivity));
+          this.store.update(upsertEntities(newActivity));
         },
         error: (error) => {
           console.error('Failed to load a activity', error);
@@ -113,7 +113,7 @@ export class ActivityStore {
   add(activity: Activity) {
     this.activityService.create(activity).subscribe({
       next: (newActivity: Activity) => {
-        this.store.update(addEntities(newActivity));
+        this.store.update(upsertEntities(newActivity));
       },
       error: (error) => {
         console.error('Failed to add activity', error);

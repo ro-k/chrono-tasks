@@ -10,6 +10,7 @@ import {Activity} from "../../core/models/activity";
 import {Job} from "../../core/models/job";
 import {TreeViewCategory} from "../../core/models/tree-view-category";
 import {TreeViewJob} from "../../core/models/tree-view-job";
+import {TreeViewItemType, TreeViewUI} from "../../core/models/tree-view-ui";
 
 
 @Injectable({
@@ -33,14 +34,14 @@ export class TreeViewStore {
     // update categories themselves
     this.categoryStore.categories$.pipe(
       map(categories =>
-        this.updateItems<TreeViewCategory, Category>(this.store.state.categories, categories, (x) => x.categoryId, (tv, c) => ({...tv,...c as any}))))
+        this.updateItems<TreeViewCategory, Category>(this.store.state.categories, categories, (x) => x.categoryId, (tv, c) => ({...tv,...c as any,...{type:TreeViewItemType.Category}}))))
       .subscribe(categories => {
         this.store.update(treeView => ({...treeView, categories: categories}))});
 
     // update categories with jobs
     this.jobStore.jobs$.pipe(
       map(jobs =>
-        this.updateCategoryChildren(this.store.state.categories, jobs)))
+        this.updateCategoryJobs(this.store.state.categories, jobs)))
       .subscribe(categories => {
         this.store.update(treeView => ({...treeView, categories: categories}))});
 
@@ -55,8 +56,7 @@ export class TreeViewStore {
     this.activityStore.jobActivities$.pipe(
       map(activities =>
       {
-          let jobs: TreeViewJob[] = [];
-          this.store.state.categories.forEach((category) => jobs = {...jobs, ...category.jobs});
+          const jobs = (this.store.state.categories.map(c => c.jobs ?? [])).flat();
           this.updateJobActivities(jobs, activities);
           return this.store.state.categories;
         }))
@@ -84,7 +84,8 @@ export class TreeViewStore {
       if(activitySet === undefined) {
         job.activities = [];
       } else {
-        job.activities = this.updateItems<Activity, Activity>(job.activities, activitySet, (_ => job.jobId), (a1, a2) => ({...a1, ...a2}));
+        job.activities = job.activities ?? [];
+        job.activities = this.updateItems<Activity, Activity>(job.activities, activitySet, (a => a.activityId), (a1, a2) => ({...a1, ...a2}));
       }
     });
 
@@ -106,27 +107,28 @@ export class TreeViewStore {
       }
     });
 
-    categories.forEach(activity => {
-      let activitySet = map.get(activity.categoryId);
+    categories.forEach(category => {
+      let activitySet = map.get(category.categoryId);
       if(activitySet === undefined) {
-        activity.activities = [];
+        category.activities = [];
       } else {
-        activity.activities = this.updateItems<Activity, Activity>(activity.activities, activitySet, (_ => activity.categoryId), (a1, a2) => ({...a1, ...a2}));
+        category.activities = category.activities ?? [];
+        category.activities = this.updateItems<Activity, Activity>(category.activities, activitySet, (a => a.activityId), (a1, a2) => ({...a1, ...a2}));
       }
     });
 
     return categories;
   }
 
-  private updateCategoryChildren(categories: TreeViewCategory[], jobs: Job[]) : TreeViewCategory[] {
+  private updateCategoryJobs(categories: TreeViewCategory[], jobs: Job[]) : TreeViewCategory[] {
     const map = new Map<string, Job[]>();
 
     jobs.forEach(job => {
       let jobSet = map.get(job.categoryId);
       if(jobSet === undefined) {
-        map.set(job.categoryId, [job]);
+        map.set(job.categoryId, [{...job,...{type:TreeViewItemType.Job}}]);
       } else {
-        jobSet.push(job);
+        jobSet.push({...job,...{type:TreeViewItemType.Job}});
       }
     });
 
@@ -135,6 +137,7 @@ export class TreeViewStore {
       if(jobSet === undefined) {
         category.jobs = [];
       } else {
+        category.jobs = category.jobs ?? [];
         category.jobs = this.updateItems<TreeViewJob, Job>(category.jobs, jobSet, (j => j.jobId), (tj, j) => ({...tj, ...j as any}));
       }
     });
@@ -169,5 +172,33 @@ export class TreeViewStore {
     });
 
     return Array.from(map.values());
+  }
+
+  toggleExpand(item: any|TreeViewUI) {
+    item.isExpanded = !item.isExpanded;
+
+    if(item.isExpanded) {
+      let type = item.type;
+      if(type === TreeViewItemType.Category){
+        this.tryGetCategory(item);
+      }
+      else if(type === TreeViewItemType.Job) {
+        this.tryGetJob(item);
+      } else {
+        console.log('unknown tree view item');
+        return;
+      }
+    }
+  }
+
+  tryGetCategory(item: TreeViewCategory) {
+    console.log('loading for categoryId: ' + item.categoryId);
+    this.activityStore.loadByCategoryId(item.categoryId);
+    this.jobStore.loadByCategoryId(item.categoryId);
+  }
+
+  tryGetJob(item: TreeViewJob) {
+    console.log('loading for jobId: ' + item.jobId);
+    this.activityStore.loadByJobId(item.jobId);
   }
 }

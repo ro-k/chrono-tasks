@@ -1,6 +1,6 @@
 import {createStore} from "@ngneat/elf";
 import {
-  addEntities,
+  upsertEntities,
   deleteEntities,
   selectAllEntities,
   updateEntities,
@@ -28,7 +28,7 @@ export class JobStore {
       {
         next: (newJobs) => {
           console.log('loading jobs');
-          this.store.update(addEntities(newJobs));
+          this.store.update(upsertEntities(newJobs));
         },
         error: (error) => {
           console.error('Failed to load jobs', error);
@@ -43,7 +43,7 @@ export class JobStore {
       {
         next: (newJobs) => {
           console.log('loading jobs by category');
-          this.store.update(addEntities(newJobs));
+          this.store.update(upsertEntities(newJobs));
         },
         error: (error) => {
           console.error('Failed to load jobs', error);
@@ -58,7 +58,7 @@ export class JobStore {
       {
         next: (newJob) => {
           console.log('loading a job by id');
-          this.store.update(addEntities(newJob));
+          this.store.update(upsertEntities(newJob));
         },
         error: (error) => {
           console.error('Failed to load a job', error);
@@ -71,7 +71,7 @@ export class JobStore {
   add(job: Job) {
     this.jobService.create(job).subscribe({
       next: (newJob: Job) => {
-        this.store.update(addEntities(newJob));
+        this.store.update(upsertEntities(newJob));
       },
       error: (error) => {
         console.error('Failed to add job', error);

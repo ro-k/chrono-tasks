@@ -45,7 +45,8 @@ export class TreeViewExplorerComponent implements OnInit {
     // );
   }
 
-  toggle(treeItem: TreeViewUI) {
-    treeItem.isExpanded = !treeItem.isExpanded;
+  toggle(treeItem: any|TreeViewUI) {
+    //treeItem.isExpanded = !treeItem.isExpanded;
+    this.treeViewStore.toggleExpand(treeItem);
   }
 }

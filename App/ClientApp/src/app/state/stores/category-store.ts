@@ -2,12 +2,11 @@ import {createStore} from "@ngneat/elf";
 import {CategoryService} from "../../features/categories/services/category.service";
 import {Category} from "../../core/models/category";
 import {
-  addEntities,
   selectAllEntities,
   updateEntities,
   withEntities,
   deleteEntities,
-  withUIEntities, selectEntities, UIEntitiesRef, unionEntities
+  upsertEntities
 } from "@ngneat/elf-entities";
 import {Injectable} from "@angular/core";
 import {TreeViewUI} from "../../core/models/tree-view-ui";
@@ -28,7 +27,7 @@ export class CategoryStore {
       {
         next: (newCategories) => {
           console.log('loading categories');
-          this.store.update(addEntities(newCategories));
+          this.store.update(upsertEntities(newCategories));
         },
         error: (error) => {
           console.error('Failed to load categories', error);
@@ -45,7 +44,7 @@ export class CategoryStore {
   add(category: Category) {
     this.categoryService.create(category).subscribe({
       next: (newCategory: Category) => {
-        this.store.update(addEntities(newCategory));
+        this.store.update(upsertEntities(newCategory));
       },
       error: (error) => {
         console.error('Failed to add category', error);
