@@ -9,9 +9,6 @@ import {CategoryStore} from "../../../../state/stores/category-store";
 })
 export class CategoryComponent {
   @Input() category!: Category;
-  @Output() delete = new EventEmitter<Category>();
-  @Output() update = new EventEmitter<Category>();
-  @Output() add = new EventEmitter<Category>();
   isExpanded = false;
   showConfirmDelete = false;
   showEdit = false;
