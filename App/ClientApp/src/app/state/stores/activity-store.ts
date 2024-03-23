@@ -95,18 +95,24 @@ export class ActivityStore {
   }
 
   // load activity by id
-  loadById(activityId: string){
+  loadById(activityId: string) : Activity | undefined {
+    const existing = this.store.getValue().entities[activityId];
+    if(existing) {
+      return existing;
+    }
     this.activityService.get(activityId).subscribe(
       {
         next: (newActivity) => {
           console.log('loading a activity by id');
           this.store.update(upsertEntities(newActivity));
+          return newActivity;
         },
         error: (error) => {
           console.error('Failed to load a activity', error);
         }
       }
     );
+    return undefined;
   }
 
   // add activity

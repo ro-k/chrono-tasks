@@ -12,6 +12,8 @@ import { HomeComponent } from "./features/navigation/components/home/home.compon
 import { CategoriesModule } from "./features/categories/categories.module";
 import { CategoryListComponent } from "./features/categories/components/category-list/category-list.component";
 import {TreeViewModule} from "./features/tree-view/tree-view.module";
+import {MainViewModule} from "./features/main-view/main-view.module";
+import {ContentPaneComponent} from "./features/main-view/components/content-pane/content-pane.component";
 
 @NgModule({
   declarations: [
@@ -27,9 +29,11 @@ import {TreeViewModule} from "./features/tree-view/tree-view.module";
     NavigationModule,
     CategoriesModule,
     TreeViewModule,
+    MainViewModule,
     RouterModule.forRoot([
       {path: '', component: HomeComponent, pathMatch: 'full'},
       {path: 'category', component: CategoryListComponent},
+      {path: 'content', component: ContentPaneComponent},
     ]),
   ],
   providers: [

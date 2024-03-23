@@ -1,0 +1,8 @@
+<div class="content-pane container">
+  <div class="list-group">
+
+    <app-content-item
+      *ngFor="let item of (content$ | async)"
+      [item]="item" (clicked)="expand($event)"></app-content-item>
+  </div>
+</div>

@@ -1,0 +1,30 @@
+.item-row {
+  display: flex;
+  align-items: center;
+  border: 1px solid #dee2e6; /* Light grey border */
+  padding: 8px;
+  margin-bottom: 4px; /* Spacing between rows */
+  background-color: #fff; /* White background */
+  cursor: pointer;
+}
+
+.item-row:hover {
+  background-color: #f8f9fa; /* Lighter grey on hover */
+}
+
+.item-row i {
+  font-size: 1.25rem; /* Larger icons */
+  width: 30px; /* Ensure icon space is consistent */
+  text-align: center;
+}
+
+.item-row div {
+  flex: 1; /* Flex-grow to distribute space */
+  padding: 0 8px; /* Spacing around text */
+}
+
+/* Specifically for the date to prevent it from growing too much */
+.item-row div:last-child {
+  flex: 0 1 auto;
+  white-space: nowrap; /* Prevent date from wrapping */
+}
