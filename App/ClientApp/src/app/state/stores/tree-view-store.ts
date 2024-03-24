@@ -4,7 +4,7 @@ import {createStore, withProps} from "@ngneat/elf";
 import {CategoryStore} from "./category-store";
 import {JobStore} from "./job-store";
 import {ActivityStore} from "./activity-store";
-import {combineLatestWith, EMPTY, map, Observable, switchMap} from "rxjs";
+import {BehaviorSubject, combineLatestWith, EMPTY, map, Observable, switchMap} from "rxjs";
 import {Category} from "../../core/models/category";
 import {Activity} from "../../core/models/activity";
 import {Job} from "../../core/models/job";
@@ -14,20 +14,23 @@ import {TreeViewUI} from "../../core/models/tree-view-ui";
 import {ItemType} from "../../core/models/item-type";
 import {ContentViewItem} from "../../core/models/content-view-item";
 import {getEntity, selectAllEntities, selectManyByPredicate} from "@ngneat/elf-entities";
-import {getXHRResponse} from "rxjs/internal/ajax/getXHRResponse";
 
 
 @Injectable({
   providedIn: 'root',
 })
 export class TreeViewStore {
+  // todo: rethink TreeView* items
   private store = createStore(
     { name: 'tree-view' },
-    withProps<TreeView>({ categories: [], navigationStack: [] })
+    withProps<TreeView>({ categories: [] }),
   );
 
+  private navigation: ContentViewItem[] = [];
+  navigationSource = new BehaviorSubject<ContentViewItem[]>([]);
+
   treeView$ = this.store.pipe(map (s => s));
-  navigationStack$ = this.store.pipe(map (s => s.navigationStack));
+  navigationStack$ = this.navigationSource.asObservable();
   contentViewItems$: Observable<ContentViewItem[]> = EMPTY;
 
   constructor(private categoryStore: CategoryStore, private jobStore: JobStore, private activityStore: ActivityStore) {
@@ -199,7 +202,7 @@ export class TreeViewStore {
         this.toggleExpand(treeJob, true);
 
         // select activities from store
-        return this.activityStore.store.pipe(selectManyByPredicate(x => x.categoryId === top.id), map(activities => activities.map(a => this.activityToContentViewItem(a))));
+        return this.activityStore.store.pipe(selectManyByPredicate(x => x.jobId === top.id), map(activities => activities.map(a => this.activityToContentViewItem(a))));
       }
       if(top.type == ItemType.Category) {
         // find category, toggle expand
@@ -245,9 +248,8 @@ export class TreeViewStore {
   }
 
   navigateUp() {
-    const stack = this.store.state.navigationStack;
-    stack.pop();
-    this.store.update(treeView => ({...treeView, stack}));
+    this.navigation.pop();
+    this.navigationSource.next(this.navigation);
   }
 
   navigateIntoItem(item: ContentViewItem) {
@@ -279,7 +281,8 @@ export class TreeViewStore {
 
     console.log('new nav stack:');
     console.log(newStack);
-    this.store.update(treeView => ({...treeView, navigationStack: newStack}));
+    this.navigation = newStack;
+    this.navigationSource.next(newStack);
   }
 
   categoryToContentViewItem(value: Category) : ContentViewItem {

@@ -10,6 +10,7 @@ import {
 import {Activity} from "../../core/models/activity";
 import {ActivityService} from "../../features/activities/services/activity-service";
 import {Injectable} from "@angular/core";
+import {tap} from "rxjs";
 
 @Injectable({
   providedIn: 'root'
@@ -38,6 +39,15 @@ export class ActivityStore {
         }
       }
     );
+  }
+
+  upsertActivities(activities: Activity[]) {
+    this.store.update(upsertEntities(activities));
+  }
+
+  // load category activities
+  loadByCategoryId_v2(categoryId: string){
+    this.activityService.getByCategory(categoryId).pipe(tap(this.upsertActivities));
   }
 
   // load category activities
