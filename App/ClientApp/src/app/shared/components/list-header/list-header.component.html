@@ -1,0 +1,6 @@
+<div class="header-area d-flex justify-content-between align-items-center">
+  <app-filter-input *ngIf="showFilter" (filterEvent)="handleFilterEvent.emit($event)"></app-filter-input>
+  <button *ngIf="showAdd" class="btn btn-primary add-button" (click)="addEvent.emit()">
+    <i class="bi bi-plus-lg"></i> Add {{ addText }}
+  </button>
+</div>
