@@ -1,0 +1,17 @@
+<div class="modal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"> {{ title }}</h5>
+        <button class="close-button" (click)="onCancel.emit()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <ng-content></ng-content>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="onCancel.emit()">Cancel</button>
+        <button type="submit" class="btn btn-primary" (click)="onSave.emit()">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
