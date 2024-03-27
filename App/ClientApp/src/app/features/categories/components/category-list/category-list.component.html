@@ -1,8 +1,7 @@
 <div class="category-list container">
-  <app-list-header [showBack]="true" (backEvent)="alert('back')"
-                   [showFilter]="true" (handleFilterEvent)="handleFilter($event)"
+  <app-list-header [showFilter]="true" (handleFilterEvent)="handleFilter($event)"
                    [showAdd]="true" (addEvent)="showAdd = !showAdd"
-                   [addText]="'Category'"></app-list-header>
+                   [itemName]="'Category'"></app-list-header>
 
   <app-category-form
     *ngIf="showAdd"

@@ -8,9 +8,7 @@ import {Component, EventEmitter, Input, Output} from '@angular/core';
 export class ListHeaderComponent {
   @Output() handleFilterEvent = new EventEmitter<string>;
   @Output() addEvent = new EventEmitter<void>;
-  @Output() backEvent = new EventEmitter<void>;
-  @Input() addText: string = '';
+  @Input() itemName: string = '';
   @Input() showAdd = true;
   @Input() showFilter = true;
-  @Input() showBack = true;
 }

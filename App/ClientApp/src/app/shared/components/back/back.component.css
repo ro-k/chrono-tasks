@@ -1,0 +1,14 @@
+.header-area {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1em; /* Adjust as needed */
+}
+
+.back-button {
+  background-color: #007bff; /* Bootstrap primary color */
+  color: white;
+  border-radius: 0.25rem; /* Bootstrap border radius */
+  /* Additional styles if needed */
+  margin-left: auto; /* This ensures the button stays to the right */
+}

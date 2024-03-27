@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Output} from '@angular/core';
+import {Component, EventEmitter, Input, Output} from '@angular/core';
 
 @Component({
   selector: 'app-filter-input',
@@ -8,6 +8,7 @@ import {Component, EventEmitter, Output} from '@angular/core';
 export class FilterInputComponent {
   filterTerm: string = '';
   @Output() filterEvent = new EventEmitter<string>();
+  @Input() itemName = '';
 
   filterCategories() {
     this.filterEvent.emit(this.filterTerm);

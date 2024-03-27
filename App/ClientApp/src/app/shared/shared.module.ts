@@ -5,19 +5,22 @@ import {FilterInputComponent} from "./components/filter-input/filter-input.compo
 import {NothingHereComponent} from "./components/nothing-here/nothing-here.component";
 import {FormsModule} from "@angular/forms";
 import {ListHeaderComponent} from "./components/list-header/list-header.component";
+import {BackComponent} from "./components/back/back.component";
 
 @NgModule({
   declarations: [
     YesNoComponent,
     FilterInputComponent,
     NothingHereComponent,
-    ListHeaderComponent
+    ListHeaderComponent,
+    BackComponent
   ],
   exports: [
     YesNoComponent,
     NothingHereComponent,
     FilterInputComponent,
-    ListHeaderComponent
+    ListHeaderComponent,
+    BackComponent
   ],
   imports: [
     CommonModule,

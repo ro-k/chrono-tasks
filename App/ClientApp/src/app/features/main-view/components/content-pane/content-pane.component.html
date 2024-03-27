@@ -1,11 +1,10 @@
 <div class="content-pane container">
-  <app-list-header [showBack]="true" (backEvent)="alert('back')"
-                   [showFilter]="true" (handleFilterEvent)="alert('filter!')"
+  <app-list-header [showFilter]="true" (handleFilterEvent)="handleFilter($event)"
                    [showAdd]="true" (addEvent)="alert('add!')"
-                   [addText]="''"></app-list-header>
+                   [itemName]="''"></app-list-header>
 
   <app-content-item [item]="parentItem" (clicked)="expand($event, true)"></app-content-item>
-  <ng-container *ngIf="(content$ | async) as content">
+  <ng-container *ngIf="(filteredContent$ | async) as content">
     <div *ngIf="content.length; else noContent" class="list-group">
       <app-content-item *ngFor="let item of content" [item]="item" (clicked)="expand($event)"></app-content-item>
     </div>
