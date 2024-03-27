@@ -15,6 +15,10 @@
   max-width: calc(100% - 1.5em); /* Adjust the same value as padding-right */
 }
 
+.list-group-item:hover {
+  background-color: #f8f9fa; /* Lighter grey on hover */
+}
+
 .list-group-item.expanded {
   max-height: fit-content; /* Expand to fit all content */
   overflow: hidden; /* This will hide overflow, not needed for a scrollbar */
@@ -50,15 +54,6 @@
 
 .description.expanded {
   white-space: pre-line; /* For expanded state */
-}
-
-.cover-line {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 0.7em; /* Height to cover partial text */
-  background-color: white; /* Match the background color of the list item */
 }
 
 .button-group {

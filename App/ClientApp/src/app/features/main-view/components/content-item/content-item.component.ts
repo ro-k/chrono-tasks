@@ -11,7 +11,6 @@ import {ItemType} from "../../../../core/models/item-type";
 export class ContentItemComponent {
   @Input() item!: ContentViewItem;
   @Output() clicked = new EventEmitter<ContentViewItem>();
-  hovered: boolean = false;
 
   constructor(private treeViewStore: TreeViewStore) {
   }

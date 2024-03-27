@@ -1,12 +1,8 @@
 <div class="category-list container">
-  <div class="header-area d-flex justify-content-between align-items-center">
-<!--    <h2>Categories</h2>-->
-<!--    <input type="text" class="search-box" placeholder="Search categories..." [(ngModel)]="searchTerm" (input)="filterCategories()">-->
-    <app-filter-input (filterEvent)="handleFilter($event)"></app-filter-input>
-    <button class="btn btn-primary add-button" (click)="showAdd = !showAdd">
-      <i class="bi bi-plus-lg"></i> Add Category
-    </button>
-  </div>
+  <app-list-header [showBack]="true" (backEvent)="alert('back')"
+                   [showFilter]="true" (handleFilterEvent)="handleFilter($event)"
+                   [showAdd]="true" (addEvent)="showAdd = !showAdd"
+                   [addText]="'Category'"></app-list-header>
 
   <app-category-form
     *ngIf="showAdd"

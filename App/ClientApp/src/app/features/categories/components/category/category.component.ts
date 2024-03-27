@@ -12,7 +12,6 @@ export class CategoryComponent {
   isExpanded = false;
   showConfirmDelete = false;
   showEdit = false;
-
   constructor(private categoryStore: CategoryStore) { }
 
   updateCategory(category: Category) {

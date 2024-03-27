@@ -1,6 +1,6 @@
-<div class="item-row" (click)="onRowClick()" [ngClass]="{'highlight': hovered}" (mouseenter)="hovered=true" (mouseleave)="hovered=false">
-  <i class="bi" [class.bi-folder]="item.type === ItemType.Category || item.type === ItemType.Job" [class.bi-file-earmark]="item.type === ItemType.Activity" aria-hidden="true"></i>
+<div class="item-row" (click)="onRowClick()">
+  <i class="bi" [class.bi-folder]="item.type !== ItemType.Activity" [class.bi-file-earmark]="item.type === ItemType.Activity" aria-hidden="true"></i>
   <div>{{ item.name }}</div>
   <div>{{ item.description }}</div>
-  <div>{{ item.modifiedAt | date:'shortDate' }}</div>
+  <div>{{ item.modifiedAt != null ? (item.modifiedAt | date:'shortDate') : ''}}</div>
 </div>

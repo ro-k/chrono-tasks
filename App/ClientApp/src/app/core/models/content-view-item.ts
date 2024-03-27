@@ -4,7 +4,7 @@ export interface ContentViewItem {
   id: string;
   name: string;
   description: string;
-  createdAt: Date;
-  modifiedAt: Date;
+  createdAt: Date|null;
+  modifiedAt: Date|null;
   type: ItemType;
 }

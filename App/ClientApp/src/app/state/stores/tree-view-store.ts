@@ -4,7 +4,7 @@ import {createStore, withProps} from "@ngneat/elf";
 import {CategoryStore} from "./category-store";
 import {JobStore} from "./job-store";
 import {ActivityStore} from "./activity-store";
-import {BehaviorSubject, combineLatestWith, EMPTY, map, Observable, switchMap} from "rxjs";
+import {BehaviorSubject, combineLatestWith, EMPTY, map, Observable, of, switchMap} from "rxjs";
 import {Category} from "../../core/models/category";
 import {Activity} from "../../core/models/activity";
 import {Job} from "../../core/models/job";
@@ -192,7 +192,18 @@ export class TreeViewStore {
       const top = stack[stack.length-1];
 
       // todo: activity
+      if(top.type === ItemType.Activity) {
+        // query activity from Activity store
+        //const activity = this.activityStore.store.query(getEntity(top.id));
 
+        // find matching treejob, call expand on it
+        // const treeJob = this.store.state.categories.find(x => x.categoryId === job?.categoryId!)?.jobs!.find(x => x.jobId === top.id);
+        // this.toggleExpand(treeJob, true);
+
+        // select activities from store
+        //return this.activityStore.store.pipe(selectManyByPredicate(x => x.jobId === top.id), map(activities => activities.map(a => this.activityToContentViewItem(a))));
+        return of([]);
+      }
       if(top.type === ItemType.Job) {
         // query job from jobStore
         const job = this.jobStore.store.query(getEntity(top.id));
@@ -253,8 +264,11 @@ export class TreeViewStore {
   }
 
   navigateIntoItem(item: ContentViewItem) {
+
+
     const newStack: ContentViewItem[] = [];
     let next : [type: ItemType, id: string] = [item.type, item.id];
+
     if(item.type === ItemType.Activity) {
       const activity = this.activityStore.store.query(getEntity(item.id));
       if(activity === undefined){

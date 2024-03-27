@@ -16,7 +16,6 @@ h2 {
 }
 
 .add-button {
-  /* Styles similar to your edit and delete buttons */
   background-color: #007bff; /* Bootstrap primary color */
   color: white;
   border-radius: 0.25rem; /* Bootstrap border radius */

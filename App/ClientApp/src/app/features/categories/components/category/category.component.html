@@ -10,7 +10,7 @@
   [category]="category">
 </app-category-form>
 
-<div class="list-group-item d-flex flex-column justify-content-between"
+<div class="list-group-item d-flex flex-column justify-content-between "
      [ngClass]="{'expanded': isExpanded}"
      (click)="isExpanded = !isExpanded">
 
@@ -29,5 +29,4 @@
   <div class="description" [ngClass]="{'expanded': isExpanded}">
       {{ category.description }}
   </div>
-  <div class="cover-line"></div>
 </div>

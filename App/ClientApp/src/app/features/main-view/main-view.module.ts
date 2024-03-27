@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {ContentItemComponent} from "./components/content-item/content-item.component";
 import {ContentPaneComponent} from "./components/content-pane/content-pane.component";
-import {TransformCategoryPipe} from "./pipes/transform-category.pipe";
+import {SharedModule} from "../../shared/shared.module";
 
 
 
@@ -10,10 +10,10 @@ import {TransformCategoryPipe} from "./pipes/transform-category.pipe";
   declarations: [
     ContentItemComponent,
     ContentPaneComponent,
-    TransformCategoryPipe
   ],
   imports: [
-    CommonModule
+    CommonModule,
+    SharedModule
   ]
 })
 export class MainViewModule { }
