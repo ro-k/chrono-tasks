@@ -2,8 +2,6 @@ import {Component, OnInit} from '@angular/core';
 import {TreeViewStore} from "../../../../state/stores/tree-view-store";
 import {CategoryStore} from "../../../../state/stores/category-store";
 import {BehaviorSubject, combineLatest, map, Observable} from "rxjs";
-import {Category} from "../../../../core/models/category";
-import {TreeView} from "../../../../core/models/tree-view";
 import {ContentViewItem} from "../../../../core/models/content-view-item";
 import {ItemType} from "../../../../core/models/item-type";
 
@@ -15,25 +13,26 @@ import {ItemType} from "../../../../core/models/item-type";
 export class ContentPaneComponent implements OnInit {
 
   parentItem: ContentViewItem = {id: '', name:'..', description:'', type:ItemType.Unknown, createdAt:null, modifiedAt:null};
+  currentType = new Set<ItemType>();
+  addType : ItemType | null = null;
 
-  categories$: Observable<Category[]>;
-  treeView$: Observable<TreeView>;
   content$: Observable<ContentViewItem[]>;
   filteredContent$: Observable<ContentViewItem[]>;
 
   private filterTerms = new BehaviorSubject<string>('');
 
   constructor(private treeViewStore: TreeViewStore, private categoryStore: CategoryStore) {
-    this.categories$ = this.categoryStore.categories$;
-    this.treeView$ = this.treeViewStore.treeView$;
     this.content$ = this.treeViewStore.contentViewItems$;
     this.filteredContent$ = combineLatest([this.content$, this.filterTerms])
       .pipe(
         map(([items, filterTerm]) => {
-          return items.filter(item =>
-            filterTerm === '' ||
-            item.name.toLowerCase().includes(filterTerm.toLowerCase()) ||
-            (item.description && item.description.toLowerCase().includes(filterTerm.toLowerCase()))
+          this.currentType.clear();
+          return items.filter(item => {
+              this.currentType.add(item.type);
+              return filterTerm === '' ||
+              item.name.toLowerCase().includes(filterTerm.toLowerCase()) ||
+              (item.description && item.description.toLowerCase().includes(filterTerm.toLowerCase()))
+            }
           );
         }),
       );
@@ -57,5 +56,10 @@ export class ContentPaneComponent implements OnInit {
     this.filterTerms.next(term);
   }
 
+  handleAddEvent(itemType: ItemType) {
+    this.addType = itemType;
+  }
+
   protected readonly alert = alert;
+  protected readonly ItemType = ItemType;
 }

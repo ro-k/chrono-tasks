@@ -10,7 +10,7 @@ import {CategoryStore} from "../../../../state/stores/category-store";
 })
 export class CategoryFormComponent implements OnInit {
   @Input() category?: Category = undefined;
-  @Output() visible = new EventEmitter<boolean>();
+  @Output() hide = new EventEmitter();
   categoryForm!: FormGroup;
 
   constructor(private formBuilder: FormBuilder, private categoryStore: CategoryStore) {
@@ -41,14 +41,14 @@ export class CategoryFormComponent implements OnInit {
         this.categoryStore.add(this.category);
       }
 
-      this.visible.emit(false);
+      this.hide.emit();
     } else {
       // Handle form validation errors
     }
   }
 
   onCancel() {
-    this.visible.emit(false);
+    this.hide.emit();
   }
 }
 

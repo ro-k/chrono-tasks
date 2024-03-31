@@ -15,7 +15,7 @@ import {EditDialogComponent} from "./components/edit-dialog/edit-dialog.componen
     NothingHereComponent,
     ListHeaderComponent,
     BackComponent,
-    EditDialogComponent
+    EditDialogComponent,
   ],
   exports: [
     YesNoComponent,
@@ -23,7 +23,7 @@ import {EditDialogComponent} from "./components/edit-dialog/edit-dialog.componen
     FilterInputComponent,
     ListHeaderComponent,
     BackComponent,
-    EditDialogComponent
+    EditDialogComponent,
   ],
     imports: [
         CommonModule,

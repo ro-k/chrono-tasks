@@ -11,16 +11,19 @@ import {StateModule} from "../../state/state.module";
 
 
 @NgModule({
-  declarations: [
-    CategoryComponent,
-    CategoryFormComponent,
-    CategoryListComponent,
-  ],
-  imports: [
-    CommonModule,
-    SharedModule,
-    ReactiveFormsModule,
-    StateModule,
-  ]
+    declarations: [
+        CategoryComponent,
+        CategoryFormComponent,
+        CategoryListComponent,
+    ],
+    exports: [
+        CategoryFormComponent
+    ],
+    imports: [
+        CommonModule,
+        SharedModule,
+        ReactiveFormsModule,
+        StateModule,
+    ]
 })
 export class CategoriesModule { }

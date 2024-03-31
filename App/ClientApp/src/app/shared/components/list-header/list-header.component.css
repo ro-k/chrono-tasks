@@ -9,6 +9,5 @@
   background-color: #007bff; /* Bootstrap primary color */
   color: white;
   border-radius: 0.25rem; /* Bootstrap border radius */
-  /* Additional styles if needed */
-  margin-left: auto; /* This ensures the button stays to the right */
+  margin-left: .4rem;
 }

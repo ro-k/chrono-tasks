@@ -185,7 +185,6 @@ export class TreeViewStore {
 
   private setupContentView() {
     this.contentViewItems$ = this.navigationStack$.pipe(switchMap(stack => {
-      debugger;
       if(stack.length === 0){
         return this.categoryStore.store.pipe(selectAllEntities(), map(categories => categories.map(c => this.categoryToContentViewItem(c))));
       }
@@ -213,7 +212,10 @@ export class TreeViewStore {
         this.toggleExpand(treeJob, true);
 
         // select activities from store
-        return this.activityStore.store.pipe(selectManyByPredicate(x => x.jobId === top.id), map(activities => activities.map(a => this.activityToContentViewItem(a))));
+        return this.activityStore.store.pipe(
+          selectManyByPredicate(x => x.jobId === top.id),
+          map(activities => activities.map(a => this.activityToContentViewItem(a))),
+          );
       }
       if(top.type == ItemType.Category) {
         // find category, toggle expand
@@ -221,8 +223,10 @@ export class TreeViewStore {
         this.toggleExpand(treeCategory, true);
 
         // query stores for matching activities / jobs
-        const activities$ = this.activityStore.store.pipe(selectManyByPredicate(x => x.categoryId === top.id), map(activities => activities.map(a => this.activityToContentViewItem(a))));
-        const jobs$ = this.jobStore.store.pipe(selectManyByPredicate(x => x.categoryId === top.id), map(jobs => jobs.map(j => this.jobToContentViewItem(j))));
+        const activities$ = this.activityStore.store.pipe(selectManyByPredicate(x => x.categoryId === top.id),
+          map(activities => activities.map(a => this.activityToContentViewItem(a))));
+        const jobs$ = this.jobStore.store.pipe(selectManyByPredicate(x => x.categoryId === top.id),
+          map(jobs => jobs.map(j => this.jobToContentViewItem(j))));
         return activities$.pipe(combineLatestWith(jobs$), map(([activities, jobs]) => [...activities, ...jobs]));
       }
 

@@ -1,4 +1,5 @@
 import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {ItemType} from "../../../core/models/item-type";
 
 @Component({
   selector: 'app-list-header',
@@ -7,8 +8,9 @@ import {Component, EventEmitter, Input, Output} from '@angular/core';
 })
 export class ListHeaderComponent {
   @Output() handleFilterEvent = new EventEmitter<string>;
-  @Output() addEvent = new EventEmitter<void>;
-  @Input() itemName: string = '';
+  @Output() addEvent = new EventEmitter<ItemType>;
+  @Input() itemTypes: Set<ItemType> = new Set<ItemType>();
   @Input() showAdd = true;
   @Input() showFilter = true;
+  protected readonly ItemType = ItemType;
 }

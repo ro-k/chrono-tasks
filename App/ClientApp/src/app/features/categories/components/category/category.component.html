@@ -6,7 +6,7 @@
 
 <app-category-form
   *ngIf="showEdit"
-  (visible) = "showEdit=$event"
+  (hide) = "showEdit=false"
   [category]="category">
 </app-category-form>
 

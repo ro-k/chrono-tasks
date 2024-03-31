@@ -1,9 +1,10 @@
 <div class="content-pane container">
   <app-list-header [showFilter]="true" (handleFilterEvent)="handleFilter($event)"
-                   [showAdd]="true" (addEvent)="alert('add!')"
-                   [itemName]="''"></app-list-header>
+                   [showAdd]="true" (addEvent)="handleAddEvent($event)"
+                   [itemTypes]="currentType">
+  </app-list-header>
 
-  <app-content-item [item]="parentItem" (clicked)="expand($event, true)"></app-content-item>
+  <app-content-item *ngIf="currentType.size === 0 || !currentType.has(ItemType.Category)" [item]="parentItem" (clicked)="expand($event, true)"></app-content-item>
   <ng-container *ngIf="(filteredContent$ | async) as content">
     <div *ngIf="content.length; else noContent" class="list-group">
       <app-content-item *ngFor="let item of content" [item]="item" (clicked)="expand($event)"></app-content-item>
@@ -13,3 +14,9 @@
     <app-nothing-here [items]="[]"></app-nothing-here>
   </ng-template>
 </div>
+
+<app-category-form
+  *ngIf="addType === ItemType.Category"
+  [category]="undefined"
+  (hide) = "addType=null">
+</app-category-form>

@@ -9,7 +9,6 @@ import {
   upsertEntities
 } from "@ngneat/elf-entities";
 import {Injectable} from "@angular/core";
-import {TreeViewUI} from "../../core/models/tree-view-ui";
 
 @Injectable({
   providedIn: 'root'
@@ -35,10 +34,6 @@ export class CategoryStore {
       }
     );
   }
-
-  // updateTreeViewUI(treeViewUI: TreeViewUI) {
-  //   this.store.update(updateEntities(treeViewUI.id, treeViewUI, { ref: UIEntitiesRef }));
-  // }
 
   // add category
   add(category: Category) {

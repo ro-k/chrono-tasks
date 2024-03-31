@@ -1,14 +1,7 @@
 <div class="category-list container">
   <app-list-header [showFilter]="true" (handleFilterEvent)="handleFilter($event)"
                    [showAdd]="true" (addEvent)="showAdd = !showAdd"
-                   [itemName]="'Category'"></app-list-header>
-
-  <app-category-form
-    *ngIf="showAdd"
-    [category]="undefined"
-    (visible) = "showAdd=$event">
-  </app-category-form>
-
+                   [itemTypes]="headerType"></app-list-header>
   <!-- List of Categories -->
   <div class="list-group">
       <app-category
@@ -19,3 +12,8 @@
   <!-- Empty state condition -->
   <app-nothing-here [items]="((categories$ | async) ?? [])"></app-nothing-here>
 </div>
+<app-category-form
+  *ngIf="showAdd"
+  [category]="undefined"
+  (hide) = "showAdd=false">
+</app-category-form>
