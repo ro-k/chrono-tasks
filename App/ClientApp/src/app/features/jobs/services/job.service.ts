@@ -28,7 +28,7 @@ export class JobService {
 
   create(job: Job): Observable<Job> {
     return this.http.post<Job>(`${this.baseUrl}api/job/`,
-      {name: job.name, description: job.description, categoryId: job.categoryId})
+      {name: job.name, description: job.description, categoryId: job.categoryId, data: job.data})
       .pipe(map(x => x), catchError(this.handleError));
   }
 

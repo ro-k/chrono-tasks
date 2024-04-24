@@ -46,7 +46,6 @@ export class CategoryFormComponent implements OnInit {
       // Handle form validation errors
     }
   }
-
   onCancel() {
     this.hide.emit();
   }

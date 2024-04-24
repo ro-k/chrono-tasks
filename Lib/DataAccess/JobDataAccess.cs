@@ -53,7 +53,7 @@ INSERT INTO public.job (
     @CategoryId, 
     @Name, 
     @Description,
-    @Data, 
+    @Data::jsonb, 
     @CreatedAt, 
     @ModifiedAt, 
     @UserId, 

@@ -268,8 +268,6 @@ export class TreeViewStore {
   }
 
   navigateIntoItem(item: ContentViewItem) {
-
-
     const newStack: ContentViewItem[] = [];
     let next : [type: ItemType, id: string] = [item.type, item.id];
 

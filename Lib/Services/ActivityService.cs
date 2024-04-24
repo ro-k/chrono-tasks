@@ -13,11 +13,13 @@ public class ActivityService : IActivityService
         _activityDataAccess = activityDataAccess;
     }
 
-    public async Task<Activity> Create(string name, string description, DateTime startTime, DateTime endTime)
+    public async Task<Activity> Create(Guid? categoryId, Guid? jobId, string name, string description, DateTime startTime, DateTime endTime)
     {
         var activity = new Activity
         {
             ActivityId = Guid.NewGuid(),
+            CategoryId = categoryId,
+            JobId = jobId,
             Name = name,
             Description = description,
             StartTime = startTime.ToUniversalTime(),

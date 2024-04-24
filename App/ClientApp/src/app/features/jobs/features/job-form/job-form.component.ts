@@ -1,8 +1,8 @@
 import {Component, EventEmitter, Input, Output} from '@angular/core';
-import {Category} from "../../../../core/models/category";
 import {FormBuilder, FormGroup, Validators} from "@angular/forms";
 import {defaultJob, Job} from "../../../../core/models/job";
 import {JobStore} from "../../../../state/stores/job-store";
+import {ContentViewItem} from "../../../../core/models/content-view-item";
 
 @Component({
   selector: 'app-job-form',
@@ -11,7 +11,7 @@ import {JobStore} from "../../../../state/stores/job-store";
 })
 export class JobFormComponent {
   @Input() job?: Job = undefined;
-  @Input() parentCategory?: Category = undefined;
+  @Input() parentItem?: ContentViewItem = undefined;
   @Output() hide = new EventEmitter();
   jobForm!: FormGroup;
 
@@ -33,15 +33,22 @@ export class JobFormComponent {
       // formData now contains the values of the title and description fields
       const name = formData.name;
       const description = formData.description;
+      let adding = false;
 
-      if (this.job) {
-        this.job.categoryId = this.parentCategory?.categoryId ?? "";
-        this.job.name = name;
-        this.job.description = description;
-        this.jobStore.update(this.job);
-      } else {
-        this.job = {...defaultJob,name,description};
+      if(this.job == undefined) {
+        this.job = {...defaultJob};
+        adding = true;
+      }
+
+      this.job.categoryId = this.parentItem?.id ?? "";
+      this.job.name = name;
+      this.job.description = description;
+      this.job.data = '{}';
+
+      if(adding) {
         this.jobStore.add(this.job);
+      } else {
+        this.jobStore.update(this.job);
       }
 
       this.hide.emit();

@@ -1,6 +1,8 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {ActivityFormComponent} from "./components/activity-form/activity-form.component";
+import {ReactiveFormsModule} from "@angular/forms";
+import {SharedModule} from "../../shared/shared.module";
 
 
 
@@ -11,8 +13,10 @@ import {ActivityFormComponent} from "./components/activity-form/activity-form.co
   exports: [
     ActivityFormComponent
   ],
-  imports: [
-    CommonModule,
-  ]
+    imports: [
+        CommonModule,
+        ReactiveFormsModule,
+        SharedModule,
+    ]
 })
 export class ActivitiesModule { }

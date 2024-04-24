@@ -1,10 +1,10 @@
 <div class="content-pane container">
   <app-list-header [showFilter]="true" (handleFilterEvent)="handleFilter($event)"
                    [showAdd]="true" (addEvent)="handleAddEvent($event)"
-                   [itemTypes]="currentType">
+                   [itemTypes]="(getItemTypesFromParent(parentItem?.type))">
   </app-list-header>
 
-  <app-content-item *ngIf="currentType.size === 0 || !currentType.has(ItemType.Category)" [item]="parentItem" (clicked)="expand($event, true)"></app-content-item>
+  <app-content-item *ngIf="parentItem != undefined" [item]="upPlaceholderItem" (clicked)="expand($event, true)"></app-content-item>
   <ng-container *ngIf="(filteredContent$ | async) as content">
     <div *ngIf="content.length; else noContent" class="list-group">
       <app-content-item *ngFor="let item of content" [item]="item" (clicked)="expand($event)"></app-content-item>
@@ -20,3 +20,17 @@
   [category]="undefined"
   (hide) = "addType=null">
 </app-category-form>
+
+<app-job-form
+  *ngIf="addType === ItemType.Job"
+  [job]="undefined"
+  [parentItem]="parentItem"
+  (hide) = "addType=null">
+</app-job-form>
+
+<app-activity-form
+  *ngIf="addType === ItemType.Activity"
+  [activity]="undefined"
+  [parentItem]="parentItem"
+  (hide) = "addType=null">
+</app-activity-form>

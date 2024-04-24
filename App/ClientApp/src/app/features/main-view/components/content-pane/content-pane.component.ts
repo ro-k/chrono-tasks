@@ -11,8 +11,8 @@ import {ItemType} from "../../../../core/models/item-type";
   styleUrl: './content-pane.component.css'
 })
 export class ContentPaneComponent implements OnInit {
-
-  parentItem: ContentViewItem = {id: '', name:'..', description:'', type:ItemType.Unknown, createdAt:null, modifiedAt:null};
+  upPlaceholderItem: ContentViewItem = {id: '', name:'..', description:'', type:ItemType.Unknown, createdAt:null, modifiedAt:null};
+  parentItem: ContentViewItem | undefined = undefined;
   currentType = new Set<ItemType>();
   addType : ItemType | null = null;
 
@@ -27,6 +27,7 @@ export class ContentPaneComponent implements OnInit {
       .pipe(
         map(([items, filterTerm]) => {
           this.currentType.clear();
+
           return items.filter(item => {
               this.currentType.add(item.type);
               return filterTerm === '' ||
@@ -36,10 +37,28 @@ export class ContentPaneComponent implements OnInit {
           );
         }),
       );
+
+    this.treeViewStore.navigationStack$.subscribe(viewItems =>
+      this.parentItem = viewItems.length > 0 ? viewItems[viewItems.length-1] : undefined);
   }
 
   ngOnInit(){
     this.categoryStore.load();
+  }
+
+  getItemTypesFromParent(parentType: ItemType | undefined){
+    switch (parentType) {
+      case null:
+      case undefined:
+      case ItemType.Unknown:
+        return new Set([ItemType.Category]);
+      case ItemType.Category:
+        return new Set([ItemType.Activity, ItemType.Job]);
+      case ItemType.Job:
+        return new Set([ItemType.Activity])
+      default:
+        return new Set<ItemType>();
+    }
   }
 
   expand(item: ContentViewItem, up = false) {

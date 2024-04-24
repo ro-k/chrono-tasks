@@ -11,7 +11,7 @@ export class ActivityService {
 
   create(activity: Activity): Observable<Activity> {
     return this.http.post<Activity>(`${this.baseUrl}api/activity/`,
-      {name: activity.name, description: activity.description, startTime: activity.startTime, endTime: activity.endTime})
+      {name: activity.name, categoryId: activity.categoryId, jobId: activity.jobId, description: activity.description, startTime: activity.startTime, endTime: activity.endTime})
       .pipe(map(x => x), catchError(this.handleError));
   }
 

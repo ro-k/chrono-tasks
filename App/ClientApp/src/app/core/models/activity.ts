@@ -15,8 +15,8 @@ export interface Activity {
 
 export const defaultActivity: Activity = {
   activityId: "",
-  categoryId: "",
-  jobId: "",
+  categoryId: null,
+  jobId: null,
   startTime: new Date(),
   endTime: new Date(),
   name: "",

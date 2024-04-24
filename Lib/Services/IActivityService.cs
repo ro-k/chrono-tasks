@@ -4,7 +4,7 @@ namespace Lib.Services;
 
 public interface IActivityService
 {
-    Task<Activity> Create(string name, string description, DateTime startTime, DateTime endTime);
+    Task<Activity> Create(Guid? categoryId, Guid? jobId, string name, string description, DateTime startTime, DateTime endTime);
     Task<Activity> Update(Activity model);
     Task<List<Activity>> GetPaged(int startRow = 0, int count = 100, bool descending = true);
     Task<Activity> Get(Guid id);

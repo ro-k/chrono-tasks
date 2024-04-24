@@ -21,7 +21,7 @@ public class ActivityController : ControllerBase
     public async Task<IActionResult> Post(Activity activity)
     {
         _userContext.UserId = Guid.Parse("27bf9e8e-317c-4a71-a2a3-61fa0be6d40a"); // TODO: temp
-        var newActivity = await _activityService.Create(activity.Name, activity.Description, activity.StartTime, activity.EndTime);
+        var newActivity = await _activityService.Create(activity.CategoryId, activity.JobId, activity.Name, activity.Description, activity.StartTime, activity.EndTime);
 
         return CreatedAtAction(nameof(Get), new { newActivity.ActivityId }, newActivity);
     }
