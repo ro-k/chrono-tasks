@@ -6,46 +6,37 @@ namespace App.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class JobController : ControllerBase
+public class JobController(IJobService jobService, IUserContext userContext) : ControllerBase
 {
-    private readonly IJobService _jobService;
-    private readonly IUserContext _userContext;
-
-    public JobController(IJobService jobService, IUserContext userContext)
-    {
-        _jobService = jobService;
-        _userContext = userContext;
-    }
-
     [HttpGet]
     public async Task<IActionResult> Get()
     {
-        _userContext.UserId = Guid.Parse("27bf9e8e-317c-4a71-a2a3-61fa0be6d40a"); // TODO: temp
-        var categories = await _jobService.GetAllByUserContext();
+        userContext.UserId = Guid.Parse("27bf9e8e-317c-4a71-a2a3-61fa0be6d40a"); // TODO: temp
+        var categories = await jobService.GetAllByUserContext();
         return Ok(categories);
     }
     
     [HttpGet("category/{categoryId:guid}")]
     public async Task<IActionResult> GetAllByCategoryId(Guid categoryId)
     {
-        _userContext.UserId = Guid.Parse("27bf9e8e-317c-4a71-a2a3-61fa0be6d40a"); // TODO: temp
+        userContext.UserId = Guid.Parse("27bf9e8e-317c-4a71-a2a3-61fa0be6d40a"); // TODO: temp
         
-        var categories = await _jobService.GetAllByCategoryId(categoryId);
+        var categories = await jobService.GetAllByCategoryId(categoryId);
         return Ok(categories);
     }
 
     [HttpGet("{jobId:guid}")]
     public async Task<IActionResult> Get(Guid jobId)
     {
-        _userContext.UserId = Guid.Parse("27bf9e8e-317c-4a71-a2a3-61fa0be6d40a"); // TODO: temp
-        return Ok(await _jobService.Get(jobId));
+        userContext.UserId = Guid.Parse("27bf9e8e-317c-4a71-a2a3-61fa0be6d40a"); // TODO: temp
+        return Ok(await jobService.Get(jobId));
     }
 
     [HttpDelete("{jobId:guid}")]
     public async Task<IActionResult> Delete(Guid jobId)
     {
-        _userContext.UserId = Guid.Parse("27bf9e8e-317c-4a71-a2a3-61fa0be6d40a"); // TODO: temp
-        if (await _jobService.Delete(jobId))
+        userContext.UserId = Guid.Parse("27bf9e8e-317c-4a71-a2a3-61fa0be6d40a"); // TODO: temp
+        if (await jobService.Delete(jobId))
         {
             return NoContent();
         }
@@ -55,8 +46,8 @@ public class JobController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Post(Job job)
     {
-        _userContext.UserId = Guid.Parse("27bf9e8e-317c-4a71-a2a3-61fa0be6d40a"); // TODO: temp
-        var newJob = await _jobService.Create(job.CategoryId, job.Name, job.Description, job.Data);
+        userContext.UserId = Guid.Parse("27bf9e8e-317c-4a71-a2a3-61fa0be6d40a"); // TODO: temp
+        var newJob = await jobService.Create(job.CategoryId, job.Name, job.Description, job.Data);
 
         return CreatedAtAction(nameof(Get), new { newJob.JobId }, newJob);
     }
@@ -64,8 +55,8 @@ public class JobController : ControllerBase
     [HttpPut]
     public async Task<IActionResult> Put(Job job)
     {
-        _userContext.UserId = Guid.Parse("27bf9e8e-317c-4a71-a2a3-61fa0be6d40a"); // TODO: temp
-        var updatedJob = await _jobService.Update(job);
+        userContext.UserId = Guid.Parse("27bf9e8e-317c-4a71-a2a3-61fa0be6d40a"); // TODO: temp
+        var updatedJob = await jobService.Update(job);
 
         return Ok(updatedJob);
     }

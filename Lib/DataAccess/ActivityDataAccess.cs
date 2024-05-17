@@ -4,11 +4,8 @@ using Npgsql;
 
 namespace Lib.DataAccess;
 
-public class ActivityDataAccess : IActivityDataAccess
+public class ActivityDataAccess(IDataBaseManager dataBaseManager, IUserContext userContext) : IActivityDataAccess
 {
-    private readonly IDataBaseManager _dataBaseManager;
-    private readonly IUserContext _userContext;
-    
     public const string GetAllQuery = @"
 SELECT
     activity.activity_id,
@@ -27,12 +24,6 @@ FROM public.activity
 WHERE user_id = @UserId
 ORDER BY created_at {0};
 ";
-    
-    public ActivityDataAccess(IDataBaseManager dataBaseManager, IUserContext userContext)
-    {
-        _dataBaseManager = dataBaseManager;
-        _userContext = userContext;
-    }
 
     public async Task<Activity> Create(Activity model)
     {
@@ -66,7 +57,7 @@ INSERT INTO public.activity (
 )
 RETURNING *;";
 
-        return await _dataBaseManager.QuerySingleOrDefaultAsync<Activity>(insertQuery, new {
+        return await dataBaseManager.QuerySingleOrDefaultAsync<Activity>(insertQuery, new {
             model.ActivityId,
             model.CategoryId,
             model.JobId,
@@ -76,7 +67,7 @@ RETURNING *;";
             model.Description,
             model.CreatedAt,
             model.ModifiedAt,
-            _userContext.UserId,
+            userContext.UserId,
             model.ConcurrencyStamp,
             model.Status
         });
@@ -98,13 +89,13 @@ UPDATE public.activity SET
     status = @Status
 WHERE activity_id = @ActivityId";
 
-        model.UserId = _userContext.UserId;
+        model.UserId = userContext.UserId;
         
-        var (query, parameters) = _dataBaseManager.WrapQueryWithConcurrencyCheck(updateQuery, model);
+        var (query, parameters) = dataBaseManager.WrapQueryWithConcurrencyCheck(updateQuery, model);
 
         try
         {
-            return await _dataBaseManager.QuerySingleOrDefaultAsync<Activity>(query, parameters);
+            return await dataBaseManager.QuerySingleOrDefaultAsync<Activity>(query, parameters);
         }
         catch (NpgsqlException e) when (e.SqlState == PgErrorCodes.ConcurrencyError)
         {
@@ -144,9 +135,9 @@ WHERE rn > @StartRow AND rn <= @EndRow AND user_id = @UserId;
         // Formatted query to include dynamic order by direction
         var finalQuery = string.Format(pagedQuery, orderByDirection);
 
-        var parameters = new { StartRow = startRow, EndRow = startRow + count, _userContext.UserId };
+        var parameters = new { StartRow = startRow, EndRow = startRow + count, userContext.UserId };
 
-        return (await _dataBaseManager.QueryAsync<Activity>(finalQuery, parameters)).ToList();
+        return (await dataBaseManager.QueryAsync<Activity>(finalQuery, parameters)).ToList();
     }
 
     public async Task<Activity> Get(Guid id)
@@ -170,7 +161,7 @@ FROM
 WHERE
     activity_id = @Id and user_id = @UserId;";
 
-        return await _dataBaseManager.QuerySingleOrDefaultAsync<Activity>(query, new { Id = id, _userContext.UserId });
+        return await dataBaseManager.QuerySingleOrDefaultAsync<Activity>(query, new { Id = id, userContext.UserId });
     }
 
     public async Task<IEnumerable<Activity>> GetAllByUserContext(bool descending = true)
@@ -200,7 +191,7 @@ ORDER BY created_at {0};
         // Formatted query to include dynamic order by direction
         var finalQuery = string.Format(query, orderByDirection);
 
-        return await _dataBaseManager.QueryAsync<Activity>(finalQuery, new { _userContext.UserId });
+        return await dataBaseManager.QueryAsync<Activity>(finalQuery, new { userContext.UserId });
     }
 
     public async Task<bool> Delete(Guid activityId)
@@ -211,7 +202,7 @@ DELETE FROM
 WHERE
     activity_id = @ActivityId AND user_id = @UserId;";
 
-        return await _dataBaseManager.ExecuteAsync(query, new { _userContext.UserId, activityId }) > 0;
+        return await dataBaseManager.ExecuteAsync(query, new { userContext.UserId, activityId }) > 0;
     }
 
     public async Task AssignCategory(Guid activityId, Guid? categoryId, bool clearCurrentAssignments = true)
@@ -223,9 +214,9 @@ where user_id = @UserId and activity_id = @ActivityId;
         var query = string.Format(insertQuery,
             clearCurrentAssignments ? "categoryId = @CategoryId, jobId = @JobId" : "categoryId = @CategoryId");
 
-        await _dataBaseManager.ExecuteAsync(query, clearCurrentAssignments
-            ? new { categoryId, activityId, _userContext.UserId, JobId = (object)null! }
-            : new { categoryId, activityId, _userContext.UserId }
+        await dataBaseManager.ExecuteAsync(query, clearCurrentAssignments
+            ? new { categoryId, activityId, userContext.UserId, JobId = (object)null! }
+            : new { categoryId, activityId, userContext.UserId }
         );
     }
 
@@ -251,7 +242,7 @@ WHERE
     category_id = @CategoryId and user_id = @UserId;
 ";
 
-        return await _dataBaseManager.QueryAsync<Activity>(query, new { categoryId, _userContext.UserId });
+        return await dataBaseManager.QueryAsync<Activity>(query, new { categoryId, userContext.UserId });
     }
 
     public async Task ClearCategories(Guid activityId)
@@ -268,9 +259,9 @@ where user_id = @UserId and activity_id = @ActivityId;
         var query = string.Format(insertQuery,
             clearCurrentAssignments ? "jobId = @JobId, categoryId = @CategoryId" : "jobId = @JobId");
 
-        await _dataBaseManager.ExecuteAsync(query, clearCurrentAssignments
-            ? new { jobId, activityId, _userContext.UserId, CategoryId = (object)null! }
-            : new { jobId, activityId, _userContext.UserId }
+        await dataBaseManager.ExecuteAsync(query, clearCurrentAssignments
+            ? new { jobId, activityId, userContext.UserId, CategoryId = (object)null! }
+            : new { jobId, activityId, userContext.UserId }
         );
     }
 
@@ -295,7 +286,7 @@ FROM
 WHERE
     job_id = @JobId and user_id = @UserId;";
 
-        return await _dataBaseManager.QueryAsync<Activity>(query, new { jobId, _userContext.UserId });
+        return await dataBaseManager.QueryAsync<Activity>(query, new { jobId, userContext.UserId });
     }
 
     public async Task ClearJobs(Guid activityId)

@@ -7,15 +7,10 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Lib.Services;
 
-public class TokenService : ITokenService
+public class TokenService(IOptions<AppSettings> appSettings) : ITokenService
 {
-    private readonly AppSettings _appSettings;
+    private readonly AppSettings _appSettings = appSettings.Value;
 
-    public TokenService(IOptions<AppSettings> appSettings)
-    {
-        _appSettings = appSettings.Value;
-    }
-    
     public string GenerateJwtToken(User user, IEnumerable<string> roles)
     {
         var claims = new List<Claim>

@@ -4,15 +4,8 @@ using Lib.Models;
 
 namespace Lib.Services;
 
-public class ActivityService : IActivityService
+public class ActivityService(IActivityDataAccess activityDataAccess) : IActivityService
 {
-    private readonly IActivityDataAccess _activityDataAccess;
-
-    public ActivityService(IActivityDataAccess activityDataAccess)
-    {
-        _activityDataAccess = activityDataAccess;
-    }
-
     public async Task<Activity> Create(Guid? categoryId, Guid? jobId, string name, string description, DateTime startTime, DateTime endTime)
     {
         var activity = new Activity
@@ -26,7 +19,7 @@ public class ActivityService : IActivityService
             EndTime = endTime.ToUniversalTime(),
             Status = Status.Active,
         };
-        return await _activityDataAccess.Create(activity);
+        return await activityDataAccess.Create(activity);
     }
     
     public async Task<Activity> Update(Activity model)
@@ -37,57 +30,57 @@ public class ActivityService : IActivityService
             throw new ConcurrencyStampMismatchException();
         }
         current.UpdateWith(model);
-        return await _activityDataAccess.Update(current);
+        return await activityDataAccess.Update(current);
     }
 
     public async Task<List<Activity>> GetPaged(int startRow = 0, int count = 100, bool descending = true)
     {
-        return await _activityDataAccess.GetPaged(startRow, count, descending);
+        return await activityDataAccess.GetPaged(startRow, count, descending);
     }
 
     public async Task<Activity> Get(Guid id)
     {
-        return await _activityDataAccess.Get(id);
+        return await activityDataAccess.Get(id);
     }
     
     public async Task<IEnumerable<Activity>> GetAllByUserContext()
     {
-        return await _activityDataAccess.GetAllByUserContext();
+        return await activityDataAccess.GetAllByUserContext();
     }
 
     public async Task<bool> Delete(Guid activityId)
     {
-        return await _activityDataAccess.Delete(activityId);
+        return await activityDataAccess.Delete(activityId);
     }
 
     public async Task AssignCategory(Guid activityId, Guid categoryId, bool clearCurrentAssignments = true)
     {
-        await _activityDataAccess.AssignCategory(activityId, categoryId, clearCurrentAssignments);
+        await activityDataAccess.AssignCategory(activityId, categoryId, clearCurrentAssignments);
     }
 
     public async Task<IEnumerable<Activity>> GetAllByCategory(Guid categoryId)
     {
-        return await _activityDataAccess.GetAllByCategory(categoryId);
+        return await activityDataAccess.GetAllByCategory(categoryId);
     }
 
     public async Task ClearCategories(Guid activityId)
     {
-        await _activityDataAccess.ClearCategories(activityId);
+        await activityDataAccess.ClearCategories(activityId);
     }
 
     public async Task AssignJob(Guid activityId, Guid jobId, bool clearCurrentAssignments = true)
     {
-        await _activityDataAccess.AssignJob(activityId, jobId, clearCurrentAssignments);
+        await activityDataAccess.AssignJob(activityId, jobId, clearCurrentAssignments);
     }
 
     public async Task<IEnumerable<Activity>> GetAllByJob(Guid jobId)
     {
-        return await _activityDataAccess.GetAllByJob(jobId);
+        return await activityDataAccess.GetAllByJob(jobId);
     }
 
     public async Task ClearJobs(Guid activityId)
     {
-        await _activityDataAccess.ClearJobs(activityId);
+        await activityDataAccess.ClearJobs(activityId);
     }
 
     /// <summary>

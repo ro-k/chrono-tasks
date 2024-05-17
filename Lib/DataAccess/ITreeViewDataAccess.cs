@@ -1,6 +1,5 @@
 using Dapper;
 using Lib.DTOs;
-using Lib.Models;
 
 namespace Lib.DataAccess;
 

@@ -4,17 +4,8 @@ using Lib.Services;
 
 namespace Lib.DataAccess;
 
-public class TreeViewDataAccess : ITreeViewDataAccess
+public class TreeViewDataAccess(IDataBaseManager dataBaseManager, IUserContext userContext) : ITreeViewDataAccess
 {
-    private readonly IDataBaseManager _dataBaseManager;
-    private readonly IUserContext _userContext;
-    
-    public TreeViewDataAccess(IDataBaseManager dataBaseManager, IUserContext userContext)
-    {
-        _dataBaseManager = dataBaseManager;
-        _userContext = userContext;
-    }
-
     public async Task<(IEnumerable<TreeViewCategoryDto>, IEnumerable<TreeViewJobDto>, IEnumerable<TreeViewActivityDto>)>
         GetAllByUserContext(
             Func<SqlMapper.GridReader,
@@ -34,8 +25,8 @@ public class TreeViewDataAccess : ITreeViewDataAccess
         // replace order by
         query = string.Format(query, orderByDirection);
 
-        return await _dataBaseManager
+        return await dataBaseManager
             .QueryMultipleAsync(
-                processGridReader, query, new { _userContext.UserId });
+                processGridReader, query, new { userContext.UserId });
     }
 }

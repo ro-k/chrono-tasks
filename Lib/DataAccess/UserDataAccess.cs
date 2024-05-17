@@ -4,17 +4,9 @@ using Npgsql;
 
 namespace Lib.DataAccess;
 
-public class UserDataAccess : IUserDataAccess
+public class UserDataAccess(IDataBaseManager dataBaseManager, IRoleDataAccess roleDataAccess)
+    : IUserDataAccess
 {
-    private readonly IDataBaseManager _dataBaseManager;
-    private readonly IRoleDataAccess _roleDataAccess;
-
-    public UserDataAccess(IDataBaseManager dataBaseManager, IRoleDataAccess roleDataAccess)
-    {
-        _dataBaseManager = dataBaseManager;
-        _roleDataAccess = roleDataAccess;
-    }
-
     private const string UserSelectString = @"
     user_id, 
     user_name, 
@@ -54,7 +46,7 @@ VALUES
     
         ct.ThrowIfCancellationRequested();
         
-        await _dataBaseManager.ExecuteAsync(insertQuery, user);
+        await dataBaseManager.ExecuteAsync(insertQuery, user);
         
         return new IdentityResult();
     }
@@ -84,13 +76,13 @@ SET
     status = @Status
 WHERE user_id = @UserId;";
     
-        var (query, parameters) = _dataBaseManager.WrapQueryWithConcurrencyCheck(updateQuery, user);
+        var (query, parameters) = dataBaseManager.WrapQueryWithConcurrencyCheck(updateQuery, user);
 
         ct.ThrowIfCancellationRequested();
 
         try
         {
-            await _dataBaseManager.ExecuteAsync(query, parameters);
+            await dataBaseManager.ExecuteAsync(query, parameters);
         }
         catch (NpgsqlException e) when (e.SqlState == PgErrorCodes.ConcurrencyError)
         {
@@ -105,13 +97,13 @@ WHERE user_id = @UserId;";
         // should probably just use Update and set Status
         const string deleteQuery = "DELETE FROM public.user WHERE user_id = @UserId";
     
-        var (query, parameters) = _dataBaseManager.WrapQueryWithConcurrencyCheck(deleteQuery, user);
+        var (query, parameters) = dataBaseManager.WrapQueryWithConcurrencyCheck(deleteQuery, user);
         
         ct.ThrowIfCancellationRequested();
         
         try
         {
-            await _dataBaseManager.ExecuteAsync(query, parameters);
+            await dataBaseManager.ExecuteAsync(query, parameters);
         }
         catch (NpgsqlException e) when (e.SqlState == PgErrorCodes.ConcurrencyError)
         {
@@ -132,7 +124,7 @@ WHERE user_id = @UserId;";
         
         ct.ThrowIfCancellationRequested();
     
-        return await _dataBaseManager.QuerySingleOrDefaultAsync<User>(selectQuery, new { UserId = userId });
+        return await dataBaseManager.QuerySingleOrDefaultAsync<User>(selectQuery, new { UserId = userId });
     }
 
     private Task<User> FindByIdAsync(Guid userId, CancellationToken ct) => FindByIdAsync(userId.ToString(), ct);
@@ -148,7 +140,7 @@ WHERE user_id = @UserId;";
     
         ct.ThrowIfCancellationRequested();
         
-        return await _dataBaseManager.QuerySingleOrDefaultAsync<User>(selectQuery, new { NormalizedUserName = userName.Normalize() });
+        return await dataBaseManager.QuerySingleOrDefaultAsync<User>(selectQuery, new { NormalizedUserName = userName.Normalize() });
     }
     
     public async Task<string> GetUserIdAsync(User user, CancellationToken ct)
@@ -205,24 +197,24 @@ WHERE user_id = @UserId;";
 
     public async Task AddToRoleAsync(User user, string roleName, CancellationToken cancellationToken)
     {
-        var dbRole = await _roleDataAccess.FindByNameAsync(roleName.Normalize(), cancellationToken);
+        var dbRole = await roleDataAccess.FindByNameAsync(roleName.Normalize(), cancellationToken);
         
         const string query = @"
 insert into public.user_role (user_id, role_id) 
 values (@UserId, @RoleId) on conflict (user_id, role_id) DO NOTHING;";
 
         cancellationToken.ThrowIfCancellationRequested();
-        await _dataBaseManager.ExecuteAsync(query, new { user.UserId, dbRole.RoleId });
+        await dataBaseManager.ExecuteAsync(query, new { user.UserId, dbRole.RoleId });
     }
 
     public async Task RemoveFromRoleAsync(User user, string roleName, CancellationToken cancellationToken)
     {
-        var dbRole = await _roleDataAccess.FindByNameAsync(roleName.Normalize(), cancellationToken);
+        var dbRole = await roleDataAccess.FindByNameAsync(roleName.Normalize(), cancellationToken);
 
         const string query = "DELETE FROM user_role WHERE user_id = @UserId AND role_id = @RoleId;";
         
         cancellationToken.ThrowIfCancellationRequested();        
-        await _dataBaseManager.ExecuteAsync(query, new { user.UserId, dbRole.RoleId });
+        await dataBaseManager.ExecuteAsync(query, new { user.UserId, dbRole.RoleId });
     }
 
     public async Task<IList<string>> GetRolesAsync(User user, CancellationToken cancellationToken)
@@ -233,17 +225,17 @@ join public.user_role ur on r.role_id = ur.role_id
 where ur.user_id = @UserId
 ";
 
-        return (await _dataBaseManager.QueryAsync<string>(query, new { user.UserId })).ToList();
+        return (await dataBaseManager.QueryAsync<string>(query, new { user.UserId })).ToList();
     }
 
     public async Task<bool> IsInRoleAsync(User user, string roleName, CancellationToken cancellationToken)
     {
-        var dbRole = await _roleDataAccess.FindByNameAsync(roleName.Normalize(), cancellationToken);
+        var dbRole = await roleDataAccess.FindByNameAsync(roleName.Normalize(), cancellationToken);
         
         const string query = @"select exists(select 1 from user_role where user_id = @UserId and role_id = @RoleId);";
 
         cancellationToken.ThrowIfCancellationRequested();
-        return await _dataBaseManager.ExecuteScalarAsync<bool>(query, new { user.UserId, dbRole.RoleId });
+        return await dataBaseManager.ExecuteScalarAsync<bool>(query, new { user.UserId, dbRole.RoleId });
     }
 
     public async Task<IList<User>> GetUsersInRoleAsync(string roleName, CancellationToken cancellationToken)
@@ -258,7 +250,7 @@ where r.normalized_name = @NormalizedRoleName;
 ";
         
         cancellationToken.ThrowIfCancellationRequested();
-        return (await _dataBaseManager.QueryAsync<User>(query, new { NormalizedRoleName = roleName.Normalize() }))
+        return (await dataBaseManager.QueryAsync<User>(query, new { NormalizedRoleName = roleName.Normalize() }))
             .ToList();
     }
 
@@ -299,7 +291,7 @@ where r.normalized_name = @NormalizedRoleName;
         
         cancellationToken.ThrowIfCancellationRequested();
 
-        return await _dataBaseManager.QuerySingleOrDefaultAsync<User>(selectQuery,
+        return await dataBaseManager.QuerySingleOrDefaultAsync<User>(selectQuery,
             new { NormalizedEmail = normalizedEmail });
     }
 
@@ -338,7 +330,7 @@ UPDATE public.user SET access_failed_count = access_failed_count + 1
 WHERE user_id = @UserId 
 RETURNING access_failed_count;";
 
-        return await _dataBaseManager.ExecuteScalarAsync<int>(query, new { user.UserId });
+        return await dataBaseManager.ExecuteScalarAsync<int>(query, new { user.UserId });
     }
 
     public async Task ResetAccessFailedCountAsync(User user, CancellationToken cancellationToken)
@@ -347,7 +339,7 @@ RETURNING access_failed_count;";
 UPDATE public.user SET access_failed_count = 0
 WHERE user_id = @UserId;";
 
-        await _dataBaseManager.ExecuteAsync(query, new { user.UserId });
+        await dataBaseManager.ExecuteAsync(query, new { user.UserId });
     }
 
     public async Task<int> GetAccessFailedCountAsync(User user, CancellationToken cancellationToken)
@@ -429,14 +421,14 @@ INSERT INTO public.user_login
 VALUES 
     (@UserLoginId, @LoginProvider, @ProviderKey, @ProviderDisplayName, @ConcurrencyStamp, @Status, @CreatedAt, @ModifiedAt, @UserId)";
 
-        await _dataBaseManager.ExecuteAsync(insertQuery, userLogin);
+        await dataBaseManager.ExecuteAsync(insertQuery, userLogin);
     }
 
     public async Task RemoveLoginAsync(User user, string loginProvider, string providerKey, CancellationToken cancellationToken)
     {
         const string query = @"delete from public.user_login where provider_key = @ProviderKey and login_provider = @LoginProvider and user_id = @UserId";
 
-        await _dataBaseManager.ExecuteAsync(query, new { providerKey, loginProvider, user.UserId });
+        await dataBaseManager.ExecuteAsync(query, new { providerKey, loginProvider, user.UserId });
     }
 
     public async Task<IList<UserLoginInfo>> GetLoginsAsync(User user, CancellationToken cancellationToken)
@@ -447,7 +439,7 @@ select
 from public.user_login where user_id = @UserId;";
         
         cancellationToken.ThrowIfCancellationRequested();
-        return (await _dataBaseManager.QueryAsync<UserLogin>(query, new { user.UserId }))
+        return (await dataBaseManager.QueryAsync<UserLogin>(query, new { user.UserId }))
             .Select(x => new UserLoginInfo(x.LoginProvider, x.ProviderKey, x.ProviderDisplayName)).ToList();
     }
 
@@ -462,6 +454,6 @@ where ul.provider_key = @ProviderKey and ul.login_provider = @LoginProvider;
 ";
         
         cancellationToken.ThrowIfCancellationRequested();
-        return await _dataBaseManager.QuerySingleOrDefaultAsync<User>(query, new { loginProvider, providerKey });
+        return await dataBaseManager.QuerySingleOrDefaultAsync<User>(query, new { loginProvider, providerKey });
     }
 }

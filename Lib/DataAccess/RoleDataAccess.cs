@@ -4,15 +4,8 @@ using Npgsql;
 
 namespace Lib.DataAccess;
 
-public class RoleDataAccess : IRoleDataAccess
+public class RoleDataAccess(IDataBaseManager dataBaseManager) : IRoleDataAccess
 {
-    private readonly IDataBaseManager _dataBaseManager;
-
-    public RoleDataAccess(IDataBaseManager dataBaseManager)
-    {
-        _dataBaseManager = dataBaseManager;
-    }
-
     public async Task<IdentityResult> CreateAsync(Role role, CancellationToken ct)
     {
         // use name as back up
@@ -28,7 +21,7 @@ VALUES
         
         ct.ThrowIfCancellationRequested();
         
-        await _dataBaseManager.ExecuteAsync(insertQuery, role);
+        await dataBaseManager.ExecuteAsync(insertQuery, role);
 
         return new IdentityResult();
     }
@@ -42,13 +35,13 @@ UPDATE role SET
     concurrency_stamp = @ConcurrencyStamp
 WHERE role_id = @RoleId;";
         
-        var (query, parameters) = _dataBaseManager.WrapQueryWithConcurrencyCheck(updateQuery, role);
+        var (query, parameters) = dataBaseManager.WrapQueryWithConcurrencyCheck(updateQuery, role);
 
         ct.ThrowIfCancellationRequested();
 
         try
         {
-            await _dataBaseManager.ExecuteAsync(query, parameters);
+            await dataBaseManager.ExecuteAsync(query, parameters);
         }
         catch (NpgsqlException e) when (e.SqlState == PgErrorCodes.ConcurrencyError)
         {
@@ -62,13 +55,13 @@ WHERE role_id = @RoleId;";
     {
         const string deleteQuery = "DELETE FROM role WHERE role_id = @RoleId;";
 
-        var (query, parameters) = _dataBaseManager.WrapQueryWithConcurrencyCheck(deleteQuery, role);
+        var (query, parameters) = dataBaseManager.WrapQueryWithConcurrencyCheck(deleteQuery, role);
         
         ct.ThrowIfCancellationRequested();
         
         try
         {
-            await _dataBaseManager.ExecuteAsync(query, parameters);
+            await dataBaseManager.ExecuteAsync(query, parameters);
         }
         catch (NpgsqlException e) when (e.SqlState == PgErrorCodes.ConcurrencyError)
         {
@@ -118,7 +111,7 @@ SELECT role_id,
 FROM role
 WHERE role_id = @RoleId;";
 
-        return await _dataBaseManager.QuerySingleOrDefaultAsync<Role>(selectQuery, new { RoleId = Guid.Parse(roleId) });
+        return await dataBaseManager.QuerySingleOrDefaultAsync<Role>(selectQuery, new { RoleId = Guid.Parse(roleId) });
     }
 
     public async Task<Role> FindByNameAsync(string roleName, CancellationToken ct)
@@ -133,7 +126,7 @@ WHERE normalized_name = @NormalizedRoleName";
         
         ct.ThrowIfCancellationRequested();
 
-        return await _dataBaseManager.QuerySingleOrDefaultAsync<Role>(selectQuery, new { NormalizedRoleName = roleName.Normalize() });
+        return await dataBaseManager.QuerySingleOrDefaultAsync<Role>(selectQuery, new { NormalizedRoleName = roleName.Normalize() });
     }
 
     public void Dispose()

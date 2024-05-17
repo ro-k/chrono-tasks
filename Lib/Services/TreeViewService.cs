@@ -4,18 +4,11 @@ using Lib.Models;
 
 namespace Lib.Services;
 
-public class TreeViewService : ITreeViewService
+public class TreeViewService(ITreeViewDataAccess treeViewDataAccess) : ITreeViewService
 {
-    private readonly ITreeViewDataAccess _treeViewDataAccess;
-
-    public TreeViewService(ITreeViewDataAccess treeViewDataAccess)
-    {
-        _treeViewDataAccess = treeViewDataAccess;
-    }
-
     public async Task<TreeViewDto> GetAllByUserContext()
     {
-        var (categories, jobs, activities) = await _treeViewDataAccess.GetAllByUserContext(async reader =>
+        var (categories, jobs, activities) = await treeViewDataAccess.GetAllByUserContext(async reader =>
         {
             var categories = await reader.ReadAsync<TreeViewCategoryDto>();
             var jobs = await reader.ReadAsync<TreeViewJobDto>();

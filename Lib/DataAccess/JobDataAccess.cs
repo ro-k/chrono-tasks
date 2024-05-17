@@ -4,11 +4,8 @@ using Npgsql;
 
 namespace Lib.DataAccess;
 
-public class JobDataAccess : IJobDataAccess
+public class JobDataAccess(IDataBaseManager dataBaseManager, IUserContext userContext) : IJobDataAccess
 {
-    private readonly IDataBaseManager _dataBaseManager;
-    private readonly IUserContext _userContext;
-
     public const string GetAllQuery = @"
 SELECT
     job_id,
@@ -27,12 +24,6 @@ WHERE
     user_id = @UserId
 ORDER BY created_at {0};
 ";
-
-    public JobDataAccess(IDataBaseManager dataBaseManager, IUserContext userContext)
-    {
-        _dataBaseManager = dataBaseManager;
-        _userContext = userContext;
-    }
 
     public async Task<Job> Create(Job model)
     {
@@ -62,7 +53,7 @@ INSERT INTO public.job (
 )
 RETURNING *;";
 
-        return await _dataBaseManager.QuerySingleOrDefaultAsync<Job>(insertQuery, model);
+        return await dataBaseManager.QuerySingleOrDefaultAsync<Job>(insertQuery, model);
     }
 
     public async Task<Job> Update(Job model)
@@ -80,11 +71,11 @@ UPDATE public.job SET
     status = @Status
 WHERE job_id = @JobId";
 
-        var (query, parameters) = _dataBaseManager.WrapQueryWithConcurrencyCheck(updateQuery, model);
+        var (query, parameters) = dataBaseManager.WrapQueryWithConcurrencyCheck(updateQuery, model);
 
         try
         {
-            return await _dataBaseManager.QuerySingleOrDefaultAsync<Job>(query, parameters);
+            return await dataBaseManager.QuerySingleOrDefaultAsync<Job>(query, parameters);
         }
         catch (NpgsqlException e) when (e.SqlState == PgErrorCodes.ConcurrencyError)
         {
@@ -122,7 +113,7 @@ WHERE rn > @StartRow AND rn <= @EndRow;
 
         var parameters = new { StartRow = startRow, EndRow = startRow + count };
 
-        return (await _dataBaseManager.QueryAsync<Job>(finalQuery, parameters)).ToList();
+        return (await dataBaseManager.QueryAsync<Job>(finalQuery, parameters)).ToList();
     }
 
     public async Task<Job> Get(Guid jobId)
@@ -144,7 +135,7 @@ FROM
 WHERE
     job_id = @JobId;";
 
-        return await _dataBaseManager.QuerySingleOrDefaultAsync<Job>(query, new { JobId = jobId });
+        return await dataBaseManager.QuerySingleOrDefaultAsync<Job>(query, new { JobId = jobId });
     }
 
     public async Task<IEnumerable<Job>> GetAllByUserContext(bool descending = true)
@@ -154,7 +145,7 @@ WHERE
         // Formatted query to include dynamic order by direction
         var finalQuery = string.Format(GetAllQuery, orderByDirection);
 
-        return await _dataBaseManager.QueryAsync<Job>(finalQuery, new { _userContext.UserId });
+        return await dataBaseManager.QueryAsync<Job>(finalQuery, new { userContext.UserId });
     }
 
     public async Task<bool> Delete(Guid jobId)
@@ -165,7 +156,7 @@ DELETE FROM
 WHERE
     job_id = @JobId AND user_id = @UserId;";
 
-        return await _dataBaseManager.ExecuteAsync(query, new { _userContext.UserId, jobId }) > 0;
+        return await dataBaseManager.ExecuteAsync(query, new { userContext.UserId, jobId }) > 0;
     }
 
     public async Task<IEnumerable<Job>> GetAllByCategoryId(Guid categoryId, bool descending = true)
@@ -194,6 +185,6 @@ ORDER BY created_at {0};
         // Formatted query to include dynamic order by direction
         var finalQuery = string.Format(getByCategoryQuery, orderByDirection);
 
-        return await _dataBaseManager.QueryAsync<Job>(finalQuery, new { _userContext.UserId, categoryId });
+        return await dataBaseManager.QueryAsync<Job>(finalQuery, new { userContext.UserId, categoryId });
     }
 }

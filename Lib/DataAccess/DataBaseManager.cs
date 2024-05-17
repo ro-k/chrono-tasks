@@ -7,14 +7,9 @@ using Microsoft.Extensions.Options;
 
 namespace Lib.DataAccess;
 
-public class DataBaseManager : IDataBaseManager
+public class DataBaseManager(IOptions<AppSettings> appSettings) : IDataBaseManager
 {
-    private readonly string _connectionString;
-
-    public DataBaseManager(IOptions<AppSettings> appSettings)
-    {
-        _connectionString = appSettings.Value.ConnectionString!;
-    }
+    private readonly string _connectionString = appSettings.Value.ConnectionString!;
 
     public async Task<IEnumerable<T>> QueryAsync<T>(string query, object? parameters = null)
     {

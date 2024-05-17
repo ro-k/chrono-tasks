@@ -4,23 +4,15 @@ using Lib.Models;
 
 namespace Lib.Services;
 
-public class CategoryService : ICategoryService
+public class CategoryService(ICategoryDataAccess categoryDataAccess, IUserContext userContext)
+    : ICategoryService
 {
-    private readonly ICategoryDataAccess _categoryDataAccess;
-    private readonly IUserContext _userContext;
-
-    public CategoryService(ICategoryDataAccess categoryDataAccess, IUserContext userContext)
-    {
-        _categoryDataAccess = categoryDataAccess;
-        _userContext = userContext;
-    }
-
     public async Task<Category> Create(string name, string description)
     {
         var category = new Category
         {
             CategoryId = Guid.NewGuid(),
-            UserId = _userContext.UserId,
+            UserId = userContext.UserId,
             Name = name,
             Description = description,
             Status = Status.Active,
@@ -30,10 +22,10 @@ public class CategoryService : ICategoryService
     
     public Task<Category> Create(Category model)
     {
-        model.UserId = _userContext.UserId;
+        model.UserId = userContext.UserId;
         model.CategoryId = Guid.NewGuid();
         
-        return _categoryDataAccess.Create(model);
+        return categoryDataAccess.Create(model);
     }
 
     public async Task<Category> Update(Category model)
@@ -44,26 +36,26 @@ public class CategoryService : ICategoryService
             throw new ConcurrencyStampMismatchException();
         }
         current.UpdateWith(model);
-        return await _categoryDataAccess.Update(current);
+        return await categoryDataAccess.Update(current);
     }
 
     public Task<List<Category>> GetPaged(int startRow = 0, int count = 100, bool descending = true)
     {
-        return _categoryDataAccess.GetPaged(startRow, count, descending);
+        return categoryDataAccess.GetPaged(startRow, count, descending);
     }
 
     public Task<Category> Get(Guid id)
     {
-        return _categoryDataAccess.Get(id);
+        return categoryDataAccess.Get(id);
     }
 
     public Task<IEnumerable<Category>> GetAllByUserContext()
     {
-        return _categoryDataAccess.GetAllByUserContext();
+        return categoryDataAccess.GetAllByUserContext();
     }
 
     public Task<bool> Delete(Guid categoryId)
     {
-        return _categoryDataAccess.Delete(categoryId);
+        return categoryDataAccess.Delete(categoryId);
     }
 }

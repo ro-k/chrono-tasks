@@ -4,11 +4,8 @@ using Npgsql;
 
 namespace Lib.DataAccess;
 
-public class CategoryDataAccess : ICategoryDataAccess
+public class CategoryDataAccess(IDataBaseManager dataBaseManager, IUserContext userContext) : ICategoryDataAccess
 {
-    private readonly IDataBaseManager _dataBaseManager;
-    private readonly IUserContext _userContext;
-
     public const string PagedCategoryCte = @"
 WITH ranked_category_ids AS (
     SELECT category_id,
@@ -39,12 +36,6 @@ WHERE
 ORDER BY created_at {0};
 ";
 
-    public CategoryDataAccess(IDataBaseManager dataBaseManager, IUserContext userContext)
-    {
-        _dataBaseManager = dataBaseManager;
-        _userContext = userContext;
-    }
-
     public async Task<Category> Create(Category model)
     {
         const string insertQuery = @"
@@ -69,7 +60,7 @@ INSERT INTO public.category (
 )
 RETURNING *;";
 
-        return await _dataBaseManager.QuerySingleOrDefaultAsync<Category>(insertQuery, model);
+        return await dataBaseManager.QuerySingleOrDefaultAsync<Category>(insertQuery, model);
     }
 
     public async Task<Category> Update(Category model)
@@ -85,11 +76,11 @@ UPDATE public.category SET
     status = @Status
 WHERE category_id = @CategoryId";
 
-        var (query, parameters) = _dataBaseManager.WrapQueryWithConcurrencyCheck(updateQuery, model);
+        var (query, parameters) = dataBaseManager.WrapQueryWithConcurrencyCheck(updateQuery, model);
 
         try
         {
-            return await _dataBaseManager.QuerySingleOrDefaultAsync<Category>(query, parameters);
+            return await dataBaseManager.QuerySingleOrDefaultAsync<Category>(query, parameters);
         }
         catch (NpgsqlException e) when (e.SqlState == PgErrorCodes.ConcurrencyError)
         {
@@ -123,9 +114,9 @@ WHERE user_id = @UserId AND rn > @StartRow AND rn <= @EndRow;
         // Formatted query to include dynamic order by direction
         var finalQuery = string.Format(pagedQuery, orderByDirection);
 
-        var parameters = new { _userContext.UserId, StartRow = startRow, EndRow = startRow + count };
+        var parameters = new { userContext.UserId, StartRow = startRow, EndRow = startRow + count };
 
-        return (await _dataBaseManager.QueryAsync<Category>(finalQuery, parameters)).ToList();
+        return (await dataBaseManager.QueryAsync<Category>(finalQuery, parameters)).ToList();
     }
     
     public async Task<Category> Get(Guid categoryId)
@@ -145,7 +136,7 @@ FROM
 WHERE
     category_id = @CategoryId;";
 
-        return await _dataBaseManager.QuerySingleOrDefaultAsync<Category>(query, new { CategoryId = categoryId });
+        return await dataBaseManager.QuerySingleOrDefaultAsync<Category>(query, new { CategoryId = categoryId });
     }
 
     public async Task<IEnumerable<Category>> GetAllByUserContext(bool descending = true)
@@ -155,7 +146,7 @@ WHERE
         // Formatted query to include dynamic order by direction
         var finalQuery = string.Format(GetAllQuery, orderByDirection);
         
-        var categories =  await _dataBaseManager.QueryAsync<Category>(finalQuery, new { _userContext.UserId });
+        var categories =  await dataBaseManager.QueryAsync<Category>(finalQuery, new { userContext.UserId });
         
         return categories;
     }
@@ -168,6 +159,6 @@ DELETE FROM
 WHERE
     category_id = @CategoryId AND user_id = @UserId;";
 
-        return await _dataBaseManager.ExecuteAsync(query, new { _userContext.UserId, categoryId }) > 0;
+        return await dataBaseManager.ExecuteAsync(query, new { userContext.UserId, categoryId }) > 0;
     }
 }

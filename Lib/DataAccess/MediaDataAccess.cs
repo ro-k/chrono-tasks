@@ -4,17 +4,8 @@ using Npgsql;
 
 namespace Lib.DataAccess;
 
-public class MediaDataAccess : IMediaDataAccess
+public class MediaDataAccess(IDataBaseManager dataBaseManager, IUserContext userContext) : IMediaDataAccess
 {
-    private readonly IDataBaseManager _dataBaseManager;
-    private readonly IUserContext _userContext;
-
-    public MediaDataAccess(IDataBaseManager dataBaseManager, IUserContext userContext)
-    {
-        _dataBaseManager = dataBaseManager;
-        _userContext = userContext;
-    }
-
     public async Task<Media> Create(Media media)
     {
         const string insertQuery = @"
@@ -24,7 +15,7 @@ VALUES
     (@MediaId, @ActivityId, @OriginalFilename, @Extension, @MimeType, @Size, @StoragePath, @Hash, @Metadata, @Status, @CreatedAt, @ModifiedAt, @UserId)
 RETURNING *;";
 
-        return await _dataBaseManager.QuerySingleOrDefaultAsync<Media>(insertQuery, media);
+        return await dataBaseManager.QuerySingleOrDefaultAsync<Media>(insertQuery, media);
     }
 
     public async Task<Media> Update(Media media)
@@ -44,11 +35,11 @@ UPDATE public.media SET
     user_id = @UserId
 WHERE media_id = @MediaId;";
         
-        var (query, parameters) = _dataBaseManager.WrapQueryWithConcurrencyCheck(updateQuery, media);
+        var (query, parameters) = dataBaseManager.WrapQueryWithConcurrencyCheck(updateQuery, media);
 
         try
         {
-            return await _dataBaseManager.QuerySingleOrDefaultAsync<Media>(query, parameters);
+            return await dataBaseManager.QuerySingleOrDefaultAsync<Media>(query, parameters);
         }
         catch (NpgsqlException e) when (e.SqlState == PgErrorCodes.ConcurrencyError)
         {
@@ -90,7 +81,7 @@ WHERE rn > @StartRow AND rn <= @EndRow;
 
         var parameters = new { StartRow = startRow, EndRow = startRow + count };
 
-        return (await _dataBaseManager.QueryAsync<Media>(finalQuery, parameters)).ToList();
+        return (await dataBaseManager.QueryAsync<Media>(finalQuery, parameters)).ToList();
     }
 
     public async Task<Media> Get(Guid mediaId)
@@ -115,7 +106,7 @@ FROM
 WHERE 
     media_id = @MediaId";
 
-        return await _dataBaseManager.QueryFirstOrDefaultAsync<Media>(selectQuery, new { MediaId = mediaId });
+        return await dataBaseManager.QueryFirstOrDefaultAsync<Media>(selectQuery, new { MediaId = mediaId });
     }
 
     public async Task<IEnumerable<Media>> GetAllByUserContext(bool descending = true)
@@ -146,7 +137,7 @@ ORDER BY created_at {0};
         // Formatted query to include dynamic order by direction
         var finalQuery = string.Format(query, orderByDirection);
         
-        return await _dataBaseManager.QueryAsync<Media>(finalQuery, new { _userContext.UserId });
+        return await dataBaseManager.QueryAsync<Media>(finalQuery, new { userContext.UserId });
     }
 
     public async Task<bool> Delete(Guid mediaId)
@@ -157,6 +148,6 @@ DELETE FROM
 WHERE
     media_id = @MediaId AND user_id = @UserId;";
 
-        return await _dataBaseManager.ExecuteAsync(query, new { _userContext.UserId, mediaId }) > 0;
+        return await dataBaseManager.ExecuteAsync(query, new { userContext.UserId, mediaId }) > 0;
     }
 }

@@ -1,6 +1,7 @@
 namespace Lib.DataAccess;
 
-public class LocalFileStorageDataAccess : IFileStorageDataAccess
+public class LocalFileStorageDataAccess(LocalFileStorageDataAccess.IFileStreamWrapper fileStreamWrapper)
+    : IFileStorageDataAccess
 {
     public interface IFileStreamWrapper
     {
@@ -19,13 +20,6 @@ public class LocalFileStorageDataAccess : IFileStorageDataAccess
         }
     }
 
-    private readonly IFileStreamWrapper _fileStreamWrapper;
-
-    public LocalFileStorageDataAccess(IFileStreamWrapper fileStreamWrapper)
-    {
-        _fileStreamWrapper = fileStreamWrapper;
-    }
-
     public async Task Store(string filePath, Stream contents)
     {
         if (string.IsNullOrEmpty(filePath))
@@ -33,19 +27,19 @@ public class LocalFileStorageDataAccess : IFileStorageDataAccess
             return;
         }
         
-        await using var fs = _fileStreamWrapper.GetNew(filePath, FileMode.Create, FileAccess.Write);
+        await using var fs = fileStreamWrapper.GetNew(filePath, FileMode.Create, FileAccess.Write);
         await contents.CopyToAsync(fs);
     }
 
     public async Task<Stream> Retrieve(string filePath)
     {
-        await using var fileStream = _fileStreamWrapper.GetNew(filePath, FileMode.Open, FileAccess.Read);
+        await using var fileStream = fileStreamWrapper.GetNew(filePath, FileMode.Open, FileAccess.Read);
         return fileStream;
     }
 
     public Task Delete(string filePath)
     {
-        _fileStreamWrapper.Delete(filePath);
+        fileStreamWrapper.Delete(filePath);
         return Task.CompletedTask;
     }
 }
