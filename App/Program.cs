@@ -7,15 +7,24 @@ using Microsoft.OpenApi.Models;
 // ReSharper disable once HeapView.ClosureAllocation
 var builder = WebApplication.CreateBuilder(args);
 
+// Build app configuration
 // ReSharper disable once HeapView.DelegateAllocation
 builder.Services.Configure<AppSettings>(x =>
 {
-    // build app configuration
-    x.ConnectionString = builder.Configuration.GetConnectionString("TaskDb");
+    builder.Configuration.AddEnvironmentVariables();
+    
+    // x.ConnectionString = builder.Configuration.GetConnectionString("TaskDb");
+    x.ConnectionString = builder.Configuration["TaskDb"];
+    x.JwtKey = builder.Configuration["JwtKey"];
+    x.JwtIssuer = builder.Configuration["JwtIssuer"];
+    x.JwtAudience = builder.Configuration["JwtAudience"];
 });
 
 // Add services to the container.
 builder.Services.ConfigureServices(); // add services in here
+
+// Add auth
+builder.Services.AddAuth(builder.Configuration.Get<AppSettings>()!);
 
 // Register the Swagger generator, defining one or more Swagger documents
 builder.Services.AddSwaggerGen(c =>

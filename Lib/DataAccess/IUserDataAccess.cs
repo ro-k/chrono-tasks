@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Lib.DataAccess;
 
-public interface IUserDataAccess : // IUserStore<User>,
+public interface IUserDataAccess : //IUserStore<User>,
     IUserPasswordStore<User>,
     IUserRoleStore<User>, 
     IUserEmailStore<User>,

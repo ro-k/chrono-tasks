@@ -12,11 +12,9 @@ public class AuthService : IAuthService
         _signInManager = signInManager;
     }
 
-    public async Task<string> Login(string user, string password)
+    public async Task<SignInResult> Login(string user, string password)
     {
-        var signInResult = await _signInManager.PasswordSignInAsync(user, password, true, false);
-
-        throw new NotImplementedException();
+        return await _signInManager.PasswordSignInAsync(user, password, true, false);
     }
 
     public async Task Logout(string user)

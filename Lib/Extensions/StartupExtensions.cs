@@ -1,8 +1,11 @@
+using System.Text;
 using Lib.DataAccess;
 using Lib.Models;
 using Lib.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Lib.Extensions;
 
@@ -42,32 +45,54 @@ public static class StartupExtensions
         .AddScoped<IJobService, JobService>()
         .AddScoped<IActivityService, ActivityService>();
 
-    private static IServiceCollection ConfigureIdentity(this IServiceCollection serviceCollection)
+    private static IServiceCollection ConfigureIdentity(this IServiceCollection services)
     {
-        // TODO: register all interfaces from IUserDataAccess
-        serviceCollection
-            //.AddScoped<IUserStore<User>, UserDataAccess>()
+        // identity-related stores
+        services.AddScoped<IUserStore<User>, UserDataAccess>()
             .AddScoped<IUserRoleStore<User>, UserDataAccess>()
             .AddScoped<IUserEmailStore<User>, UserDataAccess>()
             .AddScoped<IUserLockoutStore<User>, UserDataAccess>()
             .AddScoped<IUserPhoneNumberStore<User>, UserDataAccess>()
             .AddScoped<IUserSecurityStampStore<User>, UserDataAccess>()
             .AddScoped<IUserLoginStore<User>, UserDataAccess>()
-            .AddScoped<IUserStore<User>, UserDataAccess>()
-            .AddScoped<IRoleStore<Role>, RoleDataAccess>();
-            //.AddScoped<IRoleStore<Role>, RoleDataAccess>();
-        
-        serviceCollection
+            // role store
+            .AddScoped<IRoleStore<Role>, RoleDataAccess>()
+            // framework-provided UserManager, RoleManager, and SignInManager
+            .AddScoped<UserManager<User>>()
+            .AddScoped<RoleManager<Role>>()
+            .AddScoped<SignInManager<User>>()
+            // setup Identity with custom user and role stores
             .AddIdentity<User, Role>()
             .AddUserStore<UserDataAccess>()
             .AddRoleStore<RoleDataAccess>()
             .AddDefaultTokenProviders();
-        
-            // .AddUserManager<IUserDataAccess>()
-            // .AddRoleManager<IUserDataAccess>()
-            // .AddSignInManager<IUserDataAccess>()
-            
-            
+
+        return services;
+    }
+
+
+
+    public static IServiceCollection AddAuth(this IServiceCollection serviceCollection, AppSettings appSettings)
+    {
+        serviceCollection.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = appSettings.JwtIssuer,
+                    ValidAudience = appSettings.JwtAudience,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(appSettings.JwtKey!)),
+                };
+            });
+
         return serviceCollection;
     }
 }

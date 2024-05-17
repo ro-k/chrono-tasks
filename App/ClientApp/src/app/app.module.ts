@@ -14,6 +14,9 @@ import { CategoryListComponent } from "./features/categories/components/category
 import {TreeViewModule} from "./features/tree-view/tree-view.module";
 import {MainViewModule} from "./features/main-view/main-view.module";
 import {ContentPaneComponent} from "./features/main-view/components/content-pane/content-pane.component";
+import {AuthModule} from "./features/auth/auth.module";
+import {LoginComponent} from "./features/auth/components/login/login.component";
+import {SignupComponent} from "./features/auth/components/signup/signup.component";
 
 @NgModule({
   declarations: [
@@ -21,6 +24,7 @@ import {ContentPaneComponent} from "./features/main-view/components/content-pane
   ],
   imports: [
     BrowserModule,
+    AuthModule,
     HttpClientModule,
     FormsModule,
     ReactiveFormsModule,
@@ -34,6 +38,8 @@ import {ContentPaneComponent} from "./features/main-view/components/content-pane
       {path: '', component: HomeComponent, pathMatch: 'full'},
       {path: 'category', component: CategoryListComponent},
       {path: 'content', component: ContentPaneComponent},
+      {path: 'login', component: LoginComponent},
+      {path: 'signup', component: SignupComponent},
     ]),
   ],
   providers: [

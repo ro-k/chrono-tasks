@@ -1,0 +1,33 @@
+<div class="container mt-5">
+  <form [formGroup]="signupForm" (ngSubmit)="onSubmit()">
+    <h2>Sign Up</h2>
+    <div class="mb-3">
+      <label for="name" class="form-label">Name</label>
+      <input formControlName="name" type="text" class="form-control" id="name" placeholder="Enter name">
+      <div *ngIf="signupForm.get('name')?.errors?.required && signupForm.get('name')?.touched">
+        Name is required.
+      </div>
+    </div>
+    <div class="mb-3">
+      <label for="email" class="form-label">Email address</label>
+      <input formControlName="email" type="email" class="form-control" id="email" placeholder="Enter email">
+      <div *ngIf="signupForm.get('email')?.errors?.required && signupForm.get('email')?.touched">
+        Email is required.
+      </div>
+      <div *ngIf="signupForm.get('email')?.errors?.email && signupForm.get('email')?.touched">
+        Please enter a valid email.
+      </div>
+    </div>
+    <div class="mb-3">
+      <label for="password" class="form-label">Password</label>
+      <input formControlName="password" type="password" class="form-control" id="password" placeholder="Password">
+      <div *ngIf="signupForm.get('password')?.errors?.required && signupForm.get('password')?.touched">
+        Password is required.
+      </div>
+      <div *ngIf="signupForm.get('password')?.errors?.minLength && signupForm.get('password')?.touched">
+        Password must be at least 6 characters.
+      </div>
+    </div>
+    <button type="submit" class="btn btn-primary" [disabled]="!signupForm.valid">Sign Up</button>
+  </form>
+</div>
