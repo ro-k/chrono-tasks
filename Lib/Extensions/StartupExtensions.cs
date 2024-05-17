@@ -43,7 +43,8 @@ public static class StartupExtensions
         .AddScoped<ICategoryService, CategoryService>()
         .AddScoped<ITreeViewService, TreeViewService>()
         .AddScoped<IJobService, JobService>()
-        .AddScoped<IActivityService, ActivityService>();
+        .AddScoped<IActivityService, ActivityService>()
+        .AddScoped<ITokenService, TokenService>();
 
     private static IServiceCollection ConfigureIdentity(this IServiceCollection services)
     {
