@@ -1,5 +1,7 @@
+using System.Security.Authentication;
 using Lib.DataAccess;
 using Lib.DTOs;
+using Microsoft.AspNetCore.Http;
 
 namespace Lib.Services;
 
@@ -13,9 +15,7 @@ public class AuthService(
     {
         var result = await signInManager.PasswordSignInAsync(login.Username, login.Password, false, lockoutOnFailure: false);
         
-        // todo: add custom exceptions
-        if (!result.Succeeded) throw new Exception("Unauthorized");
-        
+        if (!result.Succeeded) throw new AuthenticationException();
         
         var cancellationToken = new CancellationToken();
         var user = await userDataAccess.FindByNameAsync(login.Username, cancellationToken);

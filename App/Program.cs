@@ -1,5 +1,6 @@
 using System.Text.Json.Serialization;
 using Lib;
+using Lib.Exceptions;
 using Lib.Extensions;
 using Microsoft.OpenApi.Models;
 
@@ -68,5 +69,7 @@ app.MapControllerRoute(
     pattern: "{controller}/{action=Index}/{id?}");
 
 app.MapFallbackToFile("index.html");
+
+app.UseMiddleware<ExceptionHandler>();
 
 app.Run();

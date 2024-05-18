@@ -1,6 +1,8 @@
+using Lib.Exceptions;
 using Lib.Models;
 using Microsoft.AspNetCore.Identity;
 using Npgsql;
+// ReSharper disable UseRawString
 
 namespace Lib.DataAccess;
 
@@ -73,35 +75,40 @@ WHERE role_id = @RoleId;";
 
     public async Task<string> GetRoleIdAsync(Role role, CancellationToken cancellationToken)
     {
-        return (await FindByNameAsync(role.Name, cancellationToken)).RoleId.ToString();
+        return (await FindByNameOrThrowAsync(role.Name, cancellationToken)).RoleId.ToString();
     }
 
-    public async Task<string> GetRoleNameAsync(Role role, CancellationToken cancellationToken)
+    public async Task<string?> GetRoleNameAsync(Role role, CancellationToken cancellationToken)
     {
-        return (await FindByIdAsync(role.RoleId.ToString(), cancellationToken)).Name;
+        return (await FindByNameOrThrowAsync(role.RoleId.ToString(), cancellationToken)).Name;
     }
 
-    public async Task SetRoleNameAsync(Role role, string roleName, CancellationToken cancellationToken)
+    public async Task SetRoleNameAsync(Role role, string? roleName, CancellationToken cancellationToken)
     {
-        var dbRole = await FindByIdAsync(role.RoleId.ToString(), cancellationToken);
+        if (string.IsNullOrEmpty(roleName)) throw new ArgumentNullException(nameof(roleName));
+        
+        var dbRole = await FindByNameOrThrowAsync(role.RoleId.ToString(), cancellationToken);
         dbRole.Name = roleName;
+        
         await UpdateAsync(dbRole, cancellationToken);
     }
 
-    public async Task<string> GetNormalizedRoleNameAsync(Role role, CancellationToken cancellationToken)
+    public async Task<string?> GetNormalizedRoleNameAsync(Role role, CancellationToken cancellationToken)
     {
-        return (await FindByIdAsync(role.RoleId.ToString(), cancellationToken)).NormalizedName;
+        return (await FindByNameOrThrowAsync(role.RoleId.ToString(), cancellationToken)).NormalizedName;
     }
 
-    public async Task SetNormalizedRoleNameAsync(Role role, string normalizedName, CancellationToken cancellationToken)
+    public async Task SetNormalizedRoleNameAsync(Role role, string? normalizedName, CancellationToken cancellationToken)
     {
-        var dbRole = await FindByIdAsync(role.RoleId.ToString(), cancellationToken);
+        if (string.IsNullOrEmpty(normalizedName)) throw new ArgumentNullException(nameof(normalizedName));
+        
+        var dbRole = await FindByNameOrThrowAsync(role.RoleId.ToString(), cancellationToken);
         dbRole.NormalizedName = normalizedName;
         await UpdateAsync(dbRole, cancellationToken);
     }
 
 
-    public async Task<Role> FindByIdAsync(string roleId, CancellationToken ct)
+    public async Task<Role?> FindByIdAsync(string roleId, CancellationToken ct)
     {
         const string selectQuery = @"
 SELECT role_id, 
@@ -114,7 +121,18 @@ WHERE role_id = @RoleId;";
         return await dataBaseManager.QuerySingleOrDefaultAsync<Role>(selectQuery, new { RoleId = Guid.Parse(roleId) });
     }
 
-    public async Task<Role> FindByNameAsync(string roleName, CancellationToken ct)
+    public async Task<Role> FindByNameOrThrowAsync(string roleName, CancellationToken ct)
+    {
+        if (string.IsNullOrEmpty(roleName)) throw new ArgumentNullException(nameof(roleName));
+
+        var dbRole = await FindByNameAsync(roleName, ct);
+
+        if (dbRole == null) throw new RoleNotFoundException();
+
+        return dbRole;
+    }
+
+    public async Task<Role?> FindByNameAsync(string roleName, CancellationToken ct)
     {
         const string selectQuery = @"
 SELECT role_id, 
