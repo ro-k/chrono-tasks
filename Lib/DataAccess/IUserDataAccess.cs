@@ -12,4 +12,5 @@ public interface IUserDataAccess : //IUserStore<User>,
     IUserSecurityStampStore<User>,
     IUserLoginStore<User>
 {
+    Task<User> FindByUserNameOrThrowAsync(string userName, CancellationToken ct);
 }

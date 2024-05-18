@@ -1,11 +1,10 @@
 using System.Security.Authentication;
 using Lib.DataAccess;
 using Lib.DTOs;
-using Microsoft.AspNetCore.Http;
 
 namespace Lib.Services;
 
-public class AuthService(
+public class UserService(
     ISignInManagerWrapper signInManager,
     IUserDataAccess userDataAccess,
     ITokenService tokenService)
@@ -18,9 +17,10 @@ public class AuthService(
         if (!result.Succeeded) throw new AuthenticationException();
         
         var cancellationToken = new CancellationToken();
-        var user = await userDataAccess.FindByNameAsync(login.Username, cancellationToken);
+        var user = await userDataAccess.FindByUserNameOrThrowAsync(login.Username, cancellationToken);
         var roles = await userDataAccess.GetRolesAsync(user, cancellationToken);
         var token = tokenService.GenerateJwtToken(user, roles.ToList());
+        
         return token;
     }
 

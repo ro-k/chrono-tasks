@@ -38,7 +38,7 @@ public static class StartupExtensions
     }
 
     private static IServiceCollection AddServices(this IServiceCollection serviceCollection) => serviceCollection
-        .AddScoped<IAuthService, AuthService>()
+        .AddScoped<IAuthService, UserService>()
         .AddScoped<ISignInManagerWrapper, SignInManagerWrapper>()
         .AddScoped<ICategoryService, CategoryService>()
         .AddScoped<ITreeViewService, TreeViewService>()

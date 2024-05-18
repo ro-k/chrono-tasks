@@ -136,7 +136,7 @@ WHERE user_id = @UserId;";
         return dbUser;
     }
 
-    private async Task<User> FindByUserNameOrThrowAsync(string userName, CancellationToken ct)
+    public async Task<User> FindByUserNameOrThrowAsync(string userName, CancellationToken ct)
     {
         if (string.IsNullOrEmpty(userName)) throw new ArgumentNullException(nameof(userName));
         
@@ -317,8 +317,6 @@ where r.normalized_name = @NormalizedRoleName;
         return await dataBaseManager.QuerySingleOrDefaultAsync<User>(selectQuery,
             new { NormalizedEmail = normalizedEmail });
     }
-
-    
     
     public async Task<string?> GetNormalizedEmailAsync(User user, CancellationToken cancellationToken)
     {
