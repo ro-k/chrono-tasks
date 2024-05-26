@@ -17,6 +17,15 @@ public interface ISignInManagerWrapper
     Task<SignInResult> PasswordSignInAsync(string userName, string password, bool isPersistent, bool lockoutOnFailure);
 
     /// <summary>
+    /// Signs in the specified <paramref name="user" />.
+    /// </summary>
+    /// <param name="user">The user to sign-in.</param>
+    /// <param name="isPersistent">Flag indicating whether the sign-in cookie should persist after the browser is closed.</param>
+    /// <param name="authenticationMethod">Name of the method used to authenticate the user.</param>
+    /// <returns>The task object representing the asynchronous operation.</returns>
+    Task SignInAsync(User user, bool isPersistent, string? authenticationMethod = null);
+
+    /// <summary>
     /// Signs the user out of the application.
     /// </summary>
     /// <returns>A task that represents the asynchronous operation.</returns>

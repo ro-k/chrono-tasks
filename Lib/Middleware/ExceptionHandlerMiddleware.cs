@@ -1,9 +1,10 @@
 using System.Net;
+using Lib.Exceptions;
 using Microsoft.AspNetCore.Http;
 
-namespace Lib.Exceptions;
+namespace Lib.Middleware;
 
-public class ExceptionHandler(RequestDelegate next)
+public class ExceptionHandlerMiddleware(RequestDelegate next)
 {
     public async Task InvokeAsync(HttpContext context)
     {

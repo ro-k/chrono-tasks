@@ -11,6 +11,11 @@ public class SignInManagerWrapper(SignInManager<User> signInManager) : ISignInMa
         return await signInManager.PasswordSignInAsync(userName, password, isPersistent, lockoutOnFailure);
     }
 
+    public async Task SignInAsync(User user, bool isPersistent, string? authenticationMethod = null)
+    {
+        await signInManager.SignInAsync(user, isPersistent, authenticationMethod);
+    }
+
     public async Task SignOutAsync()
     {
         await signInManager.SignOutAsync();

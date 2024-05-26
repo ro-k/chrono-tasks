@@ -5,4 +5,5 @@ namespace Lib.Services;
 public interface ITokenService
 {
     string GenerateJwtToken(User user, IEnumerable<string> roles);
+    Task<string> RefreshToken(string expiredToken);
 }

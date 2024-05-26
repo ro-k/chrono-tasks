@@ -2,6 +2,7 @@ using System.Text.Json.Serialization;
 using Lib;
 using Lib.Exceptions;
 using Lib.Extensions;
+using Lib.Middleware;
 using Microsoft.OpenApi.Models;
 
 
@@ -70,6 +71,7 @@ app.MapControllerRoute(
 
 app.MapFallbackToFile("index.html");
 
-app.UseMiddleware<ExceptionHandler>();
+app.UseMiddleware<ExceptionHandlerMiddleware>();
+app.UseMiddleware<TokenRefreshMiddleware>();
 
 app.Run();

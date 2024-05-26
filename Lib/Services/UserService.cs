@@ -1,50 +1,57 @@
 using System.Security.Authentication;
 using Lib.DataAccess;
 using Lib.DTOs;
+using Lib.Models;
 
 namespace Lib.Services;
 
 public class UserService(
     ISignInManagerWrapper signInManager,
+    IUserManagerWrapper userManager,
     IUserDataAccess userDataAccess,
     ITokenService tokenService)
-    : IAuthService
+    : IUserService
 {
-    public async Task<string> Login(LoginDto login)
+    public async Task<string> Login(LoginDto loginDto)
     {
-        var result = await signInManager.PasswordSignInAsync(login.Username, login.Password, false, lockoutOnFailure: false);
+        var result = await signInManager.PasswordSignInAsync(loginDto.Username, loginDto.Password, false, lockoutOnFailure: false);
         
         if (!result.Succeeded) throw new AuthenticationException();
         
         var cancellationToken = new CancellationToken();
-        var user = await userDataAccess.FindByUserNameOrThrowAsync(login.Username, cancellationToken);
+        var user = await userDataAccess.FindByUserNameOrThrowAsync(loginDto.Username, cancellationToken);
         var roles = await userDataAccess.GetRolesAsync(user, cancellationToken);
         var token = tokenService.GenerateJwtToken(user, roles.ToList());
         
         return token;
     }
 
-    public async Task Logout(string user)
+    public async Task Logout()
     {
-        throw new NotImplementedException();
+        await signInManager.SignOutAsync();
     }
 
-    public async Task Register()
+    public async Task Register(RegisterDto registerDto)
     {
-        throw new NotImplementedException();
+        var user = new User
+        {
+            UserName = registerDto.UserName,
+            Email = registerDto.Email
+        };
+
+        var result = await userManager.CreateAsync(user, registerDto.Password);
+    
+        if (result.Succeeded)
+        {
+            await userManager.AddToRoleAsync(user, "DefaultRole");
+            await signInManager.SignInAsync(user, isPersistent: false);
+        }
+
+        // Handle errors if necessary
+        // e.g., throw new Exception(string.Join(", ", result.Errors.Select(e => e.Description)));
     }
 
-    public async Task ExternalLogin(string loginProvider, string providerKey)
-    {
-        throw new NotImplementedException();
-    }
-
-    public async Task<string> CreateToken()
-    {
-        throw new NotImplementedException();
-    }
-
-    public async Task<string> RefreshToken()
+    public Task ExternalLogin(string loginProvider, string providerKey)
     {
         throw new NotImplementedException();
     }
