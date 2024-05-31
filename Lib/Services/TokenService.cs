@@ -3,7 +3,6 @@ using System.Security.Claims;
 using System.Text;
 using Lib.DataAccess;
 using Lib.Models;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
@@ -15,12 +14,7 @@ public class TokenService(IOptions<AppSettings> appSettings, IUserDataAccess use
 
     public string GenerateJwtToken(User user, IEnumerable<string> roles)
     {
-        var claims = new List<Claim>
-        {
-            new(JwtRegisteredClaimNames.Sub, user.UserName),
-            new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-            new(ClaimTypes.NameIdentifier, user.UserId.ToString())
-        };
+        var claims = GetClaims(user);
 
         claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
 
@@ -41,19 +35,52 @@ public class TokenService(IOptions<AppSettings> appSettings, IUserDataAccess use
         return tokenHandler.WriteToken(token);
     }
 
-    public async Task<string> RefreshToken(string expiredToken)
+    public static List<Claim> GetClaims(User user)
     {
-        var principal = GetPrincipalFromExpiredToken(expiredToken, appSettings.Value.JwtKey!);
-        
-        if (principal.Identity?.Name == null) throw new SecurityTokenException("Invalid claims principal");
-        
-        var username = principal.Identity.Name;
-        var user = await userDataAccess.FindByUserNameOrThrowAsync(username, new CancellationToken());
-        var newToken = GenerateJwtToken(user, await userDataAccess.GetRolesAsync(user, new CancellationToken()));
-        return newToken;
+        var claims = new List<Claim>
+        {
+            new(JwtRegisteredClaimNames.Sub, user.UserId.ToString()),
+            new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+            new(JwtRegisteredClaimNames.UniqueName, user.Username),
+        };
+
+        if (!string.IsNullOrEmpty(user.Email))
+        {
+            claims.Add(new(JwtRegisteredClaimNames.Email, user.Email));
+        }
+        if (!string.IsNullOrEmpty(user.FirstName))
+        {
+            claims.Add(new(JwtRegisteredClaimNames.GivenName, user.FirstName));
+        }
+        if (!string.IsNullOrEmpty(user.LastName))
+        {
+            claims.Add(new(JwtRegisteredClaimNames.FamilyName, user.LastName));
+        }
+
+        return claims;
     }
 
-    private static ClaimsPrincipal GetPrincipalFromExpiredToken(string token, string jwtKey)
+    public async Task<(bool, string)> TryRefreshToken(string expiredToken)
+    {
+        var (principal, jwtToken) = GetPrincipalFromExpiredToken(expiredToken, appSettings.Value.JwtKey!);
+        
+        if (jwtToken.ValidTo > DateTime.UtcNow.AddMinutes(5))
+        {
+            return (false, string.Empty);
+        }
+
+        // todo: swap to userId?
+        var username = principal.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.UniqueName)?.Value;
+        
+        if (string.IsNullOrEmpty(username)) throw new SecurityTokenException("Invalid claims");
+        
+        //var username = principal.Identity.Name;
+        var user = await userDataAccess.FindByUserNameOrThrowAsync(new User { Username = username }, new CancellationToken());
+
+        return (true, GenerateJwtToken(user, await userDataAccess.GetRolesAsync(user, new CancellationToken())));
+    }
+
+    private static (ClaimsPrincipal, JwtSecurityToken) GetPrincipalFromExpiredToken(string token, string jwtKey)
     {
         var tokenValidationParameters = new TokenValidationParameters
         {
@@ -67,13 +94,14 @@ public class TokenService(IOptions<AppSettings> appSettings, IUserDataAccess use
         var tokenHandler = new JwtSecurityTokenHandler();
         var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out var securityToken);
 
-        if (securityToken is not JwtSecurityToken jwtSecurityToken ||
-            !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256,
+        if (securityToken is JwtSecurityToken jwtSecurityToken &&
+            jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256,
                 StringComparison.InvariantCultureIgnoreCase))
         {
-            throw new SecurityTokenException("Invalid token");
+            return (principal, jwtSecurityToken);
         }
+        
+        throw new SecurityTokenException("Invalid token");
 
-        return principal;
     }
 }

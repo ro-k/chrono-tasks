@@ -1,6 +1,6 @@
-using System.Security.Authentication;
 using Lib.DataAccess;
 using Lib.DTOs;
+using Lib.Exceptions;
 using Lib.Models;
 
 namespace Lib.Services;
@@ -14,12 +14,15 @@ public class UserService(
 {
     public async Task<string> Login(LoginDto loginDto)
     {
+        // switch to using username, email not required
+        // go through model, mark nullable fields as nullable?
         var result = await signInManager.PasswordSignInAsync(loginDto.Username, loginDto.Password, false, lockoutOnFailure: false);
         
-        if (!result.Succeeded) throw new AuthenticationException();
+        if (!result.Succeeded) throw new InvalidLoginException();
         
         var cancellationToken = new CancellationToken();
-        var user = await userDataAccess.FindByUserNameOrThrowAsync(loginDto.Username, cancellationToken);
+        var user = await userDataAccess.FindByUserNameOrThrowAsync(new User { Username = loginDto.Username },
+            cancellationToken);
         var roles = await userDataAccess.GetRolesAsync(user, cancellationToken);
         var token = tokenService.GenerateJwtToken(user, roles.ToList());
         
@@ -31,12 +34,14 @@ public class UserService(
         await signInManager.SignOutAsync();
     }
 
-    public async Task Register(RegisterDto registerDto)
+    public async Task<string> Register(RegisterDto registerDto)
     {
         var user = new User
         {
-            UserName = registerDto.UserName,
-            Email = registerDto.Email
+            Username = registerDto.Username,
+            Email = registerDto.Email,
+            FirstName = registerDto.FirstName,
+            LastName = registerDto.LastName,
         };
 
         var result = await userManager.CreateAsync(user, registerDto.Password);
@@ -44,11 +49,11 @@ public class UserService(
         if (result.Succeeded)
         {
             await userManager.AddToRoleAsync(user, "DefaultRole");
-            await signInManager.SignInAsync(user, isPersistent: false);
+            //await signInManager.SignInAsync(user, isPersistent: false);
+            return await Login(new() { Username = registerDto.Username, Password = registerDto.Password });
         }
 
-        // Handle errors if necessary
-        // e.g., throw new Exception(string.Join(", ", result.Errors.Select(e => e.Description)));
+        throw new BadRequestException(result.Errors.Select(e => e.Description));
     }
 
     public Task ExternalLogin(string loginProvider, string providerKey)

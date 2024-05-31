@@ -8,22 +8,19 @@ namespace App.Controllers;
 [Route("api/[controller]")]
 public class UserController(IUserService userService) : ControllerBase
 {
-    [HttpPost]
-    [Route("login")]
+    [HttpPost("login")]
     public async Task<IActionResult> Login(LoginDto login)
     {
-        return Ok(await userService.Login(login));
+        return Ok(new { access_token = await userService.Login(login) });
     }
     
     [HttpPost]
-    public async Task<IActionResult> Register(RegisterDto registerDto)
+    public async Task<IActionResult> Post(RegisterDto registerDto)
     {
-        await userService.Register(registerDto);
-        return Ok();
+        return Ok(new { access_token = await userService.Register(registerDto) });
     }
     
-    [HttpPost]
-    [Route("logout")]
+    [HttpPost("logout")]
     public async Task<IActionResult> Logout()
     {
         await userService.Logout();

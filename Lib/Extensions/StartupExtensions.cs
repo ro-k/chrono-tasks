@@ -64,7 +64,12 @@ public static class StartupExtensions
             .AddScoped<RoleManager<Role>>()
             .AddScoped<SignInManager<User>>()
             // setup Identity with custom user and role stores
-            .AddIdentity<User, Role>()
+            .AddIdentity<User, Role>(x =>
+            {
+                x.Password.RequireNonAlphanumeric = false;
+                x.Password.RequireDigit = false;
+                x.User.RequireUniqueEmail = true;
+            })
             .AddUserStore<UserDataAccess>()
             .AddRoleStore<RoleDataAccess>()
             .AddDefaultTokenProviders();

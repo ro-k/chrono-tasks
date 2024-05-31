@@ -1,4 +1,5 @@
 using System.Net;
+using System.Security.Authentication;
 using Lib.Exceptions;
 using Microsoft.AspNetCore.Http;
 
@@ -19,6 +20,14 @@ public class ExceptionHandlerMiddleware(RequestDelegate next)
         catch (ConcurrencyStampMismatchException ex)
         {
             await HandleExceptionAsync(context, ex, HttpStatusCode.Conflict);
+        }
+        catch (InvalidLoginException ex)
+        {
+            await HandleExceptionAsync(context, ex, HttpStatusCode.Unauthorized);
+        }
+        catch (BadRequestException ex)
+        {
+            await HandleExceptionAsync(context, ex, HttpStatusCode.BadRequest);
         }
         catch (Exception ex)
         {

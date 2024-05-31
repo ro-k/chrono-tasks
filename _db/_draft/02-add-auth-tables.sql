@@ -4,14 +4,14 @@ BEGIN
 -- users
 IF NOT EXISTS (SELECT 1 FROM pg_tables WHERE schemaname = 'public' AND tablename = 'user') THEN
 CREATE TABLE public.user (
-    user_id UUID PRIMARY KEY,
+    user_id UUID PRIMARY KEY NOT NULL DEFAULT gen_random_uuid(),
     user_name TEXT NOT NULL,
     normalized_user_name TEXT NOT NULL,
     email TEXT NOT NULL,
     normalized_email TEXT NOT NULL,
     email_confirmed BOOLEAN NOT NULL,
     password_hash TEXT,
-    security_stamp UUID,
+    security_stamp TEXT,
     phone_number TEXT,
     phone_number_confirmed BOOLEAN NOT NULL,
     two_factor_enabled BOOLEAN NOT NULL,
@@ -19,10 +19,12 @@ CREATE TABLE public.user (
     lockout_enabled BOOLEAN NOT NULL,
     access_failed_count INTEGER NOT NULL DEFAULT 0,
     profile_picture_media_id UUID,
-    concurrency_stamp UUID NOT NULL,
+    concurrency_stamp UUID NOT NULL DEFAULT gen_random_uuid(),
     created_at TIMESTAMP DEFAULT NOW() NOT NULL,
     modified_at TIMESTAMP DEFAULT NOW() NOT NULL,
-    status INTEGER NOT NULL
+    status INTEGER NOT NULL,
+    first_name TEXT,
+    last_name TEXT
 );
 END IF;
 

@@ -16,7 +16,7 @@
         "ASPNETCORE_ENVIRONMENT": "Development",
         "ASPNETCORE_HOSTINGSTARTUPASSEMBLIES": "Microsoft.AspNetCore.SpaProxy",
         "TaskDb": "Host=localhost;Port=5432;Database=taskdb;User Id=postgres;Password=p0stgres;SslMode=Prefer;Pooling=true;",
-        "JwtKey": "JwtKey",
+        "JwtKey": "16d0c11d-233d-42aa-a74e-a99b8fe9ba84",
         "JwtAudience": "JwtAudience",
         "JwtIssuer": "JwtIssuer"
       }

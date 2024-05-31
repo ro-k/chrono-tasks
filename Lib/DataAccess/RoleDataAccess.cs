@@ -11,7 +11,7 @@ public class RoleDataAccess(IDataBaseManager dataBaseManager) : IRoleDataAccess
     public async Task<IdentityResult> CreateAsync(Role role, CancellationToken ct)
     {
         // use name as back up
-        role.NormalizedName = string.IsNullOrEmpty(role.NormalizedName) ? role.Name.Normalize() : role.NormalizedName;
+        role.NormalizedName = string.IsNullOrEmpty(role.NormalizedName) ? DataHelper.Normalize(role.Name) : role.NormalizedName;
 
         role.ConcurrencyStamp = Guid.NewGuid();
         
@@ -144,7 +144,7 @@ WHERE normalized_name = @NormalizedRoleName";
         
         ct.ThrowIfCancellationRequested();
 
-        return await dataBaseManager.QuerySingleOrDefaultAsync<Role>(selectQuery, new { NormalizedRoleName = roleName.Normalize() });
+        return await dataBaseManager.QuerySingleOrDefaultAsync<Role>(selectQuery, new { NormalizedRoleName = DataHelper.Normalize(roleName) });
     }
 
     public void Dispose()

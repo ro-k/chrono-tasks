@@ -4,8 +4,8 @@ namespace Lib.Models;
 
 public class User : BaseModel
 {
-    public new Guid UserId { get; set; } = Guid.NewGuid();
-    public string UserName { get; set; } = string.Empty;
+    public new Guid UserId { get; set; } = Guid.Empty;
+    public string Username { get; set; } = string.Empty;
     public string NormalizedUserName { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
     public string NormalizedEmail { get; set; } = string.Empty;
@@ -19,4 +19,6 @@ public class User : BaseModel
     public bool LockoutEnabled { get; set; }
     public int AccessFailedCount { get; set; }
     public Guid? ProfilePictureMediaId { get; set; }
+    public string FirstName { get; set; } = string.Empty;
+    public string LastName { get; set; } = string.Empty;
 }

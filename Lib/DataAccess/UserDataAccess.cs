@@ -28,23 +28,27 @@ public class UserDataAccess(IDataBaseManager dataBaseManager, IRoleDataAccess ro
     profile_picture_media_id, 
     created_at, 
     modified_at,
-    status
+    status,
+    first_name,
+    last_name
 ";
 
     public async Task<IdentityResult> CreateAsync(User user, CancellationToken ct)
     {
+        // todo: safe to remove these after next schema deploy
         user.ConcurrencyStamp = Guid.NewGuid();
+        if (user.UserId == Guid.Empty) user.UserId = Guid.NewGuid();
     
         const string insertQuery = @"
 INSERT INTO public.user 
     (user_id, user_name, normalized_user_name, email, normalized_email, email_confirmed, 
     password_hash, security_stamp, concurrency_stamp, phone_number, phone_number_confirmed, 
-    two_factor_enabled, lockout_end, lockout_enabled, access_failed_count, profile_picture_media_id, status) 
+    two_factor_enabled, lockout_end, lockout_enabled, access_failed_count, profile_picture_media_id, status, first_name, last_name) 
 VALUES 
-    (@UserId, @UserName, @NormalizedUserName, @Email, @NormalizedEmail, @EmailConfirmed, 
+    (@UserId, @Username, @NormalizedUserName, @Email, @NormalizedEmail, @EmailConfirmed, 
     @PasswordHash, @SecurityStamp, @ConcurrencyStamp, @PhoneNumber, @PhoneNumberConfirmed, 
     @TwoFactorEnabled, @LockoutEnd, @LockoutEnabled, @AccessFailedCount, @ProfilePictureMediaId, 
-    @Status)";
+    @Status, @FirstName, @LastName)";
     
         ct.ThrowIfCancellationRequested();
         
@@ -55,10 +59,13 @@ VALUES
 
     public async Task<IdentityResult> UpdateAsync(User user, CancellationToken ct)
     {
+        // todo: maybe we dont call this manually
+        if (user.UserId == Guid.Empty) return new IdentityResult();
+        
         const string updateQuery = @"
 UPDATE public.user 
 SET 
-    user_name = @UserName, 
+    user_name = @Username, 
     normalized_user_name = @NormalizedUserName, 
     email = @Email, 
     normalized_email = @NormalizedEmail, 
@@ -117,7 +124,7 @@ WHERE user_id = @UserId;";
 
     public async Task<User?> FindByIdAsync(string userId, CancellationToken ct)
     {
-        if (string.IsNullOrEmpty(userId))
+        if (string.IsNullOrEmpty(userId) || !Guid.TryParse(userId, out var userIdGuid))
         {
             return null;
         }
@@ -126,21 +133,25 @@ WHERE user_id = @UserId;";
         
         ct.ThrowIfCancellationRequested();
     
-        return await dataBaseManager.QuerySingleOrDefaultAsync<User?>(selectQuery, new { UserId = userId });
+        return await dataBaseManager.QuerySingleOrDefaultAsync<User?>(selectQuery, new { UserId = userIdGuid });
     }
 
-    private async Task<User> FindByIdOrThrowAsync(Guid userId, CancellationToken ct)
+    private async Task<User> FindByIdOrThrowAsync(User user, CancellationToken ct)
     {
-        var dbUser = await FindByIdAsync(userId.ToString(), ct);
+        // if UserId not set, we're just updating existing user entity
+        if (user.UserId == Guid.Empty) return user;
+        
+        var dbUser = await FindByIdAsync(user.UserId.ToString(), ct);
         if (dbUser == null) throw new UserNotFoundException();
         return dbUser;
     }
 
-    public async Task<User> FindByUserNameOrThrowAsync(string userName, CancellationToken ct)
+    public async Task<User> FindByUserNameOrThrowAsync(User user, CancellationToken ct)
     {
-        if (string.IsNullOrEmpty(userName)) throw new ArgumentNullException(nameof(userName));
+        if (string.IsNullOrEmpty(user.Username)) throw new ArgumentNullException(nameof(User.Username));
         
-        var dbUser = await FindByNameAsync(userName, ct);
+        // not working???
+        var dbUser = await FindByNameAsync(user.Username, ct);
 
         if (dbUser == null) throw new UserNotFoundException();
 
@@ -157,40 +168,39 @@ WHERE user_id = @UserId;";
         const string selectQuery = $"SELECT {UserSelectString} FROM public.user WHERE normalized_user_name = @NormalizedUserName";
     
         ct.ThrowIfCancellationRequested();
-        
-        return await dataBaseManager.QuerySingleOrDefaultAsync<User?>(selectQuery, new { NormalizedUserName = userName.Normalize() });
+
+        var normalized = DataHelper.Normalize(userName);
+        return await dataBaseManager.QuerySingleOrDefaultAsync<User>(selectQuery, new { NormalizedUserName = normalized });
     }
-    
-    public async Task<string> GetUserIdAsync(User user, CancellationToken ct)
-    {
-        return (await FindByUserNameOrThrowAsync(user.UserName, ct)).UserId.ToString();
-    }
+
+    public async Task<string> GetUserIdAsync(User user, CancellationToken ct) =>
+        (await FindByUserNameOrThrowAsync(user, ct)).UserId.ToString();
 
     public async Task<string?> GetUserNameAsync(User user, CancellationToken ct)
     {
-        return (await FindByIdOrThrowAsync(user.UserId, ct)).UserName;
+        return (await FindByIdOrThrowAsync(user, ct)).Username;
     }
 
     public async Task SetUserNameAsync(User user, string? userName, CancellationToken ct)
     {
         if (string.IsNullOrEmpty(userName)) throw new ArgumentNullException(nameof(userName));
         
-        var dbUser = await FindByIdOrThrowAsync(user.UserId, ct);
+        var dbUser = await FindByIdOrThrowAsync(user, ct);
         
-        dbUser.UserName = userName;
+        dbUser.Username = userName;
         await UpdateAsync(dbUser, ct);
     }
 
     public async Task<string?> GetNormalizedUserNameAsync(User user, CancellationToken ct)
     {
-        return (await FindByIdOrThrowAsync(user.UserId, ct)).NormalizedUserName;
+        return (await FindByIdOrThrowAsync(user, ct)).NormalizedUserName;
     }
 
     public async Task SetNormalizedUserNameAsync(User user, string? normalizedName, CancellationToken ct)
     {
         if (string.IsNullOrEmpty(normalizedName)) throw new ArgumentNullException(nameof(normalizedName));
         
-        var dbUser = await FindByIdOrThrowAsync(user.UserId, ct);
+        var dbUser = await FindByIdOrThrowAsync(user, ct);
         dbUser.NormalizedUserName = normalizedName;
         await UpdateAsync(dbUser, ct);
     }
@@ -203,24 +213,25 @@ WHERE user_id = @UserId;";
     public async Task SetPasswordHashAsync(User user, string? passwordHash, CancellationToken cancellationToken)
     {
         if (string.IsNullOrEmpty(passwordHash)) throw new ArgumentNullException(nameof(passwordHash));
-        
-        var dbUser = await FindByIdOrThrowAsync(user.UserId, cancellationToken);
+
+        var dbUser = await FindByIdOrThrowAsync(user, cancellationToken);
         dbUser.PasswordHash = passwordHash;
-        await UpdateAsync(dbUser, cancellationToken);
+        
+        await UpdateAsync(user, cancellationToken);
     }
 
     public async Task<string?> GetPasswordHashAsync(User user, CancellationToken cancellationToken) =>
-        (await FindByIdOrThrowAsync(user.UserId, cancellationToken)).PasswordHash;
+        (await FindByIdOrThrowAsync(user, cancellationToken)).PasswordHash;
 
     public async Task<bool> HasPasswordAsync(User user, CancellationToken cancellationToken)
     {
-        var dbUser = await FindByIdOrThrowAsync(user.UserId, cancellationToken);
+        var dbUser = await FindByIdOrThrowAsync(user, cancellationToken);
         return !string.IsNullOrEmpty(dbUser.PasswordHash);
     }
 
     public async Task AddToRoleAsync(User user, string roleName, CancellationToken cancellationToken)
     {
-        var dbRole = await roleDataAccess.FindByNameOrThrowAsync(roleName.Normalize(), cancellationToken);
+        var dbRole = await roleDataAccess.FindByNameOrThrowAsync(roleName, cancellationToken);
         
         const string query = @"
 insert into public.user_role (user_id, role_id) 
@@ -232,7 +243,7 @@ values (@UserId, @RoleId) on conflict (user_id, role_id) DO NOTHING;";
 
     public async Task RemoveFromRoleAsync(User user, string roleName, CancellationToken cancellationToken)
     {
-        var dbRole = await roleDataAccess.FindByNameOrThrowAsync(roleName.Normalize(), cancellationToken);
+        var dbRole = await roleDataAccess.FindByNameOrThrowAsync(roleName, cancellationToken);
 
         const string query = "DELETE FROM user_role WHERE user_id = @UserId AND role_id = @RoleId;";
         
@@ -253,7 +264,7 @@ where ur.user_id = @UserId
 
     public async Task<bool> IsInRoleAsync(User user, string roleName, CancellationToken cancellationToken)
     {
-        var dbRole = await roleDataAccess.FindByNameOrThrowAsync(roleName.Normalize(), cancellationToken);
+        var dbRole = await roleDataAccess.FindByNameOrThrowAsync(roleName, cancellationToken);
         
         const string query = @"select exists(select 1 from user_role where user_id = @UserId and role_id = @RoleId);";
 
@@ -273,36 +284,51 @@ where r.normalized_name = @NormalizedRoleName;
 ";
         
         cancellationToken.ThrowIfCancellationRequested();
-        return (await dataBaseManager.QueryAsync<User>(query, new { NormalizedRoleName = roleName.Normalize() }))
+        return (await dataBaseManager.QueryAsync<User>(query, new { NormalizedRoleName = DataHelper.Normalize(roleName) }))
             .ToList();
     }
 
     public async Task SetEmailAsync(User user, string? email, CancellationToken cancellationToken)
     {
-        var dbUser = await FindByIdOrThrowAsync(user.UserId, cancellationToken);
+        var dbUser = await FindByIdOrThrowAsync(user, cancellationToken);
         dbUser.Email = user.Email;
         await UpdateAsync(dbUser, cancellationToken);
     }
 
     public async Task<string?> GetEmailAsync(User user, CancellationToken cancellationToken)
     {
-        var dbUser = await FindByIdOrThrowAsync(user.UserId, cancellationToken);
+        var dbUser = await FindByIdOrThrowAsync(user, cancellationToken);
         return dbUser.Email;
     }
 
     public async Task<bool> GetEmailConfirmedAsync(User user, CancellationToken cancellationToken)
     {
-        var dbUser = await FindByIdOrThrowAsync(user.UserId, cancellationToken);
+        var dbUser = await FindByIdOrThrowAsync(user, cancellationToken);
         return dbUser.EmailConfirmed;
     }
 
     public async Task SetEmailConfirmedAsync(User user, bool confirmed, CancellationToken cancellationToken)
     {
-        var dbUser = await FindByIdOrThrowAsync(user.UserId, cancellationToken);
+        var dbUser = await FindByIdOrThrowAsync(user, cancellationToken);
         dbUser.EmailConfirmed = true;
         await UpdateAsync(dbUser, cancellationToken);
     }
 
+    public async Task<User> FindByEmailOrThrowAsync(User user, CancellationToken ct)
+    {
+        // login causing an issue here
+        // if not persisted yet, return
+        if (user.UserId == Guid.Empty) return user;
+        
+        if (string.IsNullOrEmpty(user.Email)) throw new ArgumentNullException(nameof(user.Email));
+        
+        var dbUser = await FindByEmailAsync(user.Email, ct);
+
+        if (dbUser == null) throw new UserNotFoundException();
+
+        return dbUser;
+    }
+    
     public async Task<User?> FindByEmailAsync(string normalizedEmail, CancellationToken cancellationToken)
     {
         if (string.IsNullOrEmpty(normalizedEmail))
@@ -320,27 +346,27 @@ where r.normalized_name = @NormalizedRoleName;
     
     public async Task<string?> GetNormalizedEmailAsync(User user, CancellationToken cancellationToken)
     {
-        var dbUser = await FindByIdOrThrowAsync(user.UserId, cancellationToken);
+        var dbUser = await FindByIdOrThrowAsync(user, cancellationToken);
         return dbUser.NormalizedEmail;
     }
 
     public async Task SetNormalizedEmailAsync(User user, string? normalizedEmail, CancellationToken cancellationToken)
     {
         if (string.IsNullOrEmpty(normalizedEmail)) throw new ArgumentNullException(nameof(normalizedEmail));
-        var dbUser = await FindByIdOrThrowAsync(user.UserId, cancellationToken);
+        var dbUser = await FindByIdOrThrowAsync(user, cancellationToken);
         dbUser.NormalizedEmail = normalizedEmail;
         await UpdateAsync(dbUser, cancellationToken);
     }
 
     public async Task<DateTimeOffset?> GetLockoutEndDateAsync(User user, CancellationToken cancellationToken)
     {
-        var dbUser = await FindByIdOrThrowAsync(user.UserId, cancellationToken);
+        var dbUser = await FindByIdOrThrowAsync(user, cancellationToken);
         return dbUser.LockoutEnd;
     }
 
     public async Task SetLockoutEndDateAsync(User user, DateTimeOffset? lockoutEnd, CancellationToken cancellationToken)
     {
-        var dbUser = await FindByIdOrThrowAsync(user.UserId, cancellationToken);
+        var dbUser = await FindByIdOrThrowAsync(user, cancellationToken);
         dbUser.LockoutEnd = lockoutEnd?.UtcDateTime;
         await UpdateAsync(dbUser, cancellationToken);
     }
@@ -366,29 +392,29 @@ WHERE user_id = @UserId;";
 
     public async Task<int> GetAccessFailedCountAsync(User user, CancellationToken cancellationToken)
     {
-        var dbUser = await FindByIdOrThrowAsync(user.UserId, cancellationToken);
+        var dbUser = await FindByIdOrThrowAsync(user, cancellationToken);
         return dbUser.AccessFailedCount;
     }
 
     public async Task<bool> GetLockoutEnabledAsync(User user, CancellationToken cancellationToken)
     {
-        var dbUser = await FindByIdOrThrowAsync(user.UserId, cancellationToken);
+        var dbUser = await FindByIdOrThrowAsync(user, cancellationToken);
         return dbUser.LockoutEnabled;
     }
 
     public async Task SetLockoutEnabledAsync(User user, bool enabled, CancellationToken cancellationToken)
     {
-        var dbUser = await FindByIdOrThrowAsync(user.UserId, cancellationToken);
-        dbUser.LockoutEnabled = enabled;
-
-        await UpdateAsync(dbUser, cancellationToken);
+        var dbUser = await FindByIdOrThrowAsync(user, cancellationToken);
+         dbUser.LockoutEnabled = enabled;
+        
+         await UpdateAsync(dbUser, cancellationToken);
     }
 
     public async Task SetPhoneNumberAsync(User user, string? phoneNumber, CancellationToken cancellationToken)
     {
         if (string.IsNullOrEmpty(phoneNumber)) throw new ArgumentNullException(nameof(phoneNumber));
         
-        var dbUser = await FindByIdOrThrowAsync(user.UserId, cancellationToken);
+        var dbUser = await FindByIdOrThrowAsync(user, cancellationToken);
         dbUser.PhoneNumber = phoneNumber;
 
         await UpdateAsync(dbUser, cancellationToken);
@@ -396,19 +422,19 @@ WHERE user_id = @UserId;";
 
     public async  Task<string?> GetPhoneNumberAsync(User user, CancellationToken cancellationToken)
     {
-        var dbUser = await FindByIdOrThrowAsync(user.UserId, cancellationToken);
+        var dbUser = await FindByIdOrThrowAsync(user, cancellationToken);
         return dbUser.PhoneNumber;
     }
 
     public async Task<bool> GetPhoneNumberConfirmedAsync(User user, CancellationToken cancellationToken)
     {
-        var dbUser = await FindByIdOrThrowAsync(user.UserId, cancellationToken);
+        var dbUser = await FindByIdOrThrowAsync(user, cancellationToken);
         return dbUser.PhoneNumberConfirmed;
     }
 
     public async Task SetPhoneNumberConfirmedAsync(User user, bool confirmed, CancellationToken cancellationToken)
     {
-        var dbUser = await FindByIdOrThrowAsync(user.UserId, cancellationToken);
+        var dbUser = await FindByIdOrThrowAsync(user, cancellationToken);
         dbUser.PhoneNumberConfirmed = confirmed;
 
         await UpdateAsync(dbUser, cancellationToken);
@@ -416,15 +442,14 @@ WHERE user_id = @UserId;";
 
     public async Task SetSecurityStampAsync(User user, string stamp, CancellationToken cancellationToken)
     {
-        var dbUser = await FindByIdOrThrowAsync(user.UserId, cancellationToken);
+        var dbUser = await FindByIdOrThrowAsync(user, cancellationToken);
         dbUser.SecurityStamp = stamp;
-
         await UpdateAsync(dbUser, cancellationToken);
     }
 
     public async Task<string?> GetSecurityStampAsync(User user, CancellationToken cancellationToken)
     {
-        var dbUser = await FindByIdOrThrowAsync(user.UserId, cancellationToken);
+        var dbUser = await FindByIdOrThrowAsync(user, cancellationToken);
         return dbUser.SecurityStamp;
     }
 

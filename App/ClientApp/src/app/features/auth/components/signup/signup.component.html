@@ -2,20 +2,10 @@
   <form [formGroup]="signupForm" (ngSubmit)="onSubmit()">
     <h2>Sign Up</h2>
     <div class="mb-3">
-      <label for="name" class="form-label">Name</label>
-      <input formControlName="name" type="text" class="form-control" id="name" placeholder="Enter name">
-      <div *ngIf="signupForm.get('name')?.errors?.required && signupForm.get('name')?.touched">
-        Name is required.
-      </div>
-    </div>
-    <div class="mb-3">
-      <label for="email" class="form-label">Email address</label>
-      <input formControlName="email" type="email" class="form-control" id="email" placeholder="Enter email">
-      <div *ngIf="signupForm.get('email')?.errors?.required && signupForm.get('email')?.touched">
-        Email is required.
-      </div>
-      <div *ngIf="signupForm.get('email')?.errors?.email && signupForm.get('email')?.touched">
-        Please enter a valid email.
+      <label for="username" class="form-label">Username</label>
+      <input formControlName="username" type="text" class="form-control" id="username" placeholder="Enter username">
+      <div *ngIf="signupForm.get('username')?.errors?.required && signupForm.get('username')?.touched">
+        Username is required.
       </div>
     </div>
     <div class="mb-3">
@@ -27,6 +17,18 @@
       <div *ngIf="signupForm.get('password')?.errors?.minLength && signupForm.get('password')?.touched">
         Password must be at least 6 characters.
       </div>
+    </div>
+    <div class="mb-3">
+      <label for="email" class="form-label">Email address</label>
+      <input formControlName="email" type="email" class="form-control" id="email" placeholder="Enter email">
+    </div>
+    <div class="mb-3">
+      <label for="firstname" class="form-label">First name</label>
+      <input formControlName="firstname" type="text" class="form-control" id="firstname" placeholder="Enter first name">
+    </div>
+    <div class="mb-3">
+      <label for="lastname" class="form-label">Last name</label>
+      <input formControlName="lastname" type="text" class="form-control" id="lastname" placeholder="Enter last name">
     </div>
     <button type="submit" class="btn btn-primary" [disabled]="!signupForm.valid">Sign Up</button>
   </form>
