@@ -35,26 +35,26 @@ public class TokenService(IOptions<AppSettings> appSettings, IUserDataAccess use
         return tokenHandler.WriteToken(token);
     }
 
-    public static List<Claim> GetClaims(User user)
+    private static List<Claim> GetClaims(User user)
     {
         var claims = new List<Claim>
         {
-            new(JwtRegisteredClaimNames.Sub, user.UserId.ToString()),
-            new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-            new(JwtRegisteredClaimNames.UniqueName, user.Username),
+            new(ClaimTypes.NameIdentifier, user.UserId.ToString()),
+            new(ClaimTypes.Sid, Guid.NewGuid().ToString()), // used instead of jwt id (jti)
+            new(ClaimTypes.Name, user.Username),
         };
-
+        
         if (!string.IsNullOrEmpty(user.Email))
         {
-            claims.Add(new(JwtRegisteredClaimNames.Email, user.Email));
+            claims.Add(new(ClaimTypes.Email, user.Email));
         }
         if (!string.IsNullOrEmpty(user.FirstName))
         {
-            claims.Add(new(JwtRegisteredClaimNames.GivenName, user.FirstName));
+            claims.Add(new(ClaimTypes.GivenName, user.FirstName));
         }
         if (!string.IsNullOrEmpty(user.LastName))
         {
-            claims.Add(new(JwtRegisteredClaimNames.FamilyName, user.LastName));
+            claims.Add(new(ClaimTypes.Surname, user.LastName));
         }
 
         return claims;
@@ -70,11 +70,10 @@ public class TokenService(IOptions<AppSettings> appSettings, IUserDataAccess use
         }
 
         // todo: swap to userId?
-        var username = principal.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.UniqueName)?.Value;
+        var username = principal.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value;
         
         if (string.IsNullOrEmpty(username)) throw new SecurityTokenException("Invalid claims");
         
-        //var username = principal.Identity.Name;
         var user = await userDataAccess.FindByUserNameOrThrowAsync(new User { Username = username }, new CancellationToken());
 
         return (true, GenerateJwtToken(user, await userDataAccess.GetRolesAsync(user, new CancellationToken())));

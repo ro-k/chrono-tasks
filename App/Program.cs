@@ -71,7 +71,8 @@ app.MapControllerRoute(
 
 app.UseMiddleware<ExceptionHandlerMiddleware>();
 app.UseMiddleware<TokenRefreshMiddleware>();
+app.UseMiddleware<UserContextMiddleware>();
 
-//app.MapFallbackToFile("index.html");
+app.MapFallbackToFile("/", "index.html");
 
 app.Run();
