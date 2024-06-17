@@ -1,18 +1,23 @@
 import {Component, OnInit} from '@angular/core';
-import {AuthService} from "./features/auth/services/auth.service";
+import {Observable} from "rxjs";
+import {UserDto} from "./core/models/user-dto";
+import {UserStore} from "./state/stores/user-store";
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
-export class AppComponent implements OnInit {
+export class AppComponent {
   title = 'Task';
   isLoggedIn = false;
-  constructor(private authService: AuthService) {
-  }
+  user$: Observable<UserDto | undefined>;
 
-  ngOnInit(): void {
-    this.isLoggedIn = this.authService.isLoggedIn();
+  constructor(userStore: UserStore) {
+    this.user$ = userStore.user$;
+
+    userStore.user$.subscribe(user => {
+      this.isLoggedIn = (user != null);
+    });
   }
 }

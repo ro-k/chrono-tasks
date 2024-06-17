@@ -2,6 +2,8 @@ import { Component } from '@angular/core';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import {Log} from "oidc-client";
 import {AuthService} from "../../services/auth.service";
+import {UserStore} from "../../../../state/stores/user-store";
+import {Router} from "@angular/router";
 
 @Component({
   selector: 'app-login',
@@ -9,7 +11,9 @@ import {AuthService} from "../../services/auth.service";
   styleUrls: ['./login.component.css']
 })
 export class LoginComponent {
-  constructor(private authService: AuthService) {
+  errorMessage = '';
+
+  constructor(private userStore: UserStore, private router: Router) {
   }
 
   loginForm = new FormGroup({
@@ -20,14 +24,20 @@ export class LoginComponent {
   onSubmit() {
     if (this.loginForm.valid) {
       console.log('Form Submitted', this.loginForm.value);
-      this.authService.login(this.loginForm.value.username as string, this.loginForm.value.password as string).subscribe({
-        next: response => {
-          console.log('Login successful:', response);
-        },
-        error: err => {
-          console.error('Login error:', err);
+      this.errorMessage = '';
+      this.userStore.login(this.loginForm.value.username as string, this.loginForm.value.password as string).subscribe({
+          next: () => {
+            this.router.navigate(['/']).then(success => {
+              if (!success) {
+                console.error('Navigation to home failed!');
+              }
+            });
+          },
+          error: () => {
+            this.errorMessage = 'Login failed';
+          }
         }
-      });
+      );
     } else {
       console.log('Form is not valid');
     }

@@ -1,5 +1,6 @@
 using Lib.DTOs;
 using Lib.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace App.Controllers;
@@ -25,5 +26,12 @@ public class UserController(IUserService userService) : ControllerBase
     {
         await userService.Logout();
         return Ok();
+    }
+
+    [Authorize]
+    [HttpGet]
+    public async Task<IActionResult> Get()
+    {
+        return Ok(await userService.GetUser());
     }
 }

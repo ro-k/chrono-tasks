@@ -1,5 +1,7 @@
 import { Component } from '@angular/core';
 import {AuthService} from "../../../auth/services/auth.service";
+import {UserStore} from "../../../../state/stores/user-store";
+import {Router} from "@angular/router";
 
 @Component({
   selector: 'app-nav-menu',
@@ -9,7 +11,7 @@ import {AuthService} from "../../../auth/services/auth.service";
 export class NavMenuComponent {
   isExpanded = false;
 
-  constructor(private authService: AuthService) {
+  constructor(private userStore: UserStore, private router: Router) {
   }
 
   collapse() {
@@ -21,7 +23,13 @@ export class NavMenuComponent {
   }
 
   logout() {
-    this.authService.logout();
-    window.location.reload();
+    //window.location.reload();
+    this.userStore.logout().subscribe({
+      next: () => this.router.navigate(['/login']).then(success => {
+        if (!success) {
+          console.error('Navigation to login failed!');
+        }
+      })
+    });
   }
 }

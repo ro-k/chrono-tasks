@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import {HTTP_INTERCEPTORS, HttpClientModule} from "@angular/common/http";
 import {AuthInterceptorService} from "./interceptors/auth-interceptor.service";
 import {BrowserModule} from "@angular/platform-browser";
-import {RefreshTokenInterceptor} from "./interceptors/refresh-token-interceptor.service";
 
 @NgModule({
   declarations: [
@@ -15,7 +14,6 @@ import {RefreshTokenInterceptor} from "./interceptors/refresh-token-interceptor.
   ],
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptorService, multi: true },
-    { provide: HTTP_INTERCEPTORS, useClass: RefreshTokenInterceptor, multi: true },
   ],
 })
 export class CoreModule { }

@@ -9,4 +9,5 @@ public interface IUserService
     public Task Logout();
     public Task<string> Register(RegisterDto registerDto);
     public Task ExternalLogin(string loginProvider, string providerKey);
+    public Task<UserDto> GetUser();
 }

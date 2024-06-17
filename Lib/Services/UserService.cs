@@ -9,7 +9,8 @@ public class UserService(
     ISignInManagerWrapper signInManager,
     IUserManagerWrapper userManager,
     IUserDataAccess userDataAccess,
-    ITokenService tokenService)
+    ITokenService tokenService,
+    IUserContext userContext)
     : IUserService
 {
     public async Task<string> Login(LoginDto loginDto)
@@ -60,4 +61,7 @@ public class UserService(
     {
         throw new NotImplementedException();
     }
+
+    public async Task<UserDto> GetUser() =>
+        UserDto.FromUser((await userDataAccess.FindByIdAsync(userContext.UserId.ToString(), new CancellationToken()))!);
 }

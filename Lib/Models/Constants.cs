@@ -11,5 +11,4 @@ public enum Status
     Inactive = 2,
     Deleted = 3,
     Archived = 4,
-    
 }
