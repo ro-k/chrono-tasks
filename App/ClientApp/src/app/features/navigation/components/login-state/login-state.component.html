@@ -1,0 +1,23 @@
+<div class="login-state">
+  <ng-container *ngIf="user != undefined; else loginTemplate">
+    <div class="dropdown">
+      <button class="btn avatar-circle" type="button" id="userMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+        {{ getInitials() }}
+      </button>
+      <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenuButton">
+        <li>
+          <a class="dropdown-item" href="#" (click)="viewProfile()">Profile</a>
+        </li>
+        <li>
+          <a class="dropdown-item" href="#" (click)="logout()">Logout</a>
+        </li>
+      </ul>
+      <div class="hint">
+        <span>{{ combineUserName() }} ({{ user.email }})</span>
+      </div>
+    </div>
+  </ng-container>
+  <ng-template #loginTemplate>
+    <button class="btn btn-primary" (click)="login()">Login</button>
+  </ng-template>
+</div>

@@ -10,12 +10,13 @@ import {
 import {Activity} from "../../core/models/activity";
 import {ActivityService} from "../../features/activities/services/activity-service";
 import {Injectable} from "@angular/core";
-import {tap} from "rxjs";
+import {UserStore} from "./user-store";
+import {ClearableStore} from "./clearable-store";
 
 @Injectable({
   providedIn: 'root'
 })
-export class ActivityStore {
+export class ActivityStore extends ClearableStore {
   store = createStore({ name: 'activities' }, withEntities<Activity, 'activityId'>({idKey: 'activityId'}));
   activities$ = this.store.pipe(selectAllEntities());
 
@@ -23,7 +24,8 @@ export class ActivityStore {
 
   jobActivities$ = this.store.pipe(selectAllEntitiesApply({mapEntity: e => e, filterEntity: e => e.jobId != null}));
 
-  constructor(private activityService: ActivityService) {
+  constructor(private activityService: ActivityService, userStore: UserStore) {
+    super(userStore);
   }
 
   // load activity data
@@ -43,11 +45,6 @@ export class ActivityStore {
 
   upsertActivities(activities: Activity[]) {
     this.store.update(upsertEntities(activities));
-  }
-
-  // load category activities
-  loadByCategoryId_v2(categoryId: string){
-    this.activityService.getByCategory(categoryId).pipe(tap(this.upsertActivities));
   }
 
   // load category activities

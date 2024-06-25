@@ -1,7 +1,5 @@
 import { Component } from '@angular/core';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
-import {Log} from "oidc-client";
-import {AuthService} from "../../services/auth.service";
 import {UserStore} from "../../../../state/stores/user-store";
 import {Router} from "@angular/router";
 
@@ -41,5 +39,10 @@ export class LoginComponent {
     } else {
       console.log('Form is not valid');
     }
+  }
+
+  onSignUp()
+  {
+    this.router.navigate(['/signup']).then();
   }
 }

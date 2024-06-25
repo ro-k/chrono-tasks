@@ -1,25 +1,26 @@
-import {createStore} from "@ngneat/elf";
+import {createStore, Store} from "@ngneat/elf";
 import {
   upsertEntities,
   deleteEntities,
   selectAllEntities,
   updateEntities,
   withEntities,
-  withUIEntities
 } from "@ngneat/elf-entities";
 import {Job} from "../../core/models/job";
 import {JobService} from "../../features/jobs/services/job.service";
-import {TreeViewUI} from "../../core/models/tree-view-ui";
 import {Injectable} from "@angular/core";
+import {ClearableStore} from "./clearable-store";
+import {UserStore} from "./user-store";
 
 @Injectable({
   providedIn: 'root'
 })
-export class JobStore {
+export class JobStore extends ClearableStore {
   store = createStore({ name: 'jobs' }, withEntities<Job, 'jobId'>({idKey: 'jobId'}));
   jobs$ = this.store.pipe(selectAllEntities());
 
-  constructor(private jobService: JobService) {
+  constructor(private jobService: JobService, userStore: UserStore) {
+    super(userStore);
   }
 
   // load job data

@@ -6,18 +6,21 @@ import {
   updateEntities,
   withEntities,
   deleteEntities,
-  upsertEntities
+  upsertEntities, deleteAllEntities
 } from "@ngneat/elf-entities";
 import {Injectable} from "@angular/core";
+import {UserStore} from "./user-store";
+import {ClearableStore} from "./clearable-store";
 
 @Injectable({
   providedIn: 'root'
 })
-export class CategoryStore {
+export class CategoryStore extends ClearableStore {
   store = createStore({ name: 'categories' }, withEntities<Category, 'categoryId'>({idKey: 'categoryId'}));
   categories$ = this.store.pipe(selectAllEntities());
 
-  constructor(private categoryService: CategoryService) {
+  constructor(private categoryService: CategoryService, userStore: UserStore) {
+    super(userStore);
   }
 
   // load category data

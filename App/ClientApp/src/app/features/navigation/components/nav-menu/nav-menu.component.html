@@ -33,19 +33,9 @@
           <li class="nav-item" [routerLinkActive]="['link-active']">
             <a class="nav-link text-dark" [routerLink]="['/content']">Content</a>
           </li>
-
-<!--          temporary home for these-->
-          <li class="nav-item" [routerLinkActive]="['link-active']">
-            <a class="nav-link text-dark" [routerLink]="['/login']">Login</a>
-          </li>
-          <li class="nav-item" [routerLinkActive]="['link-active']">
-            <a class="nav-link text-dark" [routerLink]="['/signup']">Sign up</a>
-          </li>
-          <li class="nav-item" [routerLinkActive]="['link-active']">
-            <a class="nav-link text-dark" (click)="logout()">Logout</a>
-          </li>
         </ul>
       </div>
+      <app-login-state></app-login-state>
     </div>
   </nav>
 </header>

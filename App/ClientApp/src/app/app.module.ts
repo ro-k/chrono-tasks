@@ -1,5 +1,5 @@
 import { BrowserModule } from '@angular/platform-browser';
-import {APP_ID, NgModule} from '@angular/core';
+import {APP_ID, APP_INITIALIZER, NgModule} from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { RouterModule } from '@angular/router';
@@ -17,6 +17,13 @@ import {ContentPaneComponent} from "./features/main-view/components/content-pane
 import {AuthModule} from "./features/auth/auth.module";
 import {LoginComponent} from "./features/auth/components/login/login.component";
 import {SignupComponent} from "./features/auth/components/signup/signup.component";
+import {UserService} from "./features/user/services/user.service";
+import {UserStore} from "./state/stores/user-store";
+
+export function initializeApp(userStore: UserStore): () => Promise<void> {
+  // todo: move to init service with other store init
+  return (): Promise<void> => userStore.refreshUserFromToken();
+}
 
 @NgModule({
   declarations: [
@@ -43,7 +50,13 @@ import {SignupComponent} from "./features/auth/components/signup/signup.componen
     ]),
   ],
   providers: [
-    {provide: APP_ID, useValue: 'ng-cli-universal'}
+    {provide: APP_ID, useValue: 'ng-cli-universal'},
+    {
+      provide: APP_INITIALIZER,
+      useFactory: initializeApp,
+      deps: [UserStore],
+      multi: true
+    },
   ],
   bootstrap: [AppComponent]
 })

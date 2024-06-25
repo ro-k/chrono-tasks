@@ -20,3 +20,8 @@ html {
 .nav-link {
   cursor: pointer;
 }
+
+.link-active .nav-link {
+  font-weight: bold;
+  color: #007bff !important;
+}

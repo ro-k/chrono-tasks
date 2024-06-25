@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import {AuthService} from "../../../auth/services/auth.service";
 import {UserStore} from "../../../../state/stores/user-store";
 import {Router} from "@angular/router";
 
@@ -23,7 +22,6 @@ export class NavMenuComponent {
   }
 
   logout() {
-    //window.location.reload();
     this.userStore.logout().subscribe({
       next: () => this.router.navigate(['/login']).then(success => {
         if (!success) {

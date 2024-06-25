@@ -1,10 +1,11 @@
 import {createStore, select, withProps} from "@ngneat/elf";
-import {Injectable} from "@angular/core";
+import {Injectable, OnInit} from "@angular/core";
 import {AuthService} from "../../features/auth/services/auth.service";
-import {catchError, map, Observable, switchMap, tap} from "rxjs";
+import {catchError, filter, map, Observable, switchMap, tap, lastValueFrom, of} from "rxjs";
 import {UserService} from "../../features/user/services/user.service";
 import {UserDto} from "../../core/models/user-dto";
 import {RegistrationInfo} from "../../core/models/registration-info";
+import {HttpErrorResponse} from "@angular/common/http";
 
 export class UserState {
   user: UserDto | undefined;
@@ -20,10 +21,22 @@ export class UserStore {
   );
   private accessTokenKey = 'access_token';
 
-//  user$ = this.store.pipe(tap (s => s));
   user$ = this.store.pipe(select(state => state.user));
+  loggedIn$ = this.user$.pipe(filter(user => user != null));
+  loggedOut$ = this.user$.pipe(filter(user => user == null));
 
   constructor(private authService: AuthService, private userService: UserService) {
+  }
+
+  refreshUserFromToken(): Promise<void> {
+    const token = this.getAuthToken();
+
+    debugger;
+    if (token) {
+      return lastValueFrom(this.load().pipe(map(()=>undefined)));
+    }
+
+    return Promise.resolve();
   }
 
   isLoggedIn(): boolean {
@@ -53,7 +66,16 @@ export class UserStore {
 
   // load user data
   load() {
-    // todo: could separate login and load
+    return this.userService.get().pipe(
+      tap(user => {
+        this.store.update(state => ({...state, user: user}));
+        console.log('User retrieved', user);
+      }),
+      catchError((error) => {
+        console.log(error);
+        return of(null);
+      })
+    );
   }
 
   // add user
@@ -83,7 +105,9 @@ export class UserStore {
         map(response =>{
           this.removeAuthToken();
           this.store.update(state => ({...state, user: undefined}));
+
           // todo: clear other stores
+
         }),
         catchError(error => {
           console.error('Logout failed:', error);
