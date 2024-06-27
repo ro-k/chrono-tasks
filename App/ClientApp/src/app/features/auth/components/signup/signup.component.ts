@@ -44,4 +44,9 @@ export class SignupComponent {
       console.log('Form is not valid');
     }
   }
+
+  onLogin()
+  {
+    this.router.navigate(['/login']).then();
+  }
 }

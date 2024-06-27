@@ -30,7 +30,10 @@
       <label for="lastname" class="form-label">Last name</label>
       <input formControlName="lastname" type="text" class="form-control" id="lastname" placeholder="Enter last name">
     </div>
-    <button type="submit" class="btn btn-primary" [disabled]="!signupForm.valid">Sign Up</button>
+    <div class="btn-group">
+      <button type="submit" class="btn btn-primary" [disabled]="!signupForm.valid">Sign Up</button>
+      <button type="button" class="btn btn-secondary" (click)="onLogin()">Login</button>
+    </div>
     <div *ngIf="errorMessage" class="error">{{ errorMessage }}</div>
   </form>
 </div>
