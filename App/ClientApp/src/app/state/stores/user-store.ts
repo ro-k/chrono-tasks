@@ -31,7 +31,6 @@ export class UserStore {
   refreshUserFromToken(): Promise<void> {
     const token = this.getAuthToken();
 
-    debugger;
     if (token) {
       return lastValueFrom(this.load().pipe(map(()=>undefined)));
     }

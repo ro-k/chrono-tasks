@@ -4,12 +4,16 @@
     <ng-container *ngIf="(treeView$ | async) as treeViewData">
       <ng-template #recursiveList let-categories>
         <li *ngFor="let category of categories" class="list-group-item">
-          <span (click)="toggle(category)">
-            {{ category.isExpanded ? '[-]' : '[+]'}} {{ category.name }}
-          </span>
-          <ul *ngIf="category.isExpanded" class="list-group">
-            <li *ngFor="let activity of category.activities" class="list-group-item">
-              {{ activity.name }}
+          <!-- Toggle button for expand/collapse with file tree style -->
+          <div (click)="toggle(category)" class="d-flex align-items-center">
+            <i class="bi me-2" [ngClass]="{'bi-folder2-open': category.isExpanded, 'bi-folder2': !category.isExpanded}"></i>
+            <span>{{ category.name }}</span>
+          </div>
+          <!-- Nested list for activities and jobs -->
+          <ul *ngIf="category.isExpanded" class="list-group ms-3">
+            <li *ngFor="let activity of category.activities" class="list-group-item d-flex align-items-center">
+              <i class="bi bi-file-earmark-text me-2"></i>
+              <span>{{ activity.name }}</span>
             </li>
             <!-- Pass the jobs as categories for the next level of recursion -->
             <ng-container *ngTemplateOutlet="recursiveList; context: {$implicit: category.jobs}"></ng-container>

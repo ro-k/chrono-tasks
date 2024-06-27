@@ -1,5 +1,29 @@
+.tree-view {
+  position: relative;
+  min-height: 100vh;
+  padding-left: 1rem; /* Padding for left spacing */
+  border-right: 1px solid #ddd; /* Border for right side */
+}
+
+.tree-view::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 1px;
+  background-color: #ddd; /* Light gray border */
+}
+
 .list-group-item {
   cursor: pointer; /* Makes it clear that items are clickable */
+  padding: 0.5rem 0.75rem; /* Padding for list items */
+  border: none; /* Remove default borders */
+  background-color: transparent; /* Transparent background */
+}
+
+.list-group-item:hover {
+  background-color: #f8f9fa; /* Light background on hover */
 }
 
 .list-group-item span {
@@ -7,21 +31,26 @@
 }
 
 .list-group {
-  width: calc(100% - 1.5em); /* Adjust 10em to the desired value */
-}
-.tree-view {
-  position: relative;
-  min-height: 100vh; /* Ensures minimum height is full viewport height */
+  margin-left: 1rem; /* Left margin for nested lists */
 }
 
-.tree-view::after {
-  content: "";
-  position: absolute;
-  top: -1em;
-  right: 0;
-  bottom: 0;
-  width: 1px; /* For a thin line */
-  background-color: #ddd; /* Light gray border, adjust to match navbar */
-  margin-right: 1em;
+.list-group-item .bi {
+  margin-right: 0.5rem; /* Margin for icons */
 }
 
+.list-group-item .text-primary:hover {
+  text-decoration: underline; /* Underline on hover */
+}
+
+.d-flex.align-items-center {
+  display: flex;
+  align-items: center;
+}
+
+.bi-folder2, .bi-folder2-open {
+  color: #6c757d; /* Gray color for folder icons */
+}
+
+.bi-file-earmark-text {
+  color: #007bff; /* Blue color for file icons */
+}
