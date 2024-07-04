@@ -55,6 +55,7 @@
   color: #007bff; /* Blue color for file icons */
 }
 
-.parent-item {
-  color: #28a745 !important; /* Green color for parent items */
+.badge.bg-primary {
+  margin-left: auto; /* Ensure the badge is aligned to the right */
+  font-size: 0.75rem; /* Smaller font size for badge */
 }
