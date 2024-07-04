@@ -30,7 +30,7 @@ builder.Services.AddAuth(builder.Configuration.Get<AppSettings>()!);
 // Register the Swagger generator, defining one or more Swagger documents
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Task API", Version = "v1" });
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "ChronoTasks API", Version = "v1" });
 });
 
 builder.Services.AddControllersWithViews()

@@ -54,3 +54,7 @@
 .bi-file-earmark-text {
   color: #007bff; /* Blue color for file icons */
 }
+
+.parent-item {
+  color: #28a745 !important; /* Green color for parent items */
+}

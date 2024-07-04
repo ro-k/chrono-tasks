@@ -9,7 +9,7 @@ import {UserStore} from "./state/stores/user-store";
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-  title = 'Task';
+  title = 'ChronoTasks';
   isLoggedIn = false;
   user$: Observable<UserDto | undefined>;
 

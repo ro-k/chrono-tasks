@@ -42,7 +42,7 @@ export class AuthInterceptorService implements HttpInterceptor {
     const authReq = req.clone({
       headers: req.headers.set('Authorization', `Bearer ${authToken}`)
     });
-    // return next.handle(authReq);
+
     return next.handle(authReq).pipe(
       catchError((error: HttpErrorResponse) => {
         if (error.status === 401) {

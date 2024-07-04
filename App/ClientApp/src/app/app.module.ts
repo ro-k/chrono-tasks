@@ -19,6 +19,7 @@ import {LoginComponent} from "./features/auth/components/login/login.component";
 import {SignupComponent} from "./features/auth/components/signup/signup.component";
 import {UserService} from "./features/user/services/user.service";
 import {UserStore} from "./state/stores/user-store";
+import {ParentsModule} from "./features/parents/parents.module";
 
 export function initializeApp(userStore: UserStore): () => Promise<void> {
   // todo: move to init service with other store init
@@ -36,6 +37,7 @@ export function initializeApp(userStore: UserStore): () => Promise<void> {
     FormsModule,
     ReactiveFormsModule,
     SharedModule,
+    ParentsModule,
     CoreModule,
     NavigationModule,
     CategoriesModule,

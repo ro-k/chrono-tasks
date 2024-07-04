@@ -29,6 +29,7 @@ public static class StartupExtensions
             .AddScoped<IJobDataAccess, JobDataAccess>()
             .AddScoped<IUserDataAccess, UserDataAccess>()
             .AddScoped<ITreeViewDataAccess, TreeViewDataAccess>()
+            .AddScoped<IParentDataAccess, ParentDataAccess>()
             .AddScoped<IUserContext, UserContext>();
 
         // allow dapper to properly map snake_case db fields to PascalCase model properties
@@ -45,6 +46,7 @@ public static class StartupExtensions
         .AddScoped<ITreeViewService, TreeViewService>()
         .AddScoped<IJobService, JobService>()
         .AddScoped<IActivityService, ActivityService>()
+        .AddScoped<IParentService, ParentService>()
         .AddScoped<ITokenService, TokenService>();
 
     private static IServiceCollection ConfigureIdentity(this IServiceCollection services)

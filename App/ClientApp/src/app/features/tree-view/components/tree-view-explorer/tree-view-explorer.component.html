@@ -2,21 +2,26 @@
   <ul class="list-group">
     <!-- Only subscribe to the observable once at the top level -->
     <ng-container *ngIf="(treeView$ | async) as treeViewData">
-      <ng-template #recursiveList let-categories>
-        <li *ngFor="let category of categories" class="list-group-item">
+      <ng-template #recursiveList let-items>
+        <li *ngFor="let item of items" class="list-group-item">
           <!-- Toggle button for expand/collapse with file tree style -->
-          <div (click)="toggle(category)" class="d-flex align-items-center">
-            <i class="bi me-2" [ngClass]="{'bi-folder2-open': category.isExpanded, 'bi-folder2': !category.isExpanded}"></i>
-            <span>{{ category.name }}</span>
+          <div (click)="toggle(item)" class="d-flex align-items-center">
+            <i class="bi me-2" [ngClass]="{
+              'bi-folder2-open': items.isExpanded,
+              'bi-folder2': !items.isExpanded
+            }"></i>
+            <span>{{ item.name }}</span>
+            <span *ngIf="item.hasChildren" class="badge bg-primary ms-auto">Has Children</span>
           </div>
           <!-- Nested list for activities and jobs -->
-          <ul *ngIf="category.isExpanded" class="list-group ms-3">
-            <li *ngFor="let activity of category.activities" class="list-group-item d-flex align-items-center">
+          <ul *ngIf="item.isExpanded" class="list-group ms-3">
+            <li *ngFor="let activity of item.activities" class="list-group-item d-flex align-items-center">
               <i class="bi bi-file-earmark-text me-2"></i>
               <span>{{ activity.name }}</span>
+              <span *ngIf="activity.hasChildren" class="badge bg-primary ms-auto">Has Children</span>
             </li>
-            <!-- Pass the jobs as categories for the next level of recursion -->
-            <ng-container *ngTemplateOutlet="recursiveList; context: {$implicit: category.jobs}"></ng-container>
+            <!-- Pass the jobs as items for the next level of recursion -->
+            <ng-container *ngTemplateOutlet="recursiveList; context: {$implicit: item.jobs}"></ng-container>
           </ul>
         </li>
       </ng-template>

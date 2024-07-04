@@ -33,6 +33,7 @@
 
     <ItemGroup>
       <Folder Include="ClientApp\src\app\features\auth\services\" />
+      <Folder Include="ClientApp\src\app\features\parents\services\" />
     </ItemGroup>
 
     <Target Name="DebugEnsureNodeEnv" BeforeTargets="Build" Condition=" '$(Configuration)' == 'Debug' And !Exists('$(SpaRoot)node_modules') ">

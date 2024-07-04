@@ -13,7 +13,8 @@ import {TreeViewJob} from "../../core/models/tree-view-job";
 import {TreeViewUI} from "../../core/models/tree-view-ui";
 import {ItemType} from "../../core/models/item-type";
 import {ContentViewItem} from "../../core/models/content-view-item";
-import {getEntity, selectAllEntities, selectManyByPredicate} from "@ngneat/elf-entities";
+import {getEntity, selectAllEntities, selectManyByPredicate, upsertEntities} from "@ngneat/elf-entities";
+import {ParentService} from "../../features/parents/services/parent.service";
 
 
 @Injectable({
@@ -23,7 +24,7 @@ export class TreeViewStore {
   // todo: rethink TreeView* items
   private store = createStore(
     { name: 'tree-view' },
-    withProps<TreeView>({ categories: [] }),
+    withProps<TreeView>({ categories: [], parentIds: new Set<string>() }),
   );
 
   private navigation: ContentViewItem[] = [];
@@ -33,17 +34,20 @@ export class TreeViewStore {
   navigationStack$ = this.navigationSource.asObservable();
   contentViewItems$: Observable<ContentViewItem[]> = EMPTY;
 
-  constructor(private categoryStore: CategoryStore, private jobStore: JobStore, private activityStore: ActivityStore) {
+  constructor(private categoryStore: CategoryStore, private jobStore: JobStore, private activityStore: ActivityStore, private parentService: ParentService) {
     this.updateItems = this.updateItems.bind(this);
     this.setupTreeView();
     this.setupContentView();
   }
 
   private setupTreeView() {
+
+    this.loadParentIds();
+
     // update categories themselves
     this.categoryStore.categories$.pipe(
       map(categories =>
-        this.updateItems<TreeViewCategory, Category>(this.store.state.categories, categories, (x) => x.categoryId, (tv, c) => ({...tv,...c as any,...{type:ItemType.Category}}))))
+        this.updateItems<TreeViewCategory, Category>(this.store.state.categories, categories, (x) => x.categoryId, (tv, c) => ({...tv,...c as any,...{type:ItemType.Category, hasChildren:this.store.state.parentIds.has(c.categoryId)}}))))
       .subscribe(categories => {
         this.store.update(treeView => ({...treeView, categories: categories}))});
 
@@ -82,6 +86,7 @@ export class TreeViewStore {
         let activitySet = map.get(jobId);
         if(activitySet === undefined) {
           map.set(jobId, [activity]);
+          this.store.state.parentIds.add(jobId); // update ParentIds
         } else {
           activitySet.push(activity);
         }
@@ -94,7 +99,7 @@ export class TreeViewStore {
         job.activities = [];
       } else {
         job.activities = job.activities ?? [];
-        job.activities = this.updateItems<Activity, Activity>(job.activities, activitySet, (a => a.activityId), (a1, a2) => ({...a1, ...a2}));
+        job.activities = this.updateItems<Activity, Activity>(job.activities, activitySet, (a => a.activityId), (a1, a2) => ({...a1, ...a2, ...{...{type:ItemType.Activity, hasChildren:this.store.state.parentIds.has(a2.activityId)}}}));
       }
     });
 
@@ -110,6 +115,7 @@ export class TreeViewStore {
         let activitySet = map.get(categoryId);
         if(activitySet === undefined) {
           map.set(categoryId, [activity]);
+          this.store.state.parentIds.add(categoryId); // update ParentIds
         } else {
           activitySet.push(activity);
         }
@@ -122,7 +128,7 @@ export class TreeViewStore {
         category.activities = [];
       } else {
         category.activities = category.activities ?? [];
-        category.activities = this.updateItems<Activity, Activity>(category.activities, activitySet, (a => a.activityId), (a1, a2) => ({...a1, ...a2}));
+        category.activities = this.updateItems<Activity, Activity>(category.activities, activitySet, (a => a.activityId), (a1, a2) => ({...a1, ...a2, ...{type:ItemType.Activity, hasChildren:this.store.state.parentIds.has(a2.activityId)}}));
       }
     });
 
@@ -135,9 +141,10 @@ export class TreeViewStore {
     jobs.forEach(job => {
       let jobSet = map.get(job.categoryId);
       if(jobSet === undefined) {
-        map.set(job.categoryId, [{...job,...{type:ItemType.Job}}]);
+        map.set(job.categoryId, [{...job,...{type:ItemType.Job, hasChildren:this.store.state.parentIds.has(job.jobId)}}]);
+        this.store.state.parentIds.add(job.categoryId); // update parentIds
       } else {
-        jobSet.push({...job,...{type:ItemType.Job}});
+        jobSet.push({...job,...{type:ItemType.Job, hasChildren:this.store.state.parentIds.has(job.jobId)}});
       }
     });
 
@@ -181,6 +188,28 @@ export class TreeViewStore {
     });
 
     return Array.from(map.values());
+  }
+
+  loadParentIds() {
+    this.parentService.getAll().subscribe(
+      {
+        next: (parentIds) => {
+          console.log('loading parent ids');
+          this.updateStoreParentIds(parentIds);
+        },
+        error: (error) => {
+          console.error('Failed to load parentIds', error);
+        }
+      }
+    );
+  }
+
+  updateStoreParentIds(parentIds: string[]) {
+
+    this.store.update(treeView => ({
+      ...treeView,
+      parentIds: new Set([...treeView.parentIds, ...parentIds])
+    }));
   }
 
   private setupContentView() {
@@ -311,5 +340,9 @@ export class TreeViewStore {
 
   activityToContentViewItem(value: Activity) : ContentViewItem {
     return {createdAt: value.createdAt, description: value.description ?? "", id: value.activityId, modifiedAt: value.modifiedAt, name: value.name, type: ItemType.Activity};
+  }
+
+  public getParents(){
+    return this.store.state.parentIds;
   }
 }
