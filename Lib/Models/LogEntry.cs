@@ -1,5 +1,7 @@
+using System.Diagnostics.CodeAnalysis;
 using Lib.Models;
 
+[ExcludeFromCodeCoverage]
 public class LogEntry : BaseModel
 {
     public Guid LogEntryId { get; set; }

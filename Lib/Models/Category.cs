@@ -1,5 +1,8 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Lib.Models;
 
+[ExcludeFromCodeCoverage]
 public class Category : BaseModel
 {
     public Guid CategoryId { get; set; }

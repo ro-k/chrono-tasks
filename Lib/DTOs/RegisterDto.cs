@@ -1,5 +1,8 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Lib.DTOs;
 
+[ExcludeFromCodeCoverage]
 public class RegisterDto
 {
     public string Email { get; set; } = "";

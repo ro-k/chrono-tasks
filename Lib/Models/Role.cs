@@ -1,6 +1,9 @@
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace Lib.Models;
 
+[ExcludeFromCodeCoverage]
 public class Role : IHasConcurrencyStamp
 {
     public Guid RoleId { get; set; } = Guid.NewGuid();

@@ -1,5 +1,8 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Lib.Models;
 
+[ExcludeFromCodeCoverage]
 public class Media : BaseModel
 {
     public Guid MediaId { get; set; } = Guid.NewGuid();

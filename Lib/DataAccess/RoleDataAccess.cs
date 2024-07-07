@@ -25,7 +25,7 @@ VALUES
         
         await dataBaseManager.ExecuteAsync(insertQuery, role);
 
-        return new IdentityResult();
+        return IdentityResult.Success;
     }
 
     public async Task<IdentityResult> UpdateAsync(Role role, CancellationToken ct)
@@ -50,7 +50,7 @@ WHERE role_id = @RoleId;";
             return IdentityResult.Failed(new IdentityError { Code = e.SqlState, Description = e.Message });
         }
 
-        return new IdentityResult();
+        return IdentityResult.Success;
     }
 
     public async Task<IdentityResult> DeleteAsync(Role role, CancellationToken ct)
@@ -70,7 +70,7 @@ WHERE role_id = @RoleId;";
             return IdentityResult.Failed(new IdentityError { Code = e.SqlState, Description = e.Message });
         }
         
-        return new IdentityResult();
+        return IdentityResult.Success;
     }
 
     public async Task<string> GetRoleIdAsync(Role role, CancellationToken cancellationToken)

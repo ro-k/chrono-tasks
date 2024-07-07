@@ -1,5 +1,8 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Lib;
 
+[ExcludeFromCodeCoverage]
 public class AppSettings
 {
     public string? ConnectionString { get; set; }

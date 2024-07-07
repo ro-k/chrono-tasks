@@ -1,5 +1,8 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Lib.Models;
 
+[ExcludeFromCodeCoverage]
 public class BaseModel : IHasConcurrencyStamp
 {
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

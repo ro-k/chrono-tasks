@@ -1,7 +1,8 @@
-using Microsoft.AspNetCore.Identity;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Lib.Models;
 
+[ExcludeFromCodeCoverage]
 public class User : BaseModel
 {
     public new Guid UserId { get; set; } = Guid.Empty;

@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Lib.DataAccess;
 
 public class LocalFileStorageDataAccess(LocalFileStorageDataAccess.IFileStreamWrapper fileStreamWrapper)
@@ -9,6 +11,7 @@ public class LocalFileStorageDataAccess(LocalFileStorageDataAccess.IFileStreamWr
         public void Delete(string filePath);
     }
 
+    [ExcludeFromCodeCoverage(Justification = "Wrapper class dealing with FileStream")]
     public class FileStreamWrapper : IFileStreamWrapper
     {
         public Stream GetNew(string filePath, FileMode fileMode, FileAccess fileAccess) =>

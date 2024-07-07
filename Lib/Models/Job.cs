@@ -1,5 +1,8 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Lib.Models;
 
+[ExcludeFromCodeCoverage]
 public class Job : BaseModel
 {
     public Guid JobId { get; set; }

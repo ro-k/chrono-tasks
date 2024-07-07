@@ -54,13 +54,13 @@ VALUES
         
         await dataBaseManager.ExecuteAsync(insertQuery, user);
         
-        return new IdentityResult();
+        return IdentityResult.Success;
     }
 
     public async Task<IdentityResult> UpdateAsync(User user, CancellationToken ct)
     {
         // todo: maybe we dont call this manually
-        if (user.UserId == Guid.Empty) return new IdentityResult();
+        if (user.UserId == Guid.Empty) return IdentityResult.Failed([new IdentityError{Description = "Invalid UserId"}]);
         
         const string updateQuery = @"
 UPDATE public.user 
@@ -98,7 +98,7 @@ WHERE user_id = @UserId;";
             return IdentityResult.Failed(new IdentityError { Code = e.SqlState, Description = e.Message });
         }
 
-        return new IdentityResult();
+        return IdentityResult.Success;
     }
 
     public async Task<IdentityResult> DeleteAsync(User user, CancellationToken ct)
@@ -119,7 +119,7 @@ WHERE user_id = @UserId;";
             return IdentityResult.Failed(new IdentityError { Code = e.SqlState, Description = e.Message });
         }
         
-        return new IdentityResult();
+        return IdentityResult.Success;
     }
 
     public async Task<User?> FindByIdAsync(string userId, CancellationToken ct)
@@ -290,8 +290,10 @@ where r.normalized_name = @NormalizedRoleName;
 
     public async Task SetEmailAsync(User user, string? email, CancellationToken cancellationToken)
     {
+        if (string.IsNullOrEmpty(email)) throw new ArgumentException("Invalid email", nameof(email));
+        
         var dbUser = await FindByIdOrThrowAsync(user, cancellationToken);
-        dbUser.Email = user.Email;
+        dbUser.Email = email;
         await UpdateAsync(dbUser, cancellationToken);
     }
 

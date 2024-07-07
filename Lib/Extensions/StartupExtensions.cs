@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using Lib.DataAccess;
 using Lib.Models;
@@ -9,6 +10,7 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Lib.Extensions;
 
+[ExcludeFromCodeCoverage]
 public static class StartupExtensions
 {
     public static IServiceCollection ConfigureServices(this IServiceCollection serviceCollection) =>

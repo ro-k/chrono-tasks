@@ -12,6 +12,4 @@ public static class DataHelper
         var upperCaseUsername = value.ToUpperInvariant().Normalize();
         return upperCaseUsername;
     }
-
-    
 }

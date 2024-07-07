@@ -1,8 +1,10 @@
+using System.Diagnostics.CodeAnalysis;
 using Lib.Models;
 
 namespace Lib.DTOs;
 
 // todo: reduce info in jwt claims
+[ExcludeFromCodeCoverage]
 public class UserDto
 {
     public Guid UserId { get; set; } = Guid.Empty;

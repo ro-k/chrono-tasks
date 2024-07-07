@@ -1,5 +1,8 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Lib.Models;
 
+[ExcludeFromCodeCoverage]
 public class UserLogin : BaseModel
 {
     public Guid UserLoginId { get; set; }

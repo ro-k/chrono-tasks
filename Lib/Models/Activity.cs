@@ -1,5 +1,9 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Lib.Models;
 
+
+[ExcludeFromCodeCoverage]
 public class Activity : BaseModel
 {
     public Guid ActivityId { get; set; }

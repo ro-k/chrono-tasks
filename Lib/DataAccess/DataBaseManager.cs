@@ -7,48 +7,59 @@ using Microsoft.Extensions.Options;
 
 namespace Lib.DataAccess;
 
-public class DataBaseManager(IOptions<AppSettings> appSettings) : IDataBaseManager
+public class DataBaseManager : IDataBaseManager
 {
-    private readonly string _connectionString = appSettings.Value.ConnectionString!;
+    private readonly Func<IDbConnection> _connectionFactory;
+    
+    public DataBaseManager(IOptions<AppSettings> appSettings)
+    {
+        _connectionFactory = () => new NpgsqlConnection(appSettings.Value.ConnectionString!);
+    }
+    
+    // For unit testing
+    public DataBaseManager(Func<IDbConnection> connectionFactory)
+    {
+        _connectionFactory = connectionFactory;
+    }
 
     public async Task<IEnumerable<T>> QueryAsync<T>(string query, object? parameters = null)
     {
-        using IDbConnection dbConnection = new NpgsqlConnection(_connectionString);
+        using var dbConnection = _connectionFactory();
         dbConnection.Open();
         return await dbConnection.QueryAsync<T>(query, parameters);
     }
 
     public async Task<T> QuerySingleOrDefaultAsync<T>(string query, object? parameters = null)
     {
-        using IDbConnection dbConnection = new NpgsqlConnection(_connectionString);
+        using var dbConnection = _connectionFactory();
         dbConnection.Open();
-        return await dbConnection.QuerySingleOrDefaultAsync<T>(query, parameters);
+        return (await dbConnection.QuerySingleOrDefaultAsync<T>(query, parameters))!;
     }
     
     public async Task<T> QueryFirstOrDefaultAsync<T>(string query, object? parameters = null)
     {
-        using IDbConnection dbConnection = new NpgsqlConnection(_connectionString);
+        using var dbConnection = _connectionFactory();
         dbConnection.Open();
-        return await dbConnection.QueryFirstOrDefaultAsync<T>(query, parameters);
+        return (await dbConnection.QueryFirstOrDefaultAsync<T>(query, parameters))!;
     }
     
     public async Task<int> ExecuteAsync(string query, object? parameters = null)
     {
-        using IDbConnection dbConnection = new NpgsqlConnection(_connectionString);
+        using var dbConnection = _connectionFactory();
         dbConnection.Open();
         return await dbConnection.ExecuteAsync(query, parameters);
     }
 
     public async Task<T> ExecuteScalarAsync<T>(string query, object? parameters = null)
     {
-        using IDbConnection dbConnection = new NpgsqlConnection(_connectionString);
+        using var dbConnection = _connectionFactory();
         dbConnection.Open();
-        return await dbConnection.ExecuteScalarAsync<T>(query, parameters);
+        return (await dbConnection.ExecuteScalarAsync<T>(query, parameters))!;
     }
     
     public async Task<T> QueryMultipleAsync<T>(Func<SqlMapper.GridReader, Task<T>> processGridReader, string query, object? parameters = null)
     {
-        using IDbConnection dbConnection = new NpgsqlConnection(_connectionString);
+        using var dbConnection = _connectionFactory();
         dbConnection.Open();
         await using var gridReader = await dbConnection.QueryMultipleAsync(query, parameters);
         return await processGridReader(gridReader);
@@ -61,11 +72,11 @@ public class DataBaseManager(IOptions<AppSettings> appSettings) : IDataBaseManag
         baseParameters.ConcurrencyStamp = Guid.NewGuid();
         
         var parameters = new DynamicParameters(baseParameters);
-        parameters.AddDynamicParams(new { OldConcurrencyStamp = oldConcurrencyStamp });
+        parameters.Add("@OldConcurrencyStamp", oldConcurrencyStamp.ToString());
         parameters.RemoveUnused = false;
 
         var appendedQuery = whereRegex.IsMatch(query)
-            ? Regex.Replace(query, @"\bWHERE\b", $"WHERE concurrency_stamp = @OldConcurrencyStamp AND ",
+            ? Regex.Replace(query, @"\bWHERE\b", $"WHERE concurrency_stamp = @OldConcurrencyStamp AND",
                 RegexOptions.IgnoreCase)
             : $"{query} WHERE concurrency_stamp = @OldConcurrencyStamp";
 

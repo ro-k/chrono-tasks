@@ -1,5 +1,8 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Lib.Models;
 
+[ExcludeFromCodeCoverage]
 public static class PgErrorCodes
 {
     public static string ConcurrencyError => "P0001";
