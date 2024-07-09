@@ -1,10 +1,13 @@
 using Dapper;
 using FluentAssertions;
 using Lib.DataAccess;
+using Lib.Exceptions;
 using Lib.Models;
 using Microsoft.AspNetCore.Identity;
 using Moq;
 using UnitTest.Fakes.Models;
+using UnitTest.Mocks;
+// ReSharper disable StringLiteralTypo
 
 namespace UnitTest.DataAccess;
 
@@ -26,6 +29,7 @@ public class UserDataAccessTests
     {
         // Given
         var user = new UserFaker().Generate();
+        user.UserId = Guid.Empty;
 
         _dataBaseManagerMock.Setup(dbm => dbm.ExecuteAsync(It.IsAny<string>(), user))
             .ReturnsAsync(1);
@@ -56,6 +60,41 @@ public class UserDataAccessTests
     }
 
     [Fact]
+    public async Task UpdateAsync_ShouldReturnFailedIdentityResult_WhenNoUserId()
+    {
+        // Given
+        var user = new UserFaker().Generate();
+        user.UserId = Guid.Empty;
+        var expectedResult = IdentityResult.Failed([new IdentityError { Description = "Invalid UserId" }]);
+
+        // When
+        var result = await _userDataAccess.UpdateAsync(user, CancellationToken.None);
+
+        // Then
+        result.Should().BeEquivalentTo(expectedResult);
+    }
+
+    [Fact]
+    public async Task UpdateAsync_ShouldReturnFailedIdentityResult_WhenUpdateFails()
+    {
+        // Given
+        var user = new UserFaker().Generate();
+        var expectedResult = IdentityResult.Failed(new IdentityError
+            { Code = PgErrorCodes.ConcurrencyError, Description = "External component has thrown an exception." });
+
+        _dataBaseManagerMock.Setup(dbm => dbm.WrapQueryWithConcurrencyCheck(It.IsAny<string>(), user))
+            .Returns((It.IsAny<string>(), It.IsAny<DynamicParameters>()));
+        _dataBaseManagerMock.Setup(dbm => dbm.ExecuteAsync(It.IsAny<string>(), It.IsAny<object>()))
+            .ThrowsAsync(new MockNpgsqlException(PgErrorCodes.ConcurrencyError));
+
+        // When
+        var result = await _userDataAccess.UpdateAsync(user, CancellationToken.None);
+
+        // Then
+        result.Should().BeEquivalentTo(expectedResult);
+    }
+
+    [Fact]
     public async Task DeleteAsync_ShouldReturnIdentityResult_WhenDeleteSucceeds()
     {
         // Given
@@ -71,6 +110,26 @@ public class UserDataAccessTests
 
         // Then
         result.Should().BeEquivalentTo(IdentityResult.Success);
+    }
+
+    [Fact]
+    public async Task DeleteAsync_ShouldReturnFailedIdentityResult_WhenConcurrencyExceptionIsThrown()
+    {
+        // Given
+        var user = new UserFaker().Generate();
+        var expectedResult = IdentityResult.Failed(new IdentityError
+            { Code = PgErrorCodes.ConcurrencyError, Description = "External component has thrown an exception." });
+
+        _dataBaseManagerMock.Setup(dbm => dbm.WrapQueryWithConcurrencyCheck(It.IsAny<string>(), user))
+            .Returns((It.IsAny<string>(), It.IsAny<DynamicParameters>()));
+        _dataBaseManagerMock.Setup(dbm => dbm.ExecuteAsync(It.IsAny<string>(), It.IsAny<object>()))
+            .ThrowsAsync(new MockNpgsqlException(PgErrorCodes.ConcurrencyError));
+
+        // When
+        var result = await _userDataAccess.DeleteAsync(user, CancellationToken.None);
+
+        // Then
+        result.Should().BeEquivalentTo(expectedResult);
     }
 
     [Fact]
@@ -90,6 +149,24 @@ public class UserDataAccessTests
         result.Should().BeEquivalentTo(user);
     }
 
+    [Theory]
+    [InlineData(null)]
+    [InlineData("not a guid")]
+    public async Task FindByIdAsync_ShouldReturnNull_WhenInvalidId(string? userId)
+    {
+        // Given
+
+        _dataBaseManagerMock.Setup(dbm =>
+                dbm.QuerySingleOrDefaultAsync<User?>(It.IsAny<string>(), It.IsAny<object>()))
+            .ReturnsAsync((User)null!);
+
+        // When
+        var result = await _userDataAccess.FindByIdAsync(userId!, CancellationToken.None);
+
+        // Then
+        result.Should().BeNull();
+    }
+
     [Fact]
     public async Task FindByNameAsync_ShouldReturnUser_WhenUserExists()
     {
@@ -105,6 +182,20 @@ public class UserDataAccessTests
 
         // Then
         result.Should().BeEquivalentTo(user);
+    }
+
+    [Fact]
+    public async Task FindByNameAsync_ShouldReturnNull_WhenNullUserName()
+    {
+        // Given
+        var user = new UserFaker().Generate();
+        user.Username = null!;
+
+        // When
+        var result = await _userDataAccess.FindByNameAsync(user.Username, CancellationToken.None);
+
+        // Then
+        result.Should().BeNull();
     }
 
     [Fact]
@@ -193,6 +284,22 @@ public class UserDataAccessTests
     }
 
     [Fact]
+    public async Task SetUserNameAsync_ShouldThrowArgumentNullException_WhenNullUserName()
+    {
+        // Given
+        var user = new User
+        {
+            UserId = Guid.NewGuid()
+        };
+
+        // When
+        var act = () => _userDataAccess.SetUserNameAsync(user, null, CancellationToken.None);
+
+        // Then
+        await act.Should().ThrowAsync<ArgumentNullException>();
+    }
+
+    [Fact]
     public async Task GetNormalizedUserNameAsync_ShouldReturnNormalizedUserName_WhenUserExists()
     {
         // Given
@@ -238,6 +345,23 @@ public class UserDataAccessTests
     }
 
     [Fact]
+    public async Task SetNormalizedUserNameAsync_ShouldThrowArgumentNullException_WhenNullNormalizedUserName()
+    {
+        // Given
+        var user = new User
+        {
+            UserId = Guid.NewGuid(),
+            NormalizedUserName = "TESTUSER"
+        };
+
+        // When
+        var act = () => _userDataAccess.SetNormalizedUserNameAsync(user, null, CancellationToken.None);
+
+        // Then
+        await act.Should().ThrowAsync<ArgumentNullException>();
+    }
+
+    [Fact]
     public async Task SetPasswordHashAsync_ShouldUpdatePasswordHash_WhenUserExists()
     {
         // Given
@@ -259,6 +383,23 @@ public class UserDataAccessTests
 
         // Then
         user.PasswordHash.Should().Be(newPasswordHash);
+    }
+
+    [Fact]
+    public async Task SetPasswordHashAsync_ShouldThrowArgumentNullException_WhenNullNewPasswordHash()
+    {
+        // Given
+        var user = new User
+        {
+            UserId = Guid.NewGuid(),
+            PasswordHash = "oldhash"
+        };
+
+        // When
+        var act = () => _userDataAccess.SetPasswordHashAsync(user, null, CancellationToken.None);
+
+        // Then
+        await act.Should().ThrowAsync<ArgumentNullException>();
     }
 
     [Fact]
@@ -387,8 +528,8 @@ public class UserDataAccessTests
         var roleName = "Admin";
         var users = new List<User>
         {
-            new User { UserId = Guid.NewGuid(), Username = "user1" },
-            new User { UserId = Guid.NewGuid(), Username = "user2" }
+            new() { UserId = Guid.NewGuid(), Username = "user1" },
+            new() { UserId = Guid.NewGuid(), Username = "user2" }
         };
 
         _dataBaseManagerMock.Setup(dbm => dbm.QueryAsync<User>(It.IsAny<string>(), It.IsAny<object>()))
@@ -423,6 +564,23 @@ public class UserDataAccessTests
 
         // Then
         user.Email.Should().Be(newEmail);
+    }
+
+    [Fact]
+    public async Task SetEmailAsync_ShouldThrowArgumentException_WhenNullNewEmail()
+    {
+        // Given
+        var user = new User
+        {
+            UserId = Guid.NewGuid(),
+            Email = "oldemail@example.com"
+        };
+
+        // When
+        var act = () => _userDataAccess.SetEmailAsync(user, null, CancellationToken.None);
+
+        // Then
+        await act.Should().ThrowAsync<ArgumentException>();
     }
 
     [Fact]
@@ -513,6 +671,22 @@ public class UserDataAccessTests
     }
 
     [Fact]
+    public async Task FindByEmailAsync_ShouldReturnNull_WhenNoEmail()
+    {
+        // Given
+
+        _dataBaseManagerMock
+            .Setup(dbm => dbm.QuerySingleOrDefaultAsync<User>(It.IsAny<string>(), It.IsAny<object>()))
+            .ReturnsAsync((User)null!);
+
+        // When
+        var result = await _userDataAccess.FindByEmailAsync(null!, CancellationToken.None);
+
+        // Then
+        result.Should().BeNull();
+    }
+
+    [Fact]
     public async Task GetNormalizedEmailAsync_ShouldReturnNormalizedEmail_WhenUserExists()
     {
         // Given
@@ -555,6 +729,23 @@ public class UserDataAccessTests
 
         // Then
         user.NormalizedEmail.Should().Be(newNormalizedEmail);
+    }
+
+    [Fact]
+    public async Task SetNormalizedEmailAsync_ShouldThrowArgumentNullException_WhenNullNewNormalizedEmail()
+    {
+        // Given
+        var user = new User
+        {
+            UserId = Guid.NewGuid(),
+            NormalizedEmail = "TESTEMAIL@EXAMPLE.COM"
+        };
+
+        // When
+        var act = () => _userDataAccess.SetNormalizedEmailAsync(user, null, CancellationToken.None);
+
+        // Then
+        await act.Should().ThrowAsync<ArgumentNullException>();
     }
 
     [Fact]
@@ -720,6 +911,23 @@ public class UserDataAccessTests
     }
 
     [Fact]
+    public async Task SetPhoneNumberAsync_ShouldThrowArgumentNullException_WhenNullNewPhoneNumber()
+    {
+        // Given
+        var user = new User
+        {
+            UserId = Guid.NewGuid(),
+            PhoneNumber = "1234567890"
+        };
+
+        // When
+        var act = () => _userDataAccess.SetPhoneNumberAsync(user, null, CancellationToken.None);
+
+        // Then
+        await act.Should().ThrowAsync<ArgumentNullException>();
+    }
+
+    [Fact]
     public async Task GetPhoneNumberAsync_ShouldReturnPhoneNumber_WhenUserExists()
     {
         // Given
@@ -878,12 +1086,12 @@ public class UserDataAccessTests
         };
         var userLogins = new List<UserLogin>
         {
-            new UserLogin
+            new()
             {
                 UserId = user.UserId, LoginProvider = "provider1", ProviderKey = "key1",
                 ProviderDisplayName = "displayName1"
             },
-            new UserLogin
+            new()
             {
                 UserId = user.UserId, LoginProvider = "provider2", ProviderKey = "key2",
                 ProviderDisplayName = "displayName2"
@@ -921,5 +1129,163 @@ public class UserDataAccessTests
 
         // Then
         result.Should().BeEquivalentTo(user);
+    }
+
+    [Fact]
+    public async Task FindByUserNameOrThrowAsync_ShouldReturnUser_WhenUserExists()
+    {
+        // Given
+        var user = new UserFaker().Generate();
+
+        _dataBaseManagerMock
+            .Setup(dbm => dbm.QuerySingleOrDefaultAsync<User>(It.IsAny<string>(), It.IsAny<object>()))
+            .ReturnsAsync(user);
+
+        // When
+        var result = await _userDataAccess.FindByUserNameOrThrowAsync(user, CancellationToken.None);
+
+        // Then
+        result.Should().BeEquivalentTo(user);
+    }
+
+    [Fact]
+    public async Task FindByUserNameOrThrowAsync_ShouldThrowUserNotFoundException_WhenUserDoesNotExist()
+    {
+        // Given
+        var user = new UserFaker().Generate();
+
+        _dataBaseManagerMock
+            .Setup(dbm => dbm.QuerySingleOrDefaultAsync<User>(It.IsAny<string>(), It.IsAny<object>()))
+            .ReturnsAsync((User)null!);
+
+        // When
+        Func<Task> act = async () => await _userDataAccess.FindByUserNameOrThrowAsync(user, CancellationToken.None);
+
+        // Then
+        await act.Should().ThrowAsync<UserNotFoundException>();
+    }
+
+    [Fact]
+    public async Task FindByUserNameOrThrowAsync_ShouldThrowArgumentNullException_WhenNoUserName()
+    {
+        // Given
+        var user = new UserFaker().Generate();
+        user.Username = null!;
+
+        // When
+        Func<Task> act = async () => await _userDataAccess.FindByUserNameOrThrowAsync(user, CancellationToken.None);
+
+        // Then
+        await act.Should().ThrowAsync<ArgumentNullException>();
+    }
+
+    [Fact]
+    public async Task FindByEmailOrThrowAsync_ShouldReturnUser_WhenUserExists()
+    {
+        // Given
+        var user = new UserFaker().Generate();
+
+        _dataBaseManagerMock
+            .Setup(dbm => dbm.QuerySingleOrDefaultAsync<User>(It.IsAny<string>(), It.IsAny<object>()))
+            .ReturnsAsync(user);
+
+        // When
+        var result = await _userDataAccess.FindByEmailOrThrowAsync(user, CancellationToken.None);
+
+        // Then
+        result.Should().BeEquivalentTo(user);
+    }
+
+    [Fact]
+    public async Task FindByEmailOrThrowAsync_ShouldReturnSameUser_WhenNoUserId()
+    {
+        // Given
+        var user = new UserFaker().Generate();
+        user.UserId = Guid.Empty;
+
+        // When
+        var result = await _userDataAccess.FindByEmailOrThrowAsync(user, CancellationToken.None);
+
+        // Then
+        result.Should().BeEquivalentTo(user);
+    }
+
+    [Fact]
+    public async Task FindByEmailOrThrowAsync_ShouldThrowArgumentNullException_WhenNoEmail()
+    {
+        // Given
+        var user = new UserFaker().Generate();
+        user.Email = null!;
+
+        // When
+        Func<Task> act = async () => await _userDataAccess.FindByEmailOrThrowAsync(user, CancellationToken.None);
+
+        // Then
+        await act.Should().ThrowAsync<ArgumentNullException>();
+    }
+
+    [Fact]
+    public async Task FindByEmailOrThrowAsync_ShouldThrowUserNotFoundException_WhenUserDoesNotExist()
+    {
+        // Given
+        var user = new UserFaker().Generate();
+
+        _dataBaseManagerMock
+            .Setup(dbm => dbm.QuerySingleOrDefaultAsync<User>(It.IsAny<string>(), It.IsAny<object>()))
+            .ReturnsAsync((User)null!);
+
+        // When
+        Func<Task> act = async () => await _userDataAccess.FindByEmailOrThrowAsync(user, CancellationToken.None);
+
+        // Then
+        await act.Should().ThrowAsync<UserNotFoundException>();
+    }
+
+    [Fact]
+    public async Task FindByIdOrThrowAsync_ShouldReturnUser_WhenUserExists()
+    {
+        // Given
+        var user = new UserFaker().Generate();
+
+        _dataBaseManagerMock
+            .Setup(dbm => dbm.QuerySingleOrDefaultAsync<User>(It.IsAny<string>(), It.IsAny<object>()))
+            .ReturnsAsync(user);
+
+        // When
+        var result = await _userDataAccess.FindByIdOrThrowAsync(user, CancellationToken.None);
+
+        // Then
+        result.Should().BeEquivalentTo(user);
+    }
+
+    [Fact]
+    public async Task FindByIdOrThrowAsync_ShouldReturnUser_WhenUserIdNotSet()
+    {
+        // Given
+        var user = new UserFaker().Generate();
+        user.UserId = Guid.Empty;
+
+        // When
+        var result = await _userDataAccess.FindByIdOrThrowAsync(user, CancellationToken.None);
+
+        // Then
+        result.Should().BeEquivalentTo(user);
+    }
+
+    [Fact]
+    public async Task FindByIdOrThrowAsync_ShouldThrowUserNotFoundException_WhenUserDoesNotExist()
+    {
+        // Given
+        var user = new UserFaker().Generate();
+
+        _dataBaseManagerMock
+            .Setup(dbm => dbm.QuerySingleOrDefaultAsync<User>(It.IsAny<string>(), It.IsAny<object>()))!
+            .ReturnsAsync((User?)null);
+
+        // When
+        Func<Task> act = async () => await _userDataAccess.FindByIdOrThrowAsync(user, CancellationToken.None);
+
+        // Then
+        await act.Should().ThrowAsync<UserNotFoundException>();
     }
 }

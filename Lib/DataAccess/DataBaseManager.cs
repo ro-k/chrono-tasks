@@ -1,4 +1,5 @@
 using System.Data;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
 using Npgsql;
 using Dapper;
@@ -11,6 +12,7 @@ public class DataBaseManager : IDataBaseManager
 {
     private readonly Func<IDbConnection> _connectionFactory;
     
+    [ExcludeFromCodeCoverage]
     public DataBaseManager(IOptions<AppSettings> appSettings)
     {
         _connectionFactory = () => new NpgsqlConnection(appSettings.Value.ConnectionString!);
@@ -50,6 +52,7 @@ public class DataBaseManager : IDataBaseManager
         return await dbConnection.ExecuteAsync(query, parameters);
     }
 
+    [ExcludeFromCodeCoverage(Justification = "ExecuteScalarAsync does not have mocking support")]
     public async Task<T> ExecuteScalarAsync<T>(string query, object? parameters = null)
     {
         using var dbConnection = _connectionFactory();
@@ -57,6 +60,7 @@ public class DataBaseManager : IDataBaseManager
         return (await dbConnection.ExecuteScalarAsync<T>(query, parameters))!;
     }
     
+    [ExcludeFromCodeCoverage(Justification = "QueryMultipleAsync does not have mocking support")]
     public async Task<T> QueryMultipleAsync<T>(Func<SqlMapper.GridReader, Task<T>> processGridReader, string query, object? parameters = null)
     {
         using var dbConnection = _connectionFactory();

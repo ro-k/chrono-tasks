@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using Lib.Exceptions;
 using Lib.Models;
 using Microsoft.AspNetCore.Identity;
@@ -147,6 +148,7 @@ WHERE normalized_name = @NormalizedRoleName";
         return await dataBaseManager.QuerySingleOrDefaultAsync<Role>(selectQuery, new { NormalizedRoleName = DataHelper.Normalize(roleName) });
     }
 
+    [ExcludeFromCodeCoverage]
     public void Dispose()
     {
     }

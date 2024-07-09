@@ -4,7 +4,10 @@ using Lib.DataAccess;
 using Lib.Models;
 using Lib.Services;
 using Moq;
+using Npgsql;
+using UnitTest.Fakes;
 using UnitTest.Fakes.Models;
+using UnitTest.Mocks;
 
 namespace UnitTest.DataAccess;
 
@@ -56,6 +59,26 @@ public class MediaDataAccessTests
         // Then
         result.Should().BeEquivalentTo(returnedMedia);
     }
+
+    [Fact]
+    public async Task Update_ShouldRethrow()
+    {
+        // Given
+        var media = new MediaFaker().Generate();
+
+        var returnedMedia = media;
+        _dataBaseManagerMock.Setup(dbm => dbm.WrapQueryWithConcurrencyCheck(It.IsAny<string>(), It.IsAny<Media>()))
+            .Returns((media.MediaId.ToString(), new DynamicParameters()));
+        _dataBaseManagerMock.Setup(dbm => dbm.QuerySingleOrDefaultAsync<Media>(It.IsAny<string>(), It.IsAny<object>()))
+            .ThrowsAsync(new MockNpgsqlException(PgErrorCodes.ConcurrencyError));
+
+        // When
+        var act = async () => await _mediaDataAccess.Update(media);
+
+        // Then
+        await act.Should().ThrowAsync<NpgsqlException>();
+    }
+
 
     [Fact]
     public async Task Get_ShouldReturnMedia_WhenExists()

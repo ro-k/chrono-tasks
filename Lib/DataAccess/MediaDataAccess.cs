@@ -43,7 +43,6 @@ WHERE media_id = @MediaId;";
         }
         catch (NpgsqlException e) when (e.SqlState == PgErrorCodes.ConcurrencyError)
         {
-            
             throw;
         }
     }

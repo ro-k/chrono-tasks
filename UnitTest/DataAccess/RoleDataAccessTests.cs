@@ -6,6 +6,7 @@ using Lib.Models;
 using Microsoft.AspNetCore.Identity;
 using Moq;
 using UnitTest.Fakes.Models;
+using UnitTest.Mocks;
 
 namespace UnitTest.DataAccess;
 
@@ -55,6 +56,26 @@ public class RoleDataAccessTests
     }
 
     [Fact]
+    public async Task UpdateAsync_ShouldReturnFailedIdentityResult_WhenUpdateFails()
+    {
+        // Given
+        var role = new RoleFaker().Generate();
+        var expectedResult = IdentityResult.Failed(new IdentityError
+            { Code = PgErrorCodes.ConcurrencyError, Description = "External component has thrown an exception." });
+
+        _dataBaseManagerMock.Setup(dbm => dbm.WrapQueryWithConcurrencyCheck(It.IsAny<string>(), role))
+            .Returns((It.IsAny<string>(), It.IsAny<DynamicParameters>()));
+        _dataBaseManagerMock.Setup(dbm => dbm.ExecuteAsync(It.IsAny<string>(), It.IsAny<object>()))
+            .ThrowsAsync(new MockNpgsqlException(PgErrorCodes.ConcurrencyError));
+
+        // When
+        var result = await _roleDataAccess.UpdateAsync(role, CancellationToken.None);
+
+        // Then
+        result.Should().BeEquivalentTo(expectedResult);
+    }
+
+    [Fact]
     public async Task DeleteAsync_ShouldReturnIdentityResult_WhenDeleteSucceeds()
     {
         // Given
@@ -70,6 +91,28 @@ public class RoleDataAccessTests
 
         // Then
         result.Should().BeEquivalentTo(IdentityResult.Success);
+    }
+
+    //var expectedResult = IdentityResult.Failed(new IdentityError
+    // { Code = PgErrorCodes.ConcurrencyError, Description = "External component has thrown an exception." });
+    [Fact]
+    public async Task DeleteAsync_ShouldReturnFailedIdentityResult_WhenDeleteFails()
+    {
+        // Given
+        var role = new RoleFaker().Generate();
+        var expectedResult = IdentityResult.Failed(new IdentityError
+            { Code = PgErrorCodes.ConcurrencyError, Description = "External component has thrown an exception." });
+
+        _dataBaseManagerMock.Setup(dbm => dbm.WrapQueryWithConcurrencyCheck(It.IsAny<string>(), role))
+            .Returns((It.IsAny<string>(), It.IsAny<DynamicParameters>()));
+        _dataBaseManagerMock.Setup(dbm => dbm.ExecuteAsync(It.IsAny<string>(), It.IsAny<object>()))
+            .ThrowsAsync(new MockNpgsqlException(PgErrorCodes.ConcurrencyError));
+
+        // When
+        var result = await _roleDataAccess.DeleteAsync(role, CancellationToken.None);
+
+        // Then
+        result.Should().BeEquivalentTo(expectedResult);
     }
 
     [Fact]
@@ -124,6 +167,19 @@ public class RoleDataAccessTests
     }
 
     [Fact]
+    public async Task SetRoleNameAsync_ShouldThrowArgumentNullException_WhenNoRoleName()
+    {
+        // Given
+        var role = new RoleFaker().Generate();
+
+        // When
+        var act = () => _roleDataAccess.SetRoleNameAsync(role, null!, CancellationToken.None);
+
+        // Then
+        await act.Should().ThrowAsync<ArgumentNullException>();
+    }
+
+    [Fact]
     public async Task GetNormalizedRoleNameAsync_ShouldReturnNormalizedRoleName_WhenRoleExists()
     {
         // Given
@@ -161,6 +217,19 @@ public class RoleDataAccessTests
     }
 
     [Fact]
+    public async Task SetNormalizedRoleNameAsync_ShouldThrowArgumentNullException_WhenNoNormalizedRoleName()
+    {
+        // Given
+        var role = new RoleFaker().Generate();
+
+        // When
+        var act = () => _roleDataAccess.SetNormalizedRoleNameAsync(role, null!, CancellationToken.None);
+
+        // Then
+        await act.Should().ThrowAsync<ArgumentNullException>();
+    }
+
+    [Fact]
     public async Task FindByIdAsync_ShouldReturnRole_WhenRoleExists()
     {
         // Given
@@ -190,6 +259,18 @@ public class RoleDataAccessTests
 
         // Then
         result.Should().BeEquivalentTo(role);
+    }
+
+    [Fact]
+    public async Task FindByNameOrThrowAsync_ShouldThrowArgumentNullException_WhenNoRoleName()
+    {
+        // Given
+
+        // When
+        var act = () => _roleDataAccess.FindByNameOrThrowAsync(null!, CancellationToken.None);
+
+        // Then
+        await act.Should().ThrowAsync<ArgumentNullException>();
     }
 
     [Fact]

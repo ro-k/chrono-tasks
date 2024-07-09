@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using Lib.Exceptions;
 using Lib.Models;
 using Microsoft.AspNetCore.Identity;
@@ -136,7 +137,7 @@ WHERE user_id = @UserId;";
         return await dataBaseManager.QuerySingleOrDefaultAsync<User?>(selectQuery, new { UserId = userIdGuid });
     }
 
-    private async Task<User> FindByIdOrThrowAsync(User user, CancellationToken ct)
+    public async Task<User> FindByIdOrThrowAsync(User user, CancellationToken ct)
     {
         // if UserId not set, we're just updating existing user entity
         if (user.UserId == Guid.Empty) return user;
@@ -205,6 +206,7 @@ WHERE user_id = @UserId;";
         await UpdateAsync(dbUser, ct);
     }
 
+    [ExcludeFromCodeCoverage]
     void IDisposable.Dispose()
     {
         GC.SuppressFinalize(this);

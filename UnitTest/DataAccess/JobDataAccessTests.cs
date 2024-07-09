@@ -4,7 +4,9 @@ using Lib.DataAccess;
 using Lib.Models;
 using Lib.Services;
 using Moq;
+using Npgsql;
 using UnitTest.Fakes.Models;
+using UnitTest.Mocks;
 
 namespace UnitTest.DataAccess;
 
@@ -55,6 +57,25 @@ public class JobDataAccessTests
 
         // Then
         result.Should().BeEquivalentTo(returnedJob);
+    }
+
+    [Fact]
+    public async Task Update_ShouldRethrowException_WhenUpdateFails()
+    {
+        // Given
+        var model = new JobFaker().Generate();
+
+        var returnedJob = model;
+        _dataBaseManagerMock.Setup(dbm => dbm.WrapQueryWithConcurrencyCheck(It.IsAny<string>(), It.IsAny<Job>()))
+            .Returns((model.JobId.ToString(), new DynamicParameters()));
+        _dataBaseManagerMock.Setup(dbm => dbm.QuerySingleOrDefaultAsync<Job>(It.IsAny<string>(), It.IsAny<object>()))
+            .ThrowsAsync(new MockNpgsqlException(PgErrorCodes.ConcurrencyError));
+
+        // When
+        var act = () => _jobDataAccess.Update(model);
+
+        // Then
+        await act.Should().ThrowAsync<NpgsqlException>();
     }
 
     [Fact]
@@ -154,6 +175,26 @@ public class JobDataAccessTests
 
         // When
         var result = await _jobDataAccess.GetAllByCategoryId(categoryId);
+
+        // Then
+        result.Should().BeEquivalentTo(jobs);
+    }
+
+    [Fact]
+    public async Task GetPaged_ShouldReturnJobs_WhenCalledWithDefaults()
+    {
+        // Given
+        var jobs = new List<Job>
+        {
+            new Job { JobId = Guid.NewGuid(), Name = "Job 1" },
+            new Job { JobId = Guid.NewGuid(), Name = "Job 2" }
+        };
+
+        _dataBaseManagerMock.Setup(dbm => dbm.QueryAsync<Job>(It.IsAny<string>(), It.IsAny<object>()))
+            .ReturnsAsync(jobs);
+
+        // When
+        var result = await _jobDataAccess.GetPaged();
 
         // Then
         result.Should().BeEquivalentTo(jobs);

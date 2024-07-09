@@ -4,7 +4,9 @@ using Lib.DataAccess;
 using Lib.Models;
 using Lib.Services;
 using Moq;
+using Npgsql;
 using UnitTest.Fakes.Models;
+using UnitTest.Mocks;
 
 namespace UnitTest.DataAccess;
 
@@ -46,7 +48,8 @@ public class CategoryDataAccessTests
         var returnedCategory = model;
         _dataBaseManagerMock.Setup(dbm => dbm.WrapQueryWithConcurrencyCheck(It.IsAny<string>(), It.IsAny<Category>()))
             .Returns((model.CategoryId.ToString(), new DynamicParameters()));
-        _dataBaseManagerMock.Setup(dbm => dbm.QuerySingleOrDefaultAsync<Category>(It.IsAny<string>(), It.IsAny<object>()))
+        _dataBaseManagerMock
+            .Setup(dbm => dbm.QuerySingleOrDefaultAsync<Category>(It.IsAny<string>(), It.IsAny<object>()))
             .ReturnsAsync(returnedCategory);
 
         // When
@@ -54,6 +57,25 @@ public class CategoryDataAccessTests
 
         // Then
         result.Should().BeEquivalentTo(returnedCategory);
+    }
+
+    [Fact]
+    public async Task Update_ShouldRethrow()
+    {
+        // Given
+        var model = new CategoryFaker().Generate();
+
+        _dataBaseManagerMock.Setup(dbm => dbm.WrapQueryWithConcurrencyCheck(It.IsAny<string>(), It.IsAny<Media>()))
+            .Returns((model.CategoryId.ToString(), new DynamicParameters()));
+        _dataBaseManagerMock
+            .Setup(dbm => dbm.QuerySingleOrDefaultAsync<Category>(It.IsAny<string>(), It.IsAny<object>()))
+            .ThrowsAsync(new MockNpgsqlException(PgErrorCodes.ConcurrencyError));
+
+        // When
+        var act = async () => await _categoryDataAccess.Update(model);
+
+        // Then
+        await act.Should().ThrowAsync<NpgsqlException>();
     }
 
     [Fact]
@@ -67,7 +89,8 @@ public class CategoryDataAccessTests
             UserId = Guid.NewGuid()
         };
 
-        _dataBaseManagerMock.Setup(dbm => dbm.QuerySingleOrDefaultAsync<Category>(It.IsAny<string>(), It.IsAny<object>()))
+        _dataBaseManagerMock
+            .Setup(dbm => dbm.QuerySingleOrDefaultAsync<Category>(It.IsAny<string>(), It.IsAny<object>()))
             .ReturnsAsync(returnedCategory);
 
         // When
@@ -133,5 +156,27 @@ public class CategoryDataAccessTests
 
         // Then
         result.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task GetPaged_ShouldReturnPagedCategories_WhenExists()
+    {
+        // Given
+        var startRow = 0;
+        var count = 2;
+        var categoryList = new List<Category>
+        {
+            new() { CategoryId = Guid.NewGuid() },
+            new() { CategoryId = Guid.NewGuid() }
+        };
+
+        _dataBaseManagerMock.Setup(dbm => dbm.QueryAsync<Category>(It.IsAny<string>(), It.IsAny<object>()))
+            .ReturnsAsync(categoryList);
+
+        // When
+        var result = await _categoryDataAccess.GetPaged(startRow, count);
+
+        // Then
+        result.Should().BeEquivalentTo(categoryList);
     }
 }

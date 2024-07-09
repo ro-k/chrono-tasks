@@ -14,4 +14,5 @@ public interface IUserDataAccess : //IUserStore<User>,
 {
     Task<User> FindByUserNameOrThrowAsync(User user, CancellationToken ct);
     Task<User> FindByEmailOrThrowAsync(User user, CancellationToken ct);
+    Task<User> FindByIdOrThrowAsync(User user, CancellationToken ct);
 }
