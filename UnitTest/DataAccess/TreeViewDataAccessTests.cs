@@ -27,18 +27,18 @@ public class TreeViewDataAccessTests
         var userId = Guid.NewGuid();
         var expectedCategories = new List<TreeViewCategoryDto>
         {
-            new TreeViewCategoryDto { CategoryId = Guid.NewGuid(), Name = "Category 1" },
-            new TreeViewCategoryDto { CategoryId = Guid.NewGuid(), Name = "Category 2" }
+            new() { CategoryId = Guid.NewGuid(), Name = "Category 1" },
+            new() { CategoryId = Guid.NewGuid(), Name = "Category 2" }
         };
         var expectedJobs = new List<TreeViewJobDto>
         {
-            new TreeViewJobDto { JobId = Guid.NewGuid(), Name = "Job 1" },
-            new TreeViewJobDto { JobId = Guid.NewGuid(), Name = "Job 2" }
+            new() { JobId = Guid.NewGuid(), Name = "Job 1" },
+            new() { JobId = Guid.NewGuid(), Name = "Job 2" }
         };
         var expectedActivities = new List<TreeViewActivityDto>
         {
-            new TreeViewActivityDto { ActivityId = Guid.NewGuid(), Name = "Activity 1" },
-            new TreeViewActivityDto { ActivityId = Guid.NewGuid(), Name = "Activity 2" }
+            new() { ActivityId = Guid.NewGuid(), Name = "Activity 1" },
+            new() { ActivityId = Guid.NewGuid(), Name = "Activity 2" }
         };
 
         var processGridReader = new Func<SqlMapper.GridReader, Task<(IEnumerable<TreeViewCategoryDto>, IEnumerable<TreeViewJobDto>, IEnumerable<TreeViewActivityDto>)>>(

@@ -107,8 +107,8 @@ public class CategoryDataAccessTests
         var userId = Guid.NewGuid();
         var categories = new List<Category>
         {
-            new Category { CategoryId = Guid.NewGuid(), UserId = userId },
-            new Category { CategoryId = Guid.NewGuid(), UserId = userId }
+            new() { CategoryId = Guid.NewGuid(), UserId = userId },
+            new() { CategoryId = Guid.NewGuid(), UserId = userId }
         };
 
         _userContextMock.Setup(uc => uc.UserId).Returns(userId);

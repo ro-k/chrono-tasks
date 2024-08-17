@@ -186,8 +186,8 @@ public class JobDataAccessTests
         // Given
         var jobs = new List<Job>
         {
-            new Job { JobId = Guid.NewGuid(), Name = "Job 1" },
-            new Job { JobId = Guid.NewGuid(), Name = "Job 2" }
+            new() { JobId = Guid.NewGuid(), Name = "Job 1" },
+            new() { JobId = Guid.NewGuid(), Name = "Job 2" }
         };
 
         _dataBaseManagerMock.Setup(dbm => dbm.QueryAsync<Job>(It.IsAny<string>(), It.IsAny<object>()))

@@ -1,9 +1,11 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Security.Claims;
 using Lib.Models;
 using Microsoft.AspNetCore.Identity;
 
 namespace Lib.Services;
 
+[ExcludeFromCodeCoverage(Justification = "Wrapper class")]
 public class SignInManagerWrapper(SignInManager<User> signInManager) : ISignInManagerWrapper
 {
     public async Task<SignInResult> PasswordSignInAsync(string userName, string password, bool isPersistent, bool lockoutOnFailure)

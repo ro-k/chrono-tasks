@@ -26,8 +26,8 @@ public class DataBaseManagerTests
         var query = "SELECT * FROM public.category";
         var expectedCategories = new List<Category>
         {
-            new Category { CategoryId = Guid.NewGuid(), Name = "Category 1" },
-            new Category { CategoryId = Guid.NewGuid(), Name = "Category 2" }
+            new() { CategoryId = Guid.NewGuid(), Name = "Category 1" },
+            new() { CategoryId = Guid.NewGuid(), Name = "Category 2" }
         };
 
         _dbConnectionMock

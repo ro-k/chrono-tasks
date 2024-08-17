@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using Lib.DataAccess;
 using Lib.DTOs;
 using Lib.Exceptions;
@@ -57,6 +58,7 @@ public class UserService(
         throw new BadRequestException(result.Errors.Select(e => e.Description));
     }
 
+    [ExcludeFromCodeCoverage]
     public Task ExternalLogin(string loginProvider, string providerKey)
     {
         throw new NotImplementedException();

@@ -4,5 +4,5 @@ namespace UnitTest;
 
 public class BaseTest
 {
-    internal static Faker TestDataGenerator = new Faker();
+    internal static Faker TestDataGenerator = new();
 }

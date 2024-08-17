@@ -1,5 +1,4 @@
 using System.Net;
-using System.Security.Authentication;
 using Lib.Exceptions;
 using Microsoft.AspNetCore.Http;
 
@@ -37,13 +36,14 @@ public class ExceptionHandlerMiddleware(RequestDelegate next)
 
     private static Task HandleExceptionAsync(HttpContext context, Exception exception, HttpStatusCode statusCode)
     {
-        context.Response.ContentType = "application/json";
+        context.Response.ContentType = "application/problem+json";
         context.Response.StatusCode = (int)statusCode;
 
-        var response = new
-        {
-            error = exception.Message,
-            statusCode = (int)statusCode
+        var response = new {
+            Detail = exception.Message,
+            StatusCode = (int)statusCode,
+            Instance = context.TraceIdentifier
+            
         };
 
         return context.Response.WriteAsync(System.Text.Json.JsonSerializer.Serialize(response));

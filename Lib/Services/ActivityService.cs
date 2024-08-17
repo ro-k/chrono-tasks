@@ -77,7 +77,7 @@ public class ActivityService(IActivityDataAccess activityDataAccess) : IActivity
     {
         return await activityDataAccess.GetAllByJob(jobId);
     }
-
+    
     public async Task ClearJobs(Guid activityId)
     {
         await activityDataAccess.ClearJobs(activityId);
@@ -119,7 +119,7 @@ public class ActivityService(IActivityDataAccess activityDataAccess) : IActivity
 
         if (jobId.HasValue)
         {
-            await AssignCategory(activityId, jobId.Value, clearCurrentAssignments);
+            await AssignJob(activityId, jobId.Value, clearCurrentAssignments);
         }
     }
 }

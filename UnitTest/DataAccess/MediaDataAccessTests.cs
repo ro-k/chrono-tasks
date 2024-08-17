@@ -5,7 +5,6 @@ using Lib.Models;
 using Lib.Services;
 using Moq;
 using Npgsql;
-using UnitTest.Fakes;
 using UnitTest.Fakes.Models;
 using UnitTest.Mocks;
 

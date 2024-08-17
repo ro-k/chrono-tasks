@@ -5,7 +5,6 @@ using Lib.Models;
 using Lib.Services;
 using Moq;
 using Npgsql;
-using UnitTest.Fakes;
 using UnitTest.Fakes.Models;
 using UnitTest.Mocks;
 
@@ -112,8 +111,8 @@ public class ActivityDataAccessTests
         var userId = Guid.NewGuid();
         var activities = new List<Activity>
         {
-            new Activity { ActivityId = Guid.NewGuid(), UserId = userId },
-            new Activity { ActivityId = Guid.NewGuid(), UserId = userId }
+            new() { ActivityId = Guid.NewGuid(), UserId = userId },
+            new() { ActivityId = Guid.NewGuid(), UserId = userId }
         };
 
         _userContextMock.Setup(uc => uc.UserId).Returns(userId);
@@ -170,8 +169,8 @@ public class ActivityDataAccessTests
         var userId = Guid.NewGuid();
         var activities = new List<Activity>
         {
-            new Activity { ActivityId = Guid.NewGuid(), UserId = userId },
-            new Activity { ActivityId = Guid.NewGuid(), UserId = userId }
+            new() { ActivityId = Guid.NewGuid(), UserId = userId },
+            new() { ActivityId = Guid.NewGuid(), UserId = userId }
         };
 
         _userContextMock.Setup(uc => uc.UserId).Returns(userId);
@@ -212,8 +211,8 @@ public class ActivityDataAccessTests
         var categoryId = Guid.NewGuid();
         var activities = new List<Activity>
         {
-            new Activity { ActivityId = Guid.NewGuid(), CategoryId = categoryId, UserId = userId },
-            new Activity { ActivityId = Guid.NewGuid(), CategoryId = categoryId, UserId = userId }
+            new() { ActivityId = Guid.NewGuid(), CategoryId = categoryId, UserId = userId },
+            new() { ActivityId = Guid.NewGuid(), CategoryId = categoryId, UserId = userId }
         };
 
         _userContextMock.Setup(uc => uc.UserId).Returns(userId);
@@ -272,8 +271,8 @@ public class ActivityDataAccessTests
         var jobId = Guid.NewGuid();
         var activities = new List<Activity>
         {
-            new Activity { ActivityId = Guid.NewGuid(), JobId = jobId, UserId = userId },
-            new Activity { ActivityId = Guid.NewGuid(), JobId = jobId, UserId = userId }
+            new() { ActivityId = Guid.NewGuid(), JobId = jobId, UserId = userId },
+            new() { ActivityId = Guid.NewGuid(), JobId = jobId, UserId = userId }
         };
 
         _userContextMock.Setup(uc => uc.UserId).Returns(userId);
