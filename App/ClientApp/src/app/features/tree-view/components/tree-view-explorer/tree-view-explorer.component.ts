@@ -11,7 +11,7 @@ import {ActivityStore} from "../../../../state/stores/activity-store";
 
   selector: 'app-tree-view-explorer',
   templateUrl: './tree-view-explorer.component.html',
-  styleUrls: ['./tree-view-explorer.component.css']
+  styleUrls: ['./tree-view-explorer.component.scss']
 })
 export class TreeViewExplorerComponent implements OnInit {
   treeView$: Observable<TreeView>;

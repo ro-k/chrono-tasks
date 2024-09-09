@@ -5,7 +5,7 @@ import {CategoryStore} from "../../../../state/stores/category-store";
 @Component({
   selector: 'app-category',
   templateUrl: './category.component.html',
-  styleUrls: ['./category.component.css']
+  styleUrls: ['./category.component.scss']
 })
 export class CategoryComponent {
   @Input() category!: Category;

@@ -4,7 +4,7 @@ import {ItemType} from "../../../core/models/item-type";
 @Component({
   selector: 'app-list-header',
   templateUrl: './list-header.component.html',
-  styleUrl: './list-header.component.css'
+  styleUrl: './list-header.component.scss'
 })
 export class ListHeaderComponent {
   @Output() handleFilterEvent = new EventEmitter<string>;

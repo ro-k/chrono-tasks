@@ -8,7 +8,7 @@ import {ItemType} from "../../../../core/models/item-type";
 @Component({
   selector: 'app-content-pane',
   templateUrl: './content-pane.component.html',
-  styleUrl: './content-pane.component.css'
+  styleUrl: './content-pane.component.scss'
 })
 export class ContentPaneComponent implements OnInit {
   upPlaceholderItem: ContentViewItem = {id: '', name:'..', description:'', type:ItemType.Unknown, createdAt:null, modifiedAt:null};

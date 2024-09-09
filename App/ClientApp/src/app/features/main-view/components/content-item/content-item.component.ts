@@ -6,7 +6,7 @@ import {ItemType} from "../../../../core/models/item-type";
 @Component({
   selector: 'app-content-item',
   templateUrl: './content-item.component.html',
-  styleUrl: './content-item.component.css'
+  styleUrl: './content-item.component.scss'
 })
 export class ContentItemComponent {
   @Input() item!: ContentViewItem;

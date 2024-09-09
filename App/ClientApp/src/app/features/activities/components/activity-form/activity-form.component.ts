@@ -9,7 +9,7 @@ import {ItemType} from "../../../../core/models/item-type";
 @Component({
   selector: 'app-activity-form',
   templateUrl: './activity-form.component.html',
-  styleUrl: './activity-form.component.css'
+  styleUrl: './activity-form.component.scss'
 })
 export class ActivityFormComponent {
   @Input() activity?: Activity = undefined;

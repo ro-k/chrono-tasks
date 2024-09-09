@@ -7,7 +7,7 @@ import {ContentViewItem} from "../../../../core/models/content-view-item";
 @Component({
   selector: 'app-job-form',
   templateUrl: './job-form.component.html',
-  styleUrl: './job-form.component.css'
+  styleUrl: './job-form.component.scss'
 })
 export class JobFormComponent {
   @Input() job?: Job = undefined;
